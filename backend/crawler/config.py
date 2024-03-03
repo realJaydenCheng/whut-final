@@ -30,7 +30,7 @@ class ItemListCrawlerConfig(_BaseConfig):
 
 class ItemDetailCrawlerConfig(_BaseConfig):
     def __init__(self, conf_dict: dict) -> None:
-        self.sleep_time = conf_dict.get('sleep_time', 0.1)
+        self.sleep_time = conf_dict.get('sleep_time', 0)
         super().__init__(conf_dict)
 
     def __repr__(self) -> str:

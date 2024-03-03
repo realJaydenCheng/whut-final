@@ -1,12 +1,15 @@
 
 
 from io import StringIO
+import logging
+from time import sleep
 
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
 
 from database import ItemDetailMongo, ItemListMongo
+from crawler.config import ItemDetailCrawlerConfig
 
 
 target = "http://gjcxcy.bjtu.edu.cn/NewLXItemListForStudentDetail.aspx?ItemNo={}"
@@ -17,16 +20,31 @@ headers = {
 
 
 def crawl(
+    logger,
+    conf: ItemDetailCrawlerConfig,
     item_list_mongo: ItemListMongo,
     item_detail_mongo: ItemDetailMongo
 ):
     for number in next_target_number(item_list_mongo, item_detail_mongo):
-        page_source = get_page_source(number)
-        markup_data = parse_markup_data(BeautifulSoup(page_source, "lxml"))
-        table_data = parse_table_data(page_source)
-        markup_data.update(table_data)
-        markup_data["number"] = number
-        item_detail_mongo.insert_one_item(markup_data)
+        try:
+            page_source = get_page_source(logger, conf, number)
+            markup_data = parse_markup_data(BeautifulSoup(page_source, "lxml"))
+            table_data = parse_table_data(page_source)
+            markup_data.update(table_data)
+            markup_data["number"] = number
+            item_detail_mongo.insert_one_item(markup_data)
+        except ValueError as e:
+            logger.warning(f"item number: {number} table may not found, cause: {e}")
+            item_detail_mongo.insert_one_item({
+                "number": number,
+                "项目名称": "项目未找到",
+                "项目简介": target.format(number),
+            })
+            continue
+        except Exception as e:
+            logger.warning(f"item number: {number} occurred {e}")
+            sleep(conf.sleep_time)
+            raise e
 
 
 def next_target_number(
@@ -39,7 +57,7 @@ def next_target_number(
             yield number
 
 
-def get_page_source(item_no: str):
+def get_page_source(logger: logging.Logger, conf: ItemDetailCrawlerConfig, item_no: str):
     for i in range(10):
         response = requests.get(target.format(item_no), headers=headers)
         response.raise_for_status()

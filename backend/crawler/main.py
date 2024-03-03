@@ -25,16 +25,16 @@ def run_with_retry(conf, fn, *args, **kwargs):
             fn(*args, **kwargs)
             break
         except Exception as e:
-            logger.warn(f"Retry {_+1} for {e}")
+            logger.warning(f"Retry {_+1} for {e}")
             if _ == conf.retry:
                 raise e
 
-def open_or_create_config(conf_path, cls):
+def open_or_default_config(conf_path, cls):
     try:
         open(conf_path).close()
         conf = load_state(conf_path, cls)
     except FileNotFoundError:
-        logger.warn(f"config '{conf_path}' not found.")
+        logger.warning(f"config '{conf_path}' not found.")
         conf = cls({})
     return conf
 
@@ -42,13 +42,13 @@ def open_or_create_config(conf_path, cls):
 if args.mode == "item-list":
     client = Chrome(item_list.get_chrome_options())
     db = ItemListMongo("final")
-    conf = open_or_create_config(args.config, ItemListCrawlerConfig)
+    conf = open_or_default_config(args.config, ItemListCrawlerConfig)
 
     run_with_retry(conf, item_list.crawl, client, db, logger, conf)
 
 elif args.mode == "item-detail":
     list_db = ItemListMongo("final")
     detail_db = ItemDetailMongo("final")
-    conf = open_or_create_config(args.config, ItemDetailCrawlerConfig)
+    conf = open_or_default_config(args.config, ItemDetailCrawlerConfig)
 
-    run_with_retry(conf, item_detail.crawl, list_db, detail_db)
+    run_with_retry(conf, item_detail.crawl, logger, conf, list_db, detail_db)
