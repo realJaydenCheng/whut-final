@@ -41,15 +41,9 @@ def next_target_number(
 
 def get_page_source(item_no: str):
     for i in range(10):
-        try:
-            response = requests.get(target.format(item_no), headers=headers)
-            response.raise_for_status()
-            return response.text
-        except Exception as e:
-            if i < 9:
-                print("retry: ", i)
-                continue
-            raise e
+        response = requests.get(target.format(item_no), headers=headers)
+        response.raise_for_status()
+        return response.text
 
 
 def parse_markup_data(soup: BeautifulSoup):

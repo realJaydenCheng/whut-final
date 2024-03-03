@@ -14,24 +14,6 @@ from database import ItemListMongo
 from crawler.config import ItemListCrawlerConfig
 
 
-now = localtime()
-logger = logging.getLogger('crawler')
-logger.setLevel(logging.DEBUG)
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler(
-    f'crawler-{now.tm_mon}-{now.tm_mday}-{now.tm_hour}-{now.tm_min}.log'
-)
-file_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-console_handler.setFormatter(formatter)
-file_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
-logger.addHandler(file_handler)
-
-
 target = "http://gjcxcy.bjtu.edu.cn/NewLXItemListForStudent.aspx?year={}"
 
 
@@ -42,15 +24,22 @@ def get_chrome_options():
     return options
 
 
-def main(client: Chrome, mongo: ItemListMongo, config = ItemListCrawlerConfig({})):
+def crawl(
+    client: Chrome,
+    mongo: ItemListMongo,
+    logger: logging.Logger,
+    config: ItemListCrawlerConfig,
+):
     try:
-        for year in range(config.start, config.end+1):
-            page_source = enter_first_page(client, target.format(year))
+        start = config.current if config.start != config.current else config.start
+        for year in range(start, config.end+1):
+            page_source = enter_first_page(client, config, target.format(year))
             page_soup = BeautifulSoup(page_source, 'lxml')
             total_page = find_total_page(page_soup)
             logger.info(f"Total page of {year}: {total_page}")
-            for page in range(1, total_page+1):
-                page_source = enter_page(client, page)
+            start_page = config.page if year == start else 1
+            for page in range(start_page, total_page+1):
+                page_source = enter_page(client, config, page)
                 page_soup = BeautifulSoup(page_source, 'lxml')
                 item_list = parse_data(page_soup)
                 logger.info(
@@ -59,27 +48,29 @@ def main(client: Chrome, mongo: ItemListMongo, config = ItemListCrawlerConfig({}
                 store_data(mongo, item_list)
     except Exception as e:
         logger.error(e)
+        now = localtime()
         state = config.__dict__
         state["current"] = year
         state["page"] = page
         ItemListCrawlerConfig(state).save_state(
-            f'crawler-{now.tm_mon}-{now.tm_mday}-{now.tm_hour}-{now.tm_min}.json'
+            f'crawler-item-list-{now.tm_mon}{now.tm_mday}-{now.tm_hour}{now.tm_min}.json'
         )
+        raise e
 
 
-def wait(client: Chrome):
+def wait(client: Chrome, conf: ItemListCrawlerConfig):
     wait = WebDriverWait(client, 10)
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "script")))
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "table")))
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "a")))
-    sleep(0.1)
+    sleep(conf.sleep_time)
 
 
-def enter_first_page(client: Chrome, url: str):
+def enter_first_page(client: Chrome, conf: ItemListCrawlerConfig, url: str):
 
     client.get(url)
 
-    wait(client)
+    wait(client, conf)
     return client.page_source
 
 
@@ -87,12 +78,12 @@ def find_total_page(soup: BeautifulSoup) -> int:
     return int(soup.select(".pager-info--number-")[-1].text)
 
 
-def enter_page(client: Chrome, page: int):
+def enter_page(client: Chrome, conf: ItemListCrawlerConfig, page: int):
 
     client.execute_script(
         f"__doPostBack('ctl00$ContentMain$AspNetPager1','{page}');"
     )
-    wait(client)
+    wait(client, conf)
     return client.page_source
 
 
