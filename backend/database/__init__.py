@@ -6,11 +6,25 @@ CLIENT = MongoClient(
     port=27017,
 )
 
+
 class ItemListMongo:
 
     def __init__(self, db: str) -> None:
         self.db = db
         self.collection = CLIENT[self.db]["itemList"]
-    
+
     def insert_many_items(self, items: list[dict]) -> None:
         self.collection.insert_many(items)
+
+
+class ItemDetailMongo:
+
+    def __init__(self, db: str) -> None:
+        self.db = db
+        self.collection = CLIENT[self.db]["itemDetail"]
+
+    def insert_one_item(self, item: dict) -> None:
+        self.collection.insert_one(item)
+
+    def is_number_exist(self, number: str) -> bool:
+        return self.collection.find_one({'number': number}) is not None
