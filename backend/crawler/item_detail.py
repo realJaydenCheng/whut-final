@@ -20,21 +20,24 @@ headers = {
 
 
 def crawl(
-    logger,
+    logger: logging.Logger,
     conf: ItemDetailCrawlerConfig,
     item_list_mongo: ItemListMongo,
     item_detail_mongo: ItemDetailMongo
 ):
-    for number in next_target_number(item_list_mongo, item_detail_mongo):
+    next_target = next_target_number_incremental if  conf.incremental else next_target_number
+    for number in next_target(item_list_mongo, item_detail_mongo):
         try:
-            page_source = get_page_source(logger, conf, number)
+            page_source = get_page_source(number)
             markup_data = parse_markup_data(BeautifulSoup(page_source, "lxml"))
             table_data = parse_table_data(page_source)
             markup_data.update(table_data)
             markup_data["number"] = number
             item_detail_mongo.insert_one_item(markup_data)
         except ValueError as e:
-            logger.warning(f"item number: {number} table may not found, cause: {e}")
+            logger.warning(
+                f"item number: {number} table may not found, cause: {e}"
+            )
             item_detail_mongo.insert_one_item({
                 "number": number,
                 "项目名称": "项目未找到",
@@ -57,7 +60,37 @@ def next_target_number(
             yield number
 
 
-def get_page_source(logger: logging.Logger, conf: ItemDetailCrawlerConfig, item_no: str):
+def next_target_number_incremental(
+    item_list_mongo: ItemListMongo,
+    item_detail_mongo: ItemDetailMongo
+):
+    pipeline = [
+        {  # 将 item_list 集合中的文档与 item_detail 集合进行左外连接
+            '$lookup': {
+                'from': item_detail_mongo.collection.name,  # 被连接的集合名
+                'localField': 'number',  # item_list 集合中用于连接的字段
+                'foreignField': 'number',  # item_detail 集合中用于连接的字段
+                'as': 'details'  # 连接后的数组字段名
+            }
+        },
+        {  # 筛选出尚未爬取的项目（即 details 数组为空的文档）
+            '$match': {
+                'details': {'$eq': []}
+            }
+        },
+        {  # 仅保留 number 字段
+            '$project': {
+                '_id': 0,
+                'number': 1
+            }
+        }
+    ]
+    cursor = item_list_mongo.collection.aggregate(pipeline)
+    for doc in cursor:
+        yield doc['number']
+
+
+def get_page_source(item_no: str):
     for i in range(10):
         response = requests.get(target.format(item_no), headers=headers)
         response.raise_for_status()
@@ -102,7 +135,7 @@ def parse_more_info(table: pd.DataFrame):
 
 def parse_table_data(page_source: str):
     tables = pd.read_html(StringIO(page_source), flavor="lxml")
-    tables = [table.fillna("") for table in tables]
+    tables = [table.astype(str).fillna("") for table in tables]
 
     if len(tables) != 3:
         raise ValueError
