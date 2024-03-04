@@ -47,13 +47,15 @@ def crawl(
         except Exception as e:
             logger.warning(f"item number: {number} occurred {e}")
             if len(cache) > 0:
-                logger.info(f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
+                logger.info(
+                    f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
                 item_detail_mongo.insert_many_items(cache)
                 cache = []
             sleep(conf.sleep_time)
             raise e
         if len(cache) >= conf.cache_size:
-            logger.info(f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
+            logger.info(
+                f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
             item_detail_mongo.insert_many_items(cache)
             cache = []
 
@@ -141,15 +143,40 @@ def parse_more_info(table: pd.DataFrame):
     return table.set_index(table.iloc[:, 0]).iloc[:, 1].to_dict()
 
 
+def find_value_in_df(target: str, df: pd.DataFrame) -> pd.DataFrame:
+    for col_index, col in enumerate(df.columns):
+        if target in df[col].values:
+            row_index = df.index[df[col] == target].tolist()
+            return row_index[0], col_index
+
+
+def extract_info_table(df: pd.DataFrame, row: int, col: int) -> pd.DataFrame:
+    return df.iloc[row:row + 4, col:col + 2]
+
+
 def parse_table_data(page_source: str):
     tables = pd.read_html(StringIO(page_source), flavor="lxml")
     tables = [table.astype(str).fillna("") for table in tables]
 
-    if len(tables) != 3:
-        raise ValueError
+    # https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
+    if len(tables) < 3:
+        raise ValueError(f"table length: {len(tables)}, expect 3.")
 
-    return {
-        "项目成员": parse_members(tables[0]),
-        "指导教师": parse_teachers(tables[1]),
-        "项目信息": parse_more_info(tables[2]),
-    }
+    if len(tables) == 3:
+        return {
+            "项目成员": parse_members(tables[0]),
+            "指导教师": parse_teachers(tables[1]),
+            "项目信息": parse_more_info(tables[2]),
+        }
+
+    if len(tables) > 3:
+        return {
+            "项目成员": parse_members(tables[0]),
+            "指导教师": parse_teachers(tables[1]),
+            "项目信息": parse_more_info(
+                extract_info_table(
+                    tables[2],
+                    *find_value_in_df("负责人曾经参与科研的情况：", tables[2])
+                )
+            ),
+        }
