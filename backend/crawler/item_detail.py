@@ -25,7 +25,8 @@ def crawl(
     item_list_mongo: ItemListMongo,
     item_detail_mongo: ItemDetailMongo
 ):
-    next_target = next_target_number_incremental if  conf.incremental else next_target_number
+    next_target = next_target_number_incremental if conf.incremental else next_target_number
+    cache = []
     for number in next_target(item_list_mongo, item_detail_mongo):
         try:
             page_source = get_page_source(number)
@@ -33,21 +34,28 @@ def crawl(
             table_data = parse_table_data(page_source)
             markup_data.update(table_data)
             markup_data["number"] = number
-            item_detail_mongo.insert_one_item(markup_data)
+            cache.append(markup_data)
         except ValueError as e:
             logger.warning(
                 f"item number: {number} table may not found, cause: {e}"
             )
-            item_detail_mongo.insert_one_item({
+            cache.append({
                 "number": number,
                 "项目名称": "项目未找到",
                 "项目简介": target.format(number),
             })
-            continue
         except Exception as e:
             logger.warning(f"item number: {number} occurred {e}")
+            if len(cache) > 0:
+                logger.info(f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
+                item_detail_mongo.insert_many_items(cache)
+                cache = []
             sleep(conf.sleep_time)
             raise e
+        if len(cache) >= conf.cache_size:
+            logger.info(f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
+            item_detail_mongo.insert_many_items(cache)
+            cache = []
 
 
 def next_target_number(
@@ -129,8 +137,8 @@ def parse_teachers(table: pd.DataFrame):
 
 
 def parse_more_info(table: pd.DataFrame):
-    table[0] = table[0].str.rstrip('：')
-    return table.set_index(0)[1].to_dict()
+    table.iloc[:, 0] = table.iloc[:, 0].str.rstrip('：')
+    return table.set_index(table.iloc[:, 0]).iloc[:, 1].to_dict()
 
 
 def parse_table_data(page_source: str):

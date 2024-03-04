@@ -4,7 +4,7 @@ import json
 
 class _BaseConfig:
     def __init__(self, conf_dict: dict) -> None:
-        self.retry = conf_dict.get("retry", 10)
+        self.retry = conf_dict.get("retry", 30)
 
     def save_state(self, path: str) -> None:
         with open(path, 'w') as f:
@@ -30,8 +30,9 @@ class ItemListCrawlerConfig(_BaseConfig):
 
 class ItemDetailCrawlerConfig(_BaseConfig):
     def __init__(self, conf_dict: dict) -> None:
-        self.sleep_time = conf_dict.get('sleep_time', 0)
-        self.incremental = conf_dict.get('incremental', False)
+        self.sleep_time = conf_dict.get('sleep_time', 0.1)
+        self.incremental = conf_dict.get('incremental', True)
+        self.cache_size = conf_dict.get('cache_size', 256)
         super().__init__(conf_dict)
 
     def __repr__(self) -> str:
