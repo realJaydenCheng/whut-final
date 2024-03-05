@@ -25,7 +25,7 @@ def run_with_retry(conf, fn, *args, **kwargs):
             fn(*args, **kwargs)
             break
         except Exception as e:
-            logger.warning(f"Retry {_+1} for {e}")
+            logger.warning(f"Retry {_+1} for {repr(e)}")
             if _ == conf.retry:
                 raise e
 

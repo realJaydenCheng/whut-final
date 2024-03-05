@@ -25,9 +25,9 @@ class ItemDetailMongo:
 
     def insert_one_item(self, item: dict) -> None:
         self.collection.insert_one(item)
-    
-    def insert_many_items(self, items: list[dict]) -> None:
-        self.collection.insert_many(items)
+
+    def insert_many_items(self, items: list[dict], *args, **kwargs) -> None:
+        self.collection.insert_many(items, *args, **kwargs)
 
     def is_number_exist(self, number: str) -> bool:
         return self.collection.find_one({'number': number}) is not None

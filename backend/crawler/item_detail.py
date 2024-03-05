@@ -27,6 +27,30 @@ def crawl(
 ):
     next_target = next_target_number_incremental if conf.incremental else next_target_number
     cache = []
+
+    def insert_and_clear_cache():
+        logger.info(
+            f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
+        item_detail_mongo.insert_many_items(cache, ordered=False)
+        cache.clear()
+
+    def add_placeholder_item(number: str):
+        logger.warning(
+                f"item number: {number} table not found, cause: {repr(e)}"
+        )
+        cache.append({
+            "number": number,
+            "项目名称": "项目未找到",
+            "项目简介": target.format(number),
+        })
+
+    def handle_unknown_error(e: Exception):
+        logger.warning(f"item number: {number} occurred {repr(e)}")
+        if len(cache) > 0:
+            insert_and_clear_cache()
+        sleep(conf.sleep_time)
+        raise e
+
     for number in next_target(item_list_mongo, item_detail_mongo):
         try:
             page_source = get_page_source(number)
@@ -36,28 +60,17 @@ def crawl(
             markup_data["number"] = number
             cache.append(markup_data)
         except ValueError as e:
-            logger.warning(
-                f"item number: {number} table may not found, cause: {e}"
-            )
-            cache.append({
-                "number": number,
-                "项目名称": "项目未找到",
-                "项目简介": target.format(number),
-            })
+            add_placeholder_item(number)
+        except requests.HTTPError as e:
+            if e.response.status_code == 500:
+                add_placeholder_item(number)
+            else:
+                handle_unknown_error(e)
         except Exception as e:
-            logger.warning(f"item number: {number} occurred {e}")
-            if len(cache) > 0:
-                logger.info(
-                    f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
-                item_detail_mongo.insert_many_items(cache)
-                cache = []
-            sleep(conf.sleep_time)
-            raise e
+            handle_unknown_error(e)
         if len(cache) >= conf.cache_size:
-            logger.info(
-                f"insert {len(cache)} items to mongo, start with {cache[0]['number']}.")
-            item_detail_mongo.insert_many_items(cache)
-            cache = []
+            insert_and_clear_cache()
+    insert_and_clear_cache()
 
 
 def next_target_number(
@@ -143,11 +156,13 @@ def parse_more_info(table: pd.DataFrame):
     return table.set_index(table.iloc[:, 0]).iloc[:, 1].to_dict()
 
 
-def find_value_in_df(target: str, df: pd.DataFrame) -> pd.DataFrame:
-    for col_index, col in enumerate(df.columns):
-        if target in df[col].values:
-            row_index = df.index[df[col] == target].tolist()
-            return row_index[0], col_index
+def find_value_in_df(targets: list[str], df: pd.DataFrame) -> pd.DataFrame:
+    for target in targets:
+        for col_index, col in enumerate(df.columns):
+            if target in df[col].values:
+                row_index = df.index[df[col] == target].tolist()
+                return row_index[0], col_index
+    raise ValueError(f"targets: {targets} not found.")
 
 
 def extract_info_table(df: pd.DataFrame, row: int, col: int) -> pd.DataFrame:
@@ -155,7 +170,11 @@ def extract_info_table(df: pd.DataFrame, row: int, col: int) -> pd.DataFrame:
 
 
 def parse_table_data(page_source: str):
-    tables = pd.read_html(StringIO(page_source), flavor="lxml")
+    try:
+        tables = pd.read_html(StringIO(page_source), flavor="lxml")
+    except Exception as e:
+        logging.warning(f"{repr(e)} occurred while parse_table_data pd.read_html")
+        raise ValueError(f"parse_table_data pd.read_html failed, cause: {repr(e)}")
     tables = [table.astype(str).fillna("") for table in tables]
 
     # https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
@@ -176,7 +195,11 @@ def parse_table_data(page_source: str):
             "项目信息": parse_more_info(
                 extract_info_table(
                     tables[2],
-                    *find_value_in_df("负责人曾经参与科研的情况：", tables[2])
+                    *find_value_in_df(
+                        [
+                            "负责人曾经参与科研的情况：",
+                            "主持人曾经参与科研的情况："
+                        ], tables[2])
                 )
             ),
         }
