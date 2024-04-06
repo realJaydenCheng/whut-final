@@ -1,5 +1,7 @@
 
 import os
+import functools
+
 from typing import Optional
 
 import dotenv
@@ -25,6 +27,7 @@ database_meta_db = DatabaseMetaData(es_client)
 
 
 def check_is_login_decorator(func):
+    @functools.wraps(func)
     def wrapper(user_id: Optional[str] = Cookie(None), *args, **kwargs):
         if user_id is None:
             return {"message": "not login"}
@@ -38,33 +41,35 @@ def root():
     return {"message": "Testing message: 'Hello World!'"}
 
 
-@app.post("/admin/db/create")
+@app.post("/api/db/create")
 @check_is_login_decorator
-def create_db(inputs: DatabaseMetaInput, user_id:str=Cookie(None)):
-    database_meta_db.create_database_meta(inputs, user_id)
+def create_db(inputs: DatabaseMetaInput, user_id: str = Cookie(None)):
+    database_meta = database_meta_db.create_database_meta(inputs, user_id)
+    database_meta_db.create_database(database_meta)
     return {"message": f"{inputs.name} created."}
 
 
-@app.post("/admin/db/delete")
+@app.post("/api/db/delete")
 @check_is_login_decorator
-def delete_db(db_id:str, user_id:str=Cookie(None)):
+def delete_db(db_id: str, user_id: str = Cookie(None)):
     if database_meta_db.check_user_is_owner(db_id, user_id):
         database_meta_db.delete_database_meta(db_id)
+        database_meta_db.delete_database(db_id)
         return {"message": f"{db_id} deleted."}
     else:
         return {"message": "have no privilege."}
 
 
-@app.get("/admin/db/list")
-def list_db(user_id:Optional[str]=Cookie(None)):
+@app.get("/api/db/list")
+def list_db(user_id: Optional[str] = Cookie(None)):
     user = user_db.get_user_info(user_id)
     return database_meta_db.list_database_metas(user.org_name)
 
 
-@app.get("/admin/db/{db_id}")
+@app.get("/api/db/{db_id}")
 @check_is_login_decorator
 def get_db(db_id: str):
-    return {"message": "Hello World", "db_id": db_id}
+    return DatabaseMeta(**database_meta_db.get_database_meta(db_id))
 
 
 def set_user_cookie(user: User, response: Response):
@@ -79,7 +84,7 @@ def clear_user_cookie(response: Response):
     response.delete_cookie(key="user_privilege")
 
 
-@app.post("/user/login")
+@app.post("/api/user/login")
 def login(user: User, response: Response):
     if user_db.is_password_ok(user):
         set_user_cookie(user, response)
@@ -89,13 +94,13 @@ def login(user: User, response: Response):
         return {"message": "login failed!"}
 
 
-@app.get("/user/logout")
+@app.get("/api/user/logout")
 def logout(response: Response):
     clear_user_cookie(response)
     return {"message": "logged out!"}
 
 
-@app.post("/user/register")
+@app.post("/api/user/register")
 def register(user: User):
     user_db.create_user(user)
     return {"message": "register success!"}

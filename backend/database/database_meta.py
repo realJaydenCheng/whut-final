@@ -3,7 +3,7 @@ import datetime
 from typing import Optional
 
 from pydantic import BaseModel
-from elasticsearch import Elasticsearch
+from elasticsearch import BadRequestError, Elasticsearch
 import uuid
 
 
@@ -43,12 +43,17 @@ class DatabaseMetaData:
         self.client = client
         self.index = "serverDatabaseMeta"
 
-    def create_database_meta(self, database_meta: DatabaseMetaInput, user_id: str):
+    def create_database_meta(self, database_meta: DatabaseMetaInput, user_id: str)->DatabaseMeta:
         database_meta_dict = database_meta.model_dump()
         database_meta_dict["create_time"] = str(datetime.datetime.now())
         database_meta_dict["id"] = str(uuid.uuid4())
         database_meta_dict["user_id"] = user_id
-        self.client.index(index=self.index, id=database_meta_dict["id"], body=database_meta_dict)
+        self.client.index(
+            index=self.index,
+            id=database_meta_dict["id"],
+            body=database_meta_dict
+        )
+        return DatabaseMeta(**database_meta_dict)
 
     def delete_database_meta(self, database_meta_id: str):
         self.client.delete(index=self.index, id=database_meta_id)
@@ -77,8 +82,86 @@ class DatabaseMetaData:
 
         return self.client.search(
             index=self.index, body={"query": query}
-        )  # TODO: get list
+        )["hits"]["hits"]
 
+    def get_database_meta(self, db_id: str):
+        return self.client.get(index=self.index, id=db_id)
 
+    def create_database(self, meta: DatabaseMeta):
 
+        # 构建es映射
+        properties = {
+            meta.title_field: {
+                "type": "text",
+                "search_analyzer": "ik_smart",
+                "analyzer": "ik_smart",
+                "fielddata": True,
+                "fields": {
+                    "max": {
+                        "type": "text",
+                        "search_analyzer": "ik_max_word",
+                        "analyzer": "ik_max_word",
+                        "fielddata": True
+                    },
+                    "like": {
+                        "type": "wildcard"
+                    }
+                }
+            },
+            meta.time_field: {
+                "type": "date",
+                "format": "yyyy-MM-dd"
+            }
+        }
 
+        for field in meta.cate_fields:
+            if field == "":
+                continue
+            properties[field] = {
+                "type": "keyword",
+                "doc_values": True,
+                "fields": {
+                    "search": {
+                        "type": "wildcard"
+                    }
+                }
+            }
+
+        for field in meta.id_fields:
+            if field == "":
+                continue
+            properties[field] = {
+                "type": "keyword"
+            }
+
+        for field in meta.text_fields:
+            if field == "":
+                continue
+            properties[field] = {
+                "type": "text",
+                "search_analyzer": "ik_smart",
+                "analyzer": "ik_smart",
+                "fielddata": True,
+                "fields": {
+                    "max": {
+                        "type": "text",
+                        "search_analyzer": "ik_max_word",
+                        "analyzer": "ik_max_word",
+                        "fielddata": True
+                    },
+                    "like": {
+                        "type": "wildcard"
+                    }
+                }
+            }
+
+        # 建表
+        es_res = self.client.indices.create(
+            index=meta.id,
+            mappings={"properties": properties},
+        )
+        if not es_res.get("acknowledged", False):
+            raise BadRequestError
+
+    def delete_database(self, db_id: str):
+        self.client.indices.delete(index=db_id)
