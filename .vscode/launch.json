@@ -11,6 +11,14 @@
             "module": "crawler.main",
             "args": ["--mode", "item-detail"],
             "cwd": "${workspaceFolder}/backend/"
-        }
+        },
+        {
+            "name": "server fastapi",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": ["--reload", "server.main:app"],
+            "cwd": "${workspaceFolder}/backend/"
+        },
     ]
 }

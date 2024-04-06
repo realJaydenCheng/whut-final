@@ -1,9 +1,12 @@
 {
     "cSpell.words": [
         "astype",
+        "dotenv",
+        "fastapi",
         "KHTML",
         "levelname",
         "mday",
+        "pydantic",
         "thead"
     ]
 }
