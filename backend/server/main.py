@@ -5,16 +5,23 @@ from typing import Optional
 import dotenv
 from fastapi import FastAPI, Cookie, Response
 from pymongo import MongoClient
+from elasticsearch import Elasticsearch
 from database.user import UserData, User
+from database.database_meta import DatabaseMeta, DatabaseMetaData, DatabaseMetaInput
 
 dotenv.load_dotenv()
 
 app = FastAPI()
-client = MongoClient(
+mongo_client = MongoClient(
     host=os.getenv("MONGO_HOST"),
     port=int(os.getenv("MONGO_PORT"))
 )
-user_db = UserData(client, "final")
+es_client = Elasticsearch(
+    hosts=os.getenv("ES_HOST")
+)
+
+user_db = UserData(mongo_client, "final")
+database_meta_db = DatabaseMetaData(es_client)
 
 
 def check_is_login_decorator(func):
@@ -28,24 +35,30 @@ def check_is_login_decorator(func):
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    return {"message": "Testing message: 'Hello World!'"}
 
 
 @app.post("/admin/db/create")
 @check_is_login_decorator
-def create_db():
-    return {"message": "Hello World"}
+def create_db(inputs: DatabaseMetaInput, user_id:str=Cookie(None)):
+    database_meta_db.create_database_meta(inputs, user_id)
+    return {"message": f"{inputs.name} created."}
 
 
 @app.post("/admin/db/delete")
 @check_is_login_decorator
-def delete_db():
-    return {"message": "Hello World"}
+def delete_db(db_id:str, user_id:str=Cookie(None)):
+    if database_meta_db.check_user_is_owner(db_id, user_id):
+        database_meta_db.delete_database_meta(db_id)
+        return {"message": f"{db_id} deleted."}
+    else:
+        return {"message": "have no privilege."}
 
 
 @app.get("/admin/db/list")
-def list_db():
-    return {"message": "Hello World"}
+def list_db(user_id:Optional[str]=Cookie(None)):
+    user = user_db.get_user_info(user_id)
+    return database_meta_db.list_database_metas(user.org_name)
 
 
 @app.get("/admin/db/{db_id}")

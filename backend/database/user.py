@@ -22,6 +22,18 @@ class UserData:
     def create_user(self, inputs: User):
         self.db[self.collection].insert_one(inputs.model_dump())
 
+    def is_password_ok(self, inputs: User):
+        user = self.db[self.collection].find_one({"id": inputs.id})
+        if user is None:
+            return False
+        return user["password_hash"] == inputs.password_hash
+    
+    def get_user_info(self, user_id: str) -> User:
+        user = self.db[self.collection].find_one({"id": user_id})
+        if user is None:
+            return None
+        return User(**user)
+    
     # def update_user(self, inputs: User):
     #     self.db[self.collection].update_one(
     #         {"id": inputs.id}, {"$set": inputs.model_dump()})
@@ -29,8 +41,4 @@ class UserData:
     # def delete_user(self, inputs: User):
     #     self.db[self.collection].delete_one({"id": inputs.id})
 
-    def is_password_ok(self, inputs: User):
-        user = self.db[self.collection].find_one({"id": inputs.id})
-        if user is None:
-            return False
-        return user["password_hash"] == inputs.password_hash
+
