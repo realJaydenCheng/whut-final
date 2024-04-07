@@ -1,0 +1,307 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "\r\n## refs\r\n\r\nhttps://github.com/microsoft/vscode-jupyter/discussions/9317\r\n\r\nhttps://marketplace.visualstudio.com/items?itemName=donjayamanne.typescript-notebook\r\n\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 连通性\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8000/api',\r\n).then((response) => {\r\n    console.log(response.data);\r\n})"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{ message: \"Testing message: 'Hello World!'\" }",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## 账号管理"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 正常注册\r\nimport axios from 'axios';\r\n\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/user/register',\r\n    {\r\n        id: \"13657290357\",\r\n        name: \"Test00\",\r\n        privilege: 0,\r\n        password_hash: \"0xffffff\",\r\n        org_name: \"whut\",\r\n    },\r\n).then((response) => {\r\n    console.log(response.data);\r\n    console.log(response.headers[\"set-cookie\"]);\r\n})\r\n\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{ message: 'register success!' }",
+                                "undefined",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 账号不存在\r\nimport axios from 'axios';\r\n\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/user/login',\r\n    {\r\n        id: \"10086\",\r\n        password_hash: \"0xffffff\",\r\n    },\r\n).then((response) => {\r\n    console.log(response.data);\r\n    console.log(response.headers[\"set-cookie\"]);\r\n})\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{ message: 'login failed!' }",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 密码错误\r\nimport axios from 'axios';\r\n\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/user/login',\r\n    {\r\n        id: \"13657290358\",\r\n        password_hash: \"0xffff00\",\r\n    },\r\n).then((response) => {\r\n    console.log(response.data);\r\n    console.log(response.headers[\"set-cookie\"]);\r\n})\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{ message: 'login failed!' }",
+                                "[",
+                                "  'user_id=\"\"; expires=Sun, 07 Apr 2024 03:53:29 GMT; Max-Age=0; Path=/; SameSite=lax',",
+                                "  'user_name=\"\"; expires=Sun, 07 Apr 2024 03:53:29 GMT; Max-Age=0; Path=/; SameSite=lax',",
+                                "  'user_privilege=\"\"; expires=Sun, 07 Apr 2024 03:53:29 GMT; Max-Age=0; Path=/; SameSite=lax',",
+                                "  'org_name=\"\"; expires=Sun, 07 Apr 2024 03:53:29 GMT; Max-Age=0; Path=/; SameSite=lax'",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 正常登录\r\nimport axios from 'axios';\r\n\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/user/login',\r\n    {\r\n        id: \"13657290357\",\r\n        password_hash: \"0xffffff\",\r\n    },\r\n).then((response) => {\r\n\r\n    console.log(response.data);\r\n    console.log(response.headers[\"set-cookie\"]);\r\n})\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{ message: 'login success!' }",
+                                "[",
+                                "  'user_id=13657290357; Path=/; SameSite=lax',",
+                                "  'user_name=Test00; Path=/; SameSite=lax',",
+                                "  'user_privilege=0; Path=/; SameSite=lax',",
+                                "  'org_name=None; Path=/; SameSite=lax'",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 登出\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8000/api/user/logout',\r\n).then((response) => {\r\n    console.log(response.data);\r\n    console.log(response.headers[\"set-cookie\"]);\r\n})\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{ message: 'logged out!' }",
+                                "[",
+                                "  'user_id=\"\"; expires=Sun, 07 Apr 2024 03:53:31 GMT; Max-Age=0; Path=/; SameSite=lax',",
+                                "  'user_name=\"\"; expires=Sun, 07 Apr 2024 03:53:31 GMT; Max-Age=0; Path=/; SameSite=lax',",
+                                "  'user_privilege=\"\"; expires=Sun, 07 Apr 2024 03:53:31 GMT; Max-Age=0; Path=/; SameSite=lax',",
+                                "  'org_name=\"\"; expires=Sun, 07 Apr 2024 03:53:31 GMT; Max-Age=0; Path=/; SameSite=lax'",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## 数据库管理"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 正常创建数据库\r\nimport axios from 'axios';\r\n\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/db/create',\r\n    {\r\n        name: \"test_db_00\",\r\n        org_name: \"public\",\r\n        title_field: \"项目名称\",\r\n        time_field: \"立项时间\",\r\n        cate_fields: [\"学科\", \"分类\", \"类型\"],\r\n        id_fields: ['承办者', '指导老师'],\r\n        text_fields: ['项目摘要'],\r\n    },\r\n    {\r\n        withCredentials: true,\r\n        headers: {\r\n            Cookie: [\r\n                'user_id=13657290357; Path=/; SameSite=lax',\r\n                'user_name=Test00; Path=/; SameSite=lax',\r\n                'user_privilege=0; Path=/; SameSite=lax',\r\n            ]\r\n        }\r\n    }\r\n).then((response) => {\r\n    console.log(response.data);\r\n    console.log(response.headers[\"set-cookie\"]);\r\n})\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{ message: 'test_db_00 created.' }",
+                                "undefined",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 合法缺省创建数据库\r\nimport axios from 'axios';\r\n\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/db/create',\r\n    {\r\n        name: \"test_db_01\",\r\n        org_name: \"whut\",\r\n        title_field: \"名称\",\r\n        time_field: \"时间\",\r\n        cate_fields: [],\r\n        id_fields: [],\r\n        text_fields: [],\r\n    },\r\n    {\r\n        withCredentials: true,\r\n        headers: {\r\n            Cookie: [\r\n                'user_id=13657290357; Path=/; SameSite=lax',\r\n                'user_name=Test00; Path=/; SameSite=lax',\r\n                'user_privilege=0; Path=/; SameSite=lax',\r\n            ]\r\n        }\r\n    }\r\n).then((response) => {\r\n    console.log(response.data);\r\n    console.log(response.headers[\"set-cookie\"]);\r\n})\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{ message: 'test_db_01 created.' }",
+                                "undefined",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 获取数据库列表\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8000/api/db/list',\r\n).then((response) => {\r\n    console.log(response.data);\r\n    console.log(response.headers[\"set-cookie\"]);\r\n})\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "[",
+                                "  {",
+                                "    name: 'test_db_00',",
+                                "    org_name: 'public',",
+                                "    title_field: '项目名称',",
+                                "    time_field: '立项时间',",
+                                "    cate_fields: [ '学科', '分类', '类型' ],",
+                                "    id_fields: [ '承办者', '指导老师' ],",
+                                "    text_fields: [ '项目摘要' ],",
+                                "    create_time: '2024-04-07',",
+                                "    id: '829735d1-3183-429b-824f-1737c1df001c',",
+                                "    user_id: '13657290357'",
+                                "  }",
+                                "]",
+                                "undefined",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 获取数据库详情\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8000/api/db/list',\r\n).then((response) => {\r\n\r\n    const db_id = response.data[0].id;\r\n\r\n    axios.get(\r\n        'http://127.0.0.1:8000/api/db/' + db_id,\r\n        {\r\n            withCredentials: true,\r\n            headers: {\r\n                Cookie: [\r\n                    'user_id=13657290357; Path=/; SameSite=lax',\r\n                    'user_name=Test00; Path=/; SameSite=lax',\r\n                    'user_privilege=0; Path=/; SameSite=lax',\r\n                ]\r\n            }\r\n        }\r\n    ).then((res) => {\r\n        console.log(res.data);\r\n        console.log(res.headers[\"set-cookie\"]);\r\n    });\r\n\r\n});\r\n\r\n\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                "{",
+                                "  id: '829735d1-3183-429b-824f-1737c1df001c',",
+                                "  user_id: '13657290357',",
+                                "  create_time: '2024-04-07',",
+                                "  name: 'test_db_00',",
+                                "  org_name: 'public',",
+                                "  title_field: '项目名称',",
+                                "  time_field: '立项时间',",
+                                "  cate_fields: [ '学科', '分类', '类型' ],",
+                                "  id_fields: [ '承办者', '指导老师' ],",
+                                "  text_fields: [ '项目摘要' ]",
+                                "}",
+                                "undefined",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// 删除测试数据库\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8000/api/db/list',\r\n).then((response) => {\r\n\r\n    const db_list = Array.from(response.data);\r\n    console.log(db_list.length);\r\n    db_list.forEach((element:any) => {\r\n\r\n        console.log(element.id);\r\n\r\n        const db_id: string = element.id;\r\n        const db_name: string = element.name;\r\n\r\n        if ( ! db_name.startsWith(\"test\")) {\r\n            return;\r\n        }\r\n\r\n        axios.post(\r\n            'http://127.0.0.1:8000/api/db/delete?db_id=' + db_id,\r\n            {},\r\n            {\r\n                withCredentials: true,\r\n                headers: {\r\n                    Cookie: [\r\n                        'user_id=13657290357; Path=/; SameSite=lax',\r\n                        'user_name=Test00; Path=/; SameSite=lax',\r\n                        'user_privilege=0; Path=/; SameSite=lax',\r\n                    ]\r\n                }\r\n            }\r\n\r\n        ).then((res) => {\r\n            console.log(res.data);\r\n            console.log(res.headers[\"set-cookie\"]);\r\n        });\r\n\r\n    });\r\n\r\n});\r\n\r\n\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "1",
+                                "",
+                                "undefined",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                ""
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                ""
+            ],
+            "outputs": []
+        }
+    ]
+}

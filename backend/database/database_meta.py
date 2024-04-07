@@ -45,7 +45,9 @@ class DatabaseMetaData:
 
     def create_database_meta(self, database_meta: DatabaseMetaInput, user_id: str)->DatabaseMeta:
         database_meta_dict = database_meta.model_dump()
-        database_meta_dict["create_time"] = str(datetime.datetime.now().strftime("yyyy-mm-dd"))
+        database_meta_dict["create_time"] = str(
+            datetime.datetime.now().strftime("%Y-%m-%d")
+        )
         database_meta_dict["id"] = str(uuid.uuid4())
         database_meta_dict["user_id"] = user_id
         self.client.index(

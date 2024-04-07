@@ -1,4 +1,6 @@
 
+from typing import Optional
+
 from pydantic import BaseModel
 from pymongo import MongoClient
 
@@ -10,7 +12,7 @@ class User(BaseModel):
 
     name: str
     privilege: int
-    org_name: str
+    org_name: Optional[str] = None
 
 
 class UserLoginInput(BaseModel):

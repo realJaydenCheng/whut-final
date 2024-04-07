@@ -45,12 +45,14 @@ def set_user_cookie(user: User, response: Response):
     response.set_cookie(key="user_id", value=user.id)
     response.set_cookie(key="user_name", value=user.name)
     response.set_cookie(key="user_privilege", value=user.privilege)
+    response.set_cookie(key="org_name", value=user.org_name)
 
 
 def clear_user_cookie(response: Response):
     response.delete_cookie(key="user_id")
     response.delete_cookie(key="user_name")
     response.delete_cookie(key="user_privilege")
+    response.delete_cookie(key="org_name")
 
 
 @app.post("/api/user/register")
@@ -91,6 +93,13 @@ def list_db(user_id: Annotated[str, Cookie()] = None):
     return database_meta_db.list_database_metas(user.org_name)
 
 
+@app.get("/api/db/{db_id}")
+@check_is_login_decorator
+def get_db(db_id: str, user_id: Annotated[str, Cookie()] = None):
+    db_meta = database_meta_db.get_database_meta(db_id)["_source"]
+    return DatabaseMeta(**db_meta)
+
+
 @app.post("/api/db/delete")
 @check_is_login_decorator
 def delete_db(db_id: str, user_id: Annotated[str, Cookie()] = None):
@@ -100,9 +109,3 @@ def delete_db(db_id: str, user_id: Annotated[str, Cookie()] = None):
         return {"message": f"{db_id} deleted."}
     else:
         return {"message": "have no privilege."}
-
-
-@app.get("/api/db/{db_id}")
-@check_is_login_decorator
-def get_db(db_id: str):
-    return DatabaseMeta(**database_meta_db.get_database_meta(db_id))
