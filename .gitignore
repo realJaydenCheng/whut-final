@@ -161,4 +161,5 @@ cython_debug/
 
 backend/var/
 
-node_modules
+node_modules/
+*/node_modules/
