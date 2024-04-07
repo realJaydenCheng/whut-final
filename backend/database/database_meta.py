@@ -41,11 +41,11 @@ class DatabaseMetaData:
 
     def __init__(self, client: Elasticsearch) -> None:
         self.client = client
-        self.index = "serverDatabaseMeta"
+        self.index = "server-database-meta"
 
     def create_database_meta(self, database_meta: DatabaseMetaInput, user_id: str)->DatabaseMeta:
         database_meta_dict = database_meta.model_dump()
-        database_meta_dict["create_time"] = str(datetime.datetime.now())
+        database_meta_dict["create_time"] = str(datetime.datetime.now().strftime("yyyy-mm-dd"))
         database_meta_dict["id"] = str(uuid.uuid4())
         database_meta_dict["user_id"] = user_id
         self.client.index(
@@ -80,9 +80,9 @@ class DatabaseMetaData:
         if org_name not in [None, "public"]:
             query["bool"]["should"].append({"term": {"org_name": org_name}})
 
-        return self.client.search(
+        return [ x["_source"] for x in  self.client.search(
             index=self.index, body={"query": query}
-        )["hits"]["hits"]
+        )["hits"]["hits"] ]
 
     def get_database_meta(self, db_id: str):
         return self.client.get(index=self.index, id=db_id)

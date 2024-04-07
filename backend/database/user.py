@@ -6,9 +6,16 @@ from pymongo import MongoClient
 class User(BaseModel):
 
     id: str
+    password_hash: str
 
     name: str
     privilege: int
+    org_name: str
+
+
+class UserLoginInput(BaseModel):
+
+    id: str
     password_hash: str
 
 
@@ -22,7 +29,7 @@ class UserData:
     def create_user(self, inputs: User):
         self.db[self.collection].insert_one(inputs.model_dump())
 
-    def is_password_ok(self, inputs: User):
+    def is_password_ok(self, inputs: UserLoginInput):
         user = self.db[self.collection].find_one({"id": inputs.id})
         if user is None:
             return False
