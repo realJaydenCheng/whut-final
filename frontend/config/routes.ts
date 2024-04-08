@@ -28,6 +28,12 @@ export default [
     ],
   },
   {
+    path: '/database',
+    name: '数据库',
+    icon: 'database',
+    component: './Database',
+  },
+  {
     path: '/welcome',
     name: 'welcome',
     icon: 'smile',
