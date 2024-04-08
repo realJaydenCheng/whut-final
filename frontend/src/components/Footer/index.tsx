@@ -4,31 +4,35 @@ import React from 'react';
 
 const Footer: React.FC = () => {
   return (
+
     <DefaultFooter
+
       style={{
         background: 'none',
       }}
+
       links={[
         {
-          key: 'Ant Design Pro',
-          title: 'Ant Design Pro',
-          href: 'https://pro.ant.design',
+          key: '武汉理工大学毕业设计',
+          title: '武汉理工大学毕业设计',
+          href: 'https://www.whut.edu.cn/',
           blankTarget: true,
         },
         {
           key: 'github',
-          title: <GithubOutlined />,
-          href: 'https://github.com/ant-design/ant-design-pro',
+          title: <><GithubOutlined /> Jayden Cheng </>,
+          href: 'https://github.com/realJaydenCheng',
           blankTarget: true,
-        },
-        {
-          key: 'Ant Design',
-          title: 'Ant Design',
-          href: 'https://ant.design',
-          blankTarget: true,
-        },
+        }
       ]}
+
+      copyright={
+        <a href='https://blog.csdn.net/JaydenCheng'>
+          信息管理与信息系统2002班 程嘉豪</a>
+      }
+
     />
+
   );
 };
 
