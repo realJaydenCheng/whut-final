@@ -1,101 +1,100 @@
-// @ts-ignore
-/* eslint-disable */
-
 declare namespace API {
-  type CurrentUser = {
-    name?: string;
-    avatar?: string;
-    userid?: string;
-    email?: string;
-    signature?: string;
-    title?: string;
-    group?: string;
-    tags?: { key?: string; label?: string }[];
-    notifyCount?: number;
-    unreadCount?: number;
-    country?: string;
-    access?: string;
-    geographic?: {
-      province?: { label?: string; key?: string };
-      city?: { label?: string; key?: string };
-    };
-    address?: string;
-    phone?: string;
+  type createDbApiDbCreatePostParams = {
+    user_id?: string;
   };
 
-  type LoginResult = {
-    status?: string;
-    type?: string;
-    currentAuthority?: string;
+  type DatabaseMeta = {
+    /** Id */
+    id: string;
+    /** User Id */
+    user_id: string;
+    /** Create Time */
+    create_time: string;
+    /** Name */
+    name: string;
+    /** Org Name */
+    org_name: string;
+    /** Title Field */
+    title_field: string;
+    /** Time Field */
+    time_field: string;
+    /** Cate Fields */
+    cate_fields: string[];
+    /** Id Fields */
+    id_fields: string[];
+    /** Text Fields */
+    text_fields: string[];
   };
 
-  type PageParams = {
-    current?: number;
-    pageSize?: number;
+  type DatabaseMetaInput = {
+    /** Name */
+    name: string;
+    /** Org Name */
+    org_name: string;
+    /** Title Field */
+    title_field: string;
+    /** Time Field */
+    time_field: string;
+    /** Cate Fields */
+    cate_fields: string[];
+    /** Id Fields */
+    id_fields: string[];
+    /** Text Fields */
+    text_fields: string[];
   };
 
-  type RuleListItem = {
-    key?: number;
-    disabled?: boolean;
-    href?: string;
-    avatar?: string;
-    name?: string;
-    owner?: string;
-    desc?: string;
-    callNo?: number;
-    status?: number;
-    updatedAt?: string;
-    createdAt?: string;
-    progress?: number;
+  type deleteDbApiDbDeletePostParams = {
+    db_id: string;
+    user_id?: string;
   };
 
-  type RuleList = {
-    data?: RuleListItem[];
-    /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
+  type getDbApiDbDbIdGetParams = {
+    db_id: string;
+    user_id?: string;
   };
 
-  type FakeCaptcha = {
-    code?: number;
-    status?: string;
+  type HTTPValidationError = {
+    /** Detail */
+    detail?: ValidationError[];
   };
 
-  type LoginParams = {
-    username?: string;
-    password?: string;
-    autoLogin?: boolean;
-    type?: string;
+  type listDbApiDbListGetParams = {
+    user_id?: string;
   };
 
-  type ErrorResponse = {
-    /** 业务约定的错误码 */
-    errorCode: string;
-    /** 业务上的错误信息 */
-    errorMessage?: string;
-    /** 业务上的请求是否成功 */
-    success?: boolean;
+  type ReturnMessage = {
+    /** Message */
+    message: string;
+    /** Status */
+    status: boolean;
   };
 
-  type NoticeIconList = {
-    data?: NoticeIconItem[];
-    /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
+  type User = {
+    /** Id */
+    id: string;
+    /** Password Hash */
+    password_hash: string;
+    /** Name */
+    name: string;
+    /** Privilege */
+    privilege: number;
+    /** Org Name */
+    org_name?: string | null;
   };
 
-  type NoticeIconItemType = 'notification' | 'message' | 'event';
+  type UserLoginInput = {
+    /** Id */
+    id: string;
+    /** Password Hash */
+    password_hash: string;
+  };
 
-  type NoticeIconItem = {
-    id?: string;
-    extra?: string;
-    key?: string;
-    read?: boolean;
-    avatar?: string;
-    title?: string;
-    status?: string;
-    datetime?: string;
-    description?: string;
-    type?: NoticeIconItemType;
+  type ValidationError = {
+    /** Location */
+    loc: (string | number)[];
+    /** Message */
+    msg: string;
+    /** Error Type */
+    type: string;
   };
 }

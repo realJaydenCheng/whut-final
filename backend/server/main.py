@@ -6,6 +6,7 @@ from typing import Optional, Annotated
 
 import dotenv
 from fastapi import FastAPI, Cookie, Response
+from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
 from database.user import UserData, User, UserLoginInput
@@ -26,19 +27,25 @@ user_db = UserData(mongo_client, "final")
 database_meta_db = DatabaseMetaData(es_client)
 
 
+
+class ReturnMessage(BaseModel):
+    message: str
+    status: bool
+
+
 def check_is_login_decorator(func):
     @functools.wraps(func)
     def wrapper(user_id: Annotated[str, Cookie()] = None, *args, **kwargs):
         if user_id is None:
-            return {"message": "not login"}
+            return ReturnMessage(message="您还没有登录", status=False)
         else:
             return func(user_id=user_id, *args, **kwargs)
     return wrapper
 
 
-@app.get("/api")
+@app.get("/api", response_model=ReturnMessage)
 def root():
-    return {"message": "Testing message: 'Hello World!'"}
+    return ReturnMessage(message="Hello World!", status=True)
 
 
 def set_user_cookie(user: User, response: Response):
@@ -55,37 +62,40 @@ def clear_user_cookie(response: Response):
     response.delete_cookie(key="org_name")
 
 
-@app.post("/api/user/register")
+@app.post("/api/user/register", response_model=ReturnMessage)
 def register(user: User):
-    user_db.create_user(user)
-    return {"message": "register success!"}
+    try:
+        user_db.create_user(user)
+        return ReturnMessage(message="注册成功", status=True)
+    except Exception as e:
+        return ReturnMessage(message=repr(e), status=False)
 
 
-@app.post("/api/user/login")
+@app.post("/api/user/login", response_model=ReturnMessage)
 def login(user: UserLoginInput, response: Response):
     if user_obj := user_db.get_user_info(user.id):
         set_user_cookie(user_obj, response)
-        return {"message": "login success!"}
+        return ReturnMessage(message="登陆成功", status=True)
     else:
         clear_user_cookie(response)
-        return {"message": "login failed!"}
+        return ReturnMessage(message="登陆失败", status=False)
 
 
-@app.get("/api/user/logout")
+@app.get("/api/user/logout", response_model=ReturnMessage)
 def logout(response: Response):
     clear_user_cookie(response)
-    return {"message": "logged out!"}
+    return ReturnMessage(message="已登出", status=True)
 
 
-@app.post("/api/db/create")
+@app.post("/api/db/create", response_model=ReturnMessage)
 @check_is_login_decorator
 def create_db(inputs: DatabaseMetaInput, user_id: Annotated[str, Cookie()] = None):
     database_meta = database_meta_db.create_database_meta(inputs, user_id)
     database_meta_db.create_database(database_meta)
-    return {"message": f"{inputs.name} created."}
+    return ReturnMessage(message=f"已创建{inputs.name}", status=True)
 
 
-@app.get("/api/db/list")
+@app.get("/api/db/list", response_model=list[DatabaseMeta])
 def list_db(user_id: Annotated[str, Cookie()] = None):
     if user_id is None:
         return database_meta_db.list_database_metas(None)
@@ -93,19 +103,19 @@ def list_db(user_id: Annotated[str, Cookie()] = None):
     return database_meta_db.list_database_metas(user.org_name)
 
 
-@app.get("/api/db/{db_id}")
+@app.get("/api/db/{db_id}", response_model=DatabaseMeta)
 @check_is_login_decorator
 def get_db(db_id: str, user_id: Annotated[str, Cookie()] = None):
     db_meta = database_meta_db.get_database_meta(db_id)["_source"]
     return DatabaseMeta(**db_meta)
 
 
-@app.post("/api/db/delete")
+@app.post("/api/db/delete", response_model=ReturnMessage)
 @check_is_login_decorator
 def delete_db(db_id: str, user_id: Annotated[str, Cookie()] = None):
     if database_meta_db.check_user_is_owner(db_id, user_id):
         database_meta_db.delete_database_meta(db_id)
         database_meta_db.delete_database(db_id)
-        return {"message": f"{db_id} deleted."}
+        return ReturnMessage(message=f"已删除{db_id}", status=True)
     else:
-        return {"message": "have no privilege."}
+        return ReturnMessage(message="没有操作权限", status=False)

@@ -66,7 +66,7 @@ class DatabaseMetaData:
             return database_meta["_source"]["user_id"] == user_id
         return False
 
-    def list_database_metas(self, org_name: Optional[str]):
+    def list_database_metas(self, org_name: Optional[str]) -> list[DatabaseMeta]:
 
         query = {
             "bool": {
@@ -82,7 +82,7 @@ class DatabaseMetaData:
         if org_name not in [None, "public"]:
             query["bool"]["should"].append({"term": {"org_name": org_name}})
 
-        return [ x["_source"] for x in  self.client.search(
+        return [ DatabaseMeta(**x["_source"]) for x in  self.client.search(
             index=self.index, body={"query": query}
         )["hits"]["hits"] ]
 
