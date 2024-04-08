@@ -16,12 +16,12 @@ export default [
     layout: false,
     routes: [
       {
-        name: 'login',
+        name: '登录',
         path: '/user/login',
         component: './User/Login',
       },
       {
-        name: 'register',
+        name: '注册',
         path: '/user/register',
         component: './User/Register',
       },
@@ -43,7 +43,6 @@ export default [
     path: '/admin',
     name: 'admin',
     icon: 'crown',
-    access: 'canAdmin',
     routes: [
       {
         path: '/admin',
@@ -55,12 +54,6 @@ export default [
         component: './Admin',
       },
     ],
-  },
-  {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
   },
   {
     path: '/',

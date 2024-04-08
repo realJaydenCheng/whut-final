@@ -9,7 +9,9 @@
             "request": "launch",
             "type": "msedge",
             "url": "http://localhost:8001",
-            "webRoot": "${workspaceFolder}"
+            "sourceMaps": true,
+            "webRoot": "${workspaceRoot}",
+            "userDataDir": "${workspaceRoot}/.vscode/chrome"
         },
         {
             "name": "detail crawler",

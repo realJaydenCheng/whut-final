@@ -1,5 +1,5 @@
 import { Footer } from '@/components';
-import { login } from '@/services/ant-design-pro/api';
+import { loginApiUserLoginPost } from '@/services/ant-design-pro/loginApiUserLoginPost';
 import {
   LockOutlined,
   UserOutlined,
@@ -10,7 +10,7 @@ import {
   ProFormCheckbox,
   ProFormText,
 } from '@ant-design/pro-components';
-import { FormattedMessage, history, SelectLang, useIntl, useModel, Helmet } from '@umijs/max';
+import { history, useModel, Helmet } from '@umijs/max';
 import { Alert, message } from 'antd';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -27,17 +27,6 @@ const useStyles = createStyles(({ token }) => {
       transition: 'color 0.3s',
       '&:hover': {
         color: token.colorPrimaryActive,
-      },
-    },
-    lang: {
-      width: 42,
-      height: 42,
-      lineHeight: '42px',
-      position: 'fixed',
-      right: 16,
-      borderRadius: token.borderRadius,
-      ':hover': {
-        backgroundColor: token.colorBgTextHover,
       },
     },
     container: {
@@ -67,12 +56,15 @@ const LoginMessage: React.FC<{
   );
 };
 
+interface LoginState {
+  status: boolean | null
+}
+
 const Login: React.FC = () => {
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
+  const [userLoginState, setUserLoginState] = useState<LoginState>({status: null});
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
-  const intl = useIntl();
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
@@ -86,15 +78,12 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (values: API.LoginParams) => {
-    try {
+  const handleSubmit = async (values: API.UserLoginInput) => {
+
       // 登录
-      const msg = await login({ ...values, type });
-      if (msg.status === 'ok') {
-        const defaultLoginSuccessMessage = intl.formatMessage({
-          id: 'pages.login.success',
-          defaultMessage: '登录成功！',
-        });
+      const msg = await loginApiUserLoginPost(values);
+      if (msg.status === true) {
+        const defaultLoginSuccessMessage = '登录成功！'
         message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
         const urlParams = new URL(window.location.href).searchParams;
@@ -104,16 +93,9 @@ const Login: React.FC = () => {
       console.log(msg);
       // 如果失败去设置用户错误信息
       setUserLoginState(msg);
-    } catch (error) {
-      const defaultLoginFailureMessage = intl.formatMessage({
-        id: 'pages.login.failure',
-        defaultMessage: '登录失败，请重试！',
-      });
-      console.log(error);
-      message.error(defaultLoginFailureMessage);
-    }
+    
   };
-  const { status, type: loginType } = userLoginState;
+  const { status } = userLoginState;
 
   return (
 
@@ -137,12 +119,12 @@ const Login: React.FC = () => {
             autoLogin: true,
           }}
           onFinish={async (values) => {
-            await handleSubmit(values as API.LoginParams);
+            await handleSubmit(values as API.UserLoginInput);
           }}
         >
 
           {
-            status === 'error' &&
+            status === false &&
             (
               <LoginMessage
                 content={'账户或密码错误'}
@@ -151,23 +133,23 @@ const Login: React.FC = () => {
           }
 
           <ProFormText
-            name="username"
+            name="id"
             fieldProps={{
               size: 'large',
               prefix: <UserOutlined />,
             }}
-            placeholder={'请输入用户名'}
+            placeholder={'请输入手机号'}
             rules={[
               {
                 required: true,
-                message: "请输入用户名!"
+                message: "请输入手机号!"
                 ,
               },
             ]}
           />
 
           <ProFormText.Password
-            name="password"
+            name="password_hash"
             fieldProps={{
               size: 'large',
               prefix: <LockOutlined />,
@@ -186,9 +168,6 @@ const Login: React.FC = () => {
               marginBottom: 24,
             }}
           >
-            <ProFormCheckbox noStyle name="autoLogin">
-              自动登录
-            </ProFormCheckbox>
             <a
               style={{
                 float: 'right',

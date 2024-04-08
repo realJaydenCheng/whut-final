@@ -6,30 +6,52 @@ import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
-import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
 import React from 'react';
+
+import cookie from 'react-cookies'
+
+
+
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
+
+interface Cookies {
+  user_id: string,
+  user_name: string,
+  user_privilege: number,
+  org_name: string,
+}
+
+function get_user_info(): Cookies {
+  return {
+    user_id: cookie.load("user_id", true),
+    user_name: cookie.load("user_name", true),
+    user_privilege: cookie.load("user_privilege", false),
+    org_name: cookie.load("org_name", true),
+  }
+}
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
+  currentUser?: Cookies;
   loading?: boolean;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  fetchUserInfo?: () => Promise<Cookies | undefined>;
 }> {
   const fetchUserInfo = async () => {
-    try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
-      return msg.data;
-    } catch (error) {
-      history.push(loginPath);
+    const cookies = get_user_info();
+    if (cookies.user_id != ""){
+      return cookies;
+    } else {
+      return {
+        user_id: "",
+        user_name: "",
+        user_privilege: 0,
+        org_name: "",
+      }
     }
-    return undefined;
   };
   // 如果不是登录页面，执行
   const { location } = history;
@@ -50,25 +72,22 @@ export async function getInitialState(): Promise<{
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
+
     actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
+
+    waterMarkProps: {
+      content: initialState?.currentUser?.user_name,
+    },
+
     avatarProps: {
-      src: initialState?.currentUser?.avatar,
       title: <AvatarName />,
       render: (_, avatarChildren) => {
         return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
     },
-    waterMarkProps: {
-      content: initialState?.currentUser?.name,
-    },
+
     footerRender: () => <Footer />,
-    onPageChange: () => {
-      const { location } = history;
-      // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
-        history.push(loginPath);
-      }
-    },
+
     bgLayoutImgList: [
       {
         src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr',
@@ -89,15 +108,18 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         width: '331px',
       },
     ],
+
     links: isDev
       ? [
-          <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
-            <LinkOutlined />
-            <span>OpenAPI 文档</span>
-          </Link>,
-        ]
+        <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
+          <LinkOutlined />
+          <span>OpenAPI 文档</span>
+        </Link>,
+      ]
       : [],
+
     menuHeaderRender: undefined,
+
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     // 增加一个 loading 的状态

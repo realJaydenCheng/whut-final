@@ -1,13 +1,18 @@
 {
     "cSpell.words": [
+        "ahooks",
         "antd",
         "astype",
         "dotenv",
         "fastapi",
+        "fielddata",
         "KHTML",
         "levelname",
         "mday",
+        "metas",
         "pydantic",
-        "thead"
+        "thead",
+        "umijs",
+        "webp"
     ]
 }

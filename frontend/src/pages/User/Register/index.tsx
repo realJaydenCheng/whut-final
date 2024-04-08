@@ -3,21 +3,22 @@ import { Button, Col, Form, Input, message, Popover, Progress, Row, Select, Spac
 import type { Store } from 'antd/es/form/interface';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
-import type { StateType } from './service';
-import { fakeRegister } from './service';
 import useStyles from './style.style';
+import { Footer } from '@/components';
+import registerApiUserRegisterPost from "@/services/ant-design-pro"
+
 
 const FormItem = Form.Item;
 const { Option } = Select;
 
 const passwordProgressMap: {
-  ok: 'success';
-  pass: 'normal';
-  poor: 'exception';
+  'progress-ok': 'success';
+  'progress-pass': 'normal';
+  'progress-poor': 'exception';
 } = {
-  ok: 'success',
-  pass: 'normal',
-  poor: 'exception',
+  'progress-ok': 'success',
+  'progress-pass': 'normal',
+  'progress-poor': 'exception',
 };
 const Register: FC = () => {
   const { styles } = useStyles();
@@ -29,17 +30,17 @@ const Register: FC = () => {
   let interval: number | undefined;
 
   const passwordStatusMap = {
-    ok: (
+    'progress-ok': (
       <div className={styles.success}>
         <span>强度：强</span>
       </div>
     ),
-    pass: (
+    'progress-pass': (
       <div className={styles.warning}>
         <span>强度：中</span>
       </div>
     ),
-    poor: (
+    'progress-poor': (
       <div className={styles.error}>
         <span>强度：太短</span>
       </div>
@@ -53,37 +54,24 @@ const Register: FC = () => {
     },
     [interval],
   );
-  const onGetCaptcha = () => {
-    let counts = 59;
-    setCount(counts);
-    interval = window.setInterval(() => {
-      counts -= 1;
-      setCount(counts);
-      if (counts === 0) {
-        clearInterval(interval);
-      }
-    }, 1000);
-  };
+
   const getPasswordStatus = () => {
     const value = form.getFieldValue('password');
     if (value && value.length > 9) {
-      return 'ok';
+      return 'progress-ok';
     }
     if (value && value.length > 5) {
-      return 'pass';
+      return 'progress-pass';
     }
-    return 'poor';
+    return 'progress-poor';
   };
   const { loading: submitting, run: register } = useRequest<{
-    data: StateType;
-  }>(fakeRegister, {
+    data: API.ReturnMessage;
+  }>(registerApiUserRegisterPost, {
     manual: true,
     onSuccess: (data, params) => {
-      if (data.status === 'ok') {
-        message.success('注册成功！');
-        history.push({
-          pathname: `/user/register-result?account=${params[0].email}`,
-        });
+      if (data.status === true) {
+        message.success(data.message);
       }
     },
   });
@@ -124,7 +112,7 @@ const Register: FC = () => {
     const value = form.getFieldValue('password');
     const passwordStatus = getPasswordStatus();
     return value && value.length ? (
-      <div className={styles[`progress-${passwordStatus}`]}>
+      <div>
         <Progress
           status={passwordProgressMap[passwordStatus]}
           strokeWidth={6}
@@ -140,10 +128,7 @@ const Register: FC = () => {
       padding: '32px 0',
     }}>
       <h1>注册</h1>
-      <Form form={form} name="UserRegister" onFinish={onFinish} contentStyle={{
-        minWidth: 280,
-        maxWidth: '75vw',
-      }}>
+      <Form form={form} name="UserRegister" onFinish={onFinish}>
 
         <FormItem
           name="name"
@@ -171,6 +156,18 @@ const Register: FC = () => {
           ]}
         >
           <Input size="large" placeholder="手机号" />
+        </FormItem>
+
+        <FormItem
+          name="org_name"
+          rules={[
+            {
+              required: true,
+              message: '请输入组织名!',
+            }
+          ]}
+        >
+          <Input size="large" placeholder="组织名" />
         </FormItem>
 
         <Popover
@@ -223,18 +220,6 @@ const Register: FC = () => {
         </Popover>
 
         <FormItem
-          name="org_name"
-          rules={[
-            {
-              required: true,
-              message: '请输入组织名!',
-            }
-          ]}
-        >
-          <Input size="large" placeholder="组织名" />
-        </FormItem>
-
-        <FormItem
           name="confirm"
           rules={[
             {
@@ -267,6 +252,8 @@ const Register: FC = () => {
         </FormItem>
 
       </Form>
+
+      <Footer></Footer>
     </div>
   );
 };
