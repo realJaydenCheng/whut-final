@@ -3,6 +3,7 @@
         "ahooks",
         "antd",
         "astype",
+        "cond",
         "dotenv",
         "fastapi",
         "fielddata",
@@ -11,8 +12,10 @@
         "mday",
         "metas",
         "pydantic",
+        "substr",
         "thead",
         "umijs",
+        "upserted",
         "webp"
     ]
 }
