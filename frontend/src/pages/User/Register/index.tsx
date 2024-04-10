@@ -5,7 +5,7 @@ import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import useStyles from './style.style';
 import { Footer } from '@/components';
-import registerApiUserRegisterPost from "@/services/ant-design-pro"
+import {registerApiUserRegisterPost} from "@/services/ant-design-pro/registerApiUserRegisterPost"
 
 
 const FormItem = Form.Item;
@@ -22,9 +22,7 @@ const passwordProgressMap: {
 };
 const Register: FC = () => {
   const { styles } = useStyles();
-  const [count, setCount]: [number, any] = useState(0);
   const [open, setVisible]: [boolean, any] = useState(false);
-  const [prefix, setPrefix]: [string, any] = useState('86');
   const [popover, setPopover]: [boolean, any] = useState(false);
   const confirmDirty = false;
   let interval: number | undefined;
@@ -72,6 +70,7 @@ const Register: FC = () => {
     onSuccess: (data, params) => {
       if (data.status === true) {
         message.success(data.message);
+        
       }
     },
   });
@@ -105,9 +104,7 @@ const Register: FC = () => {
     }
     return promise.resolve();
   };
-  const changePrefix = (value: string) => {
-    setPrefix(value);
-  };
+
   const renderPasswordProgress = () => {
     const value = form.getFieldValue('password');
     const passwordStatus = getPasswordStatus();
@@ -143,7 +140,7 @@ const Register: FC = () => {
         </FormItem>
 
         <FormItem
-          name="mobile"
+          name="id"
           rules={[
             {
               required: true,
@@ -168,6 +165,12 @@ const Register: FC = () => {
           ]}
         >
           <Input size="large" placeholder="组织名" />
+        </FormItem>
+
+        <FormItem
+          name="privilege"
+        >
+          <Input size="large" defaultValue={0} value={0} />
         </FormItem>
 
         <Popover
@@ -202,11 +205,12 @@ const Register: FC = () => {
           placement="right"
           open={open}
         >
+
           <FormItem
-            name="password"
+            name="password_hash"
             className={
-              form.getFieldValue('password') &&
-              form.getFieldValue('password').length > 0 &&
+              form.getFieldValue('password_hash') &&
+              form.getFieldValue('password_hash').length > 0 &&
               styles.password
             }
             rules={[
@@ -220,7 +224,7 @@ const Register: FC = () => {
         </Popover>
 
         <FormItem
-          name="confirm"
+
           rules={[
             {
               required: true,
