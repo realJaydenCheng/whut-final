@@ -78,7 +78,7 @@ export default defineConfig({
    */
   title: 'Ant Design Pro',
   layout: {
-    locale: true,
+    locale: false,
     ...defaultSettings,
   },
   /**
@@ -111,8 +111,13 @@ export default defineConfig({
    * @name 网络请求配置
    * @description 它基于 axios 和 ahooks 的 useRequest 提供了一套统一的网络请求和错误处理方案。
    * @doc https://umijs.org/docs/max/request
+   * see:
+   * https://github.com/alibaba/hooks/issues/714#issuecomment-725236865
+   * https://umijs.org/docs/max/request#%E6%9E%84%E5%BB%BA%E6%97%B6%E9%85%8D%E7%BD%AE
    */
-  request: {},
+  request: {
+    dataField: ''
+  },
   /**
    * @name 权限插件
    * @description 基于 initialState 的权限插件，必须先打开 initialState

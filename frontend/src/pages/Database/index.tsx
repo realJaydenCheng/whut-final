@@ -2,28 +2,30 @@ import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { useRequest } from '@umijs/max';
 import {
-  Avatar,
   Button,
   Card,
-  Col,
   Dropdown,
   Input,
   List,
   Modal,
   Progress,
-  Radio,
-  Row,
 } from 'antd';
 import dayjs from 'dayjs';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import OperationModal from './components/OperationModal';
 import type { BasicListItemDataType } from './data.d';
-import { addFakeList, queryFakeList, removeFakeList, updateFakeList } from './service';
+import { addFakeList, removeFakeList, updateFakeList } from './service';
 import useStyles from './style.style';
-const RadioButton = Radio.Button;
-const RadioGroup = Radio.Group;
+
+import { listDbApiDbListGet } from '@/services/ant-design-pro/listDbApiDbListGet';
+import { deleteDbApiDbDeletePost } from '@/services/ant-design-pro/deleteDbApiDbDeletePost';
+import { createDbApiDbCreatePost } from '@/services/ant-design-pro/createDbApiDbCreatePost';
+import { getDbApiDbDbIdGet } from '@/services/ant-design-pro/getDbApiDbDbIdGet';
+
+
 const { Search } = Input;
+
 const Info: FC<{
   title: React.ReactNode;
   value: React.ReactNode;
@@ -38,49 +40,46 @@ const Info: FC<{
     </div>
   );
 };
-const ListContent = ({
-  data: { owner, createdAt, percent, status },
-}: {
-  data: BasicListItemDataType;
-}) => {
+
+const ListContent = (data: API.DatabaseMeta) => {
   const { styles } = useStyles();
   return (
     <div>
       <div className={styles.listContentItem}>
         <span>Owner</span>
-        <p>{owner}</p>
+        <p>{data.user_id}</p>
       </div>
       <div className={styles.listContentItem}>
-        <span>开始时间</span>
-        <p>{dayjs(createdAt).format('YYYY-MM-DD HH:mm')}</p>
+        <span>创建时间</span>
+        <p> {data.create_time} </p>
       </div>
       <div className={styles.listContentItem}>
-        <Progress
-          percent={percent}
-          status={status}
-          strokeWidth={6}
-          style={{
-            width: 180,
-          }}
-        />
       </div>
     </div>
   );
 };
+
+const databaseMetaToDescription = (item: API.DatabaseMeta) => {
+  return `${item.name}`;
+}
+
+
 export const BasicList: FC = () => {
+
   const { styles } = useStyles();
   const [done, setDone] = useState<boolean>(false);
   const [open, setVisible] = useState<boolean>(false);
   const [current, setCurrent] = useState<Partial<BasicListItemDataType> | undefined>(undefined);
+
+  // see:
+  // https://ahooks.js.org/zh-CN/hooks/use-request/basic/#%E7%AB%8B%E5%8D%B3%E5%8F%98%E6%9B%B4%E6%95%B0%E6%8D%AE
   const {
     data: listData,
     loading,
+    params,
     mutate,
-  } = useRequest(() => {
-    return queryFakeList({
-      count: 50,
-    });
-  });
+  } = useRequest<API.DatabaseMeta[]>(listDbApiDbListGet,);
+
   const { run: postRun } = useRequest(
     (method, params) => {
       if (method === 'remove') {
@@ -93,28 +92,33 @@ export const BasicList: FC = () => {
     },
     {
       manual: true,
-      onSuccess: (result) => {
-        mutate(result);
-      },
+      // onSuccess: (result) => {
+      //   mutate(result);
+      // },
     },
   );
-  const list = listData?.list || [];
+
+  const list = listData || [];
+
   const paginationProps = {
     showSizeChanger: true,
     showQuickJumper: true,
     pageSize: 5,
     total: list.length,
   };
-  const showEditModal = (item: BasicListItemDataType) => {
+
+  const showEditModal = (item: API.DatabaseMeta) => {
     setVisible(true);
     setCurrent(item);
   };
+
   const deleteItem = (id: string) => {
     postRun('remove', {
       id,
     });
   };
-  const editAndDelete = (key: string | number, currentItem: BasicListItemDataType) => {
+
+  const editAndDelete = (key: string | number, currentItem: API.DatabaseMeta) => {
     if (key === 'edit') showEditModal(currentItem);
     else if (key === 'delete') {
       Modal.confirm({
@@ -126,13 +130,15 @@ export const BasicList: FC = () => {
       });
     }
   };
+
   const extraContent = (
     <div>
       <Search className={styles.extraContentSearch} placeholder="请输入" onSearch={() => ({})} />
     </div>
   );
+
   const MoreBtn: React.FC<{
-    item: BasicListItemDataType;
+    item: API.DatabaseMeta;
   }> = ({ item }) => (
     <Dropdown
       menu={{
@@ -154,79 +160,85 @@ export const BasicList: FC = () => {
       </a>
     </Dropdown>
   );
+
   const handleDone = () => {
     setDone(false);
     setVisible(false);
     setCurrent({});
   };
-  const handleSubmit = (values: BasicListItemDataType) => {
+
+  const handleSubmit = (values: API.DatabaseMeta) => {
     setDone(true);
     const method = values?.id ? 'update' : 'add';
     postRun(method, values);
   };
+
+  const renderListItem = (item: API.DatabaseMeta) => {
+    return (
+      <List.Item
+        actions={[
+          <a
+            key="edit"
+            onClick={(e) => {
+              e.preventDefault();
+              showEditModal(item);
+            }}
+          >
+            编辑
+          </a>,
+          <MoreBtn key="more" item={item} />,
+        ]}
+      >
+        <List.Item.Meta
+          title={item.name}
+          description={databaseMetaToDescription(item)}
+        />
+
+        {/* https://stackoverflow.com/questions/59969756/not-assignable-to-type-intrinsicattributes-intrinsicclassattributes-react-js */}
+        <ListContent {...item} />
+
+      </List.Item>
+    )
+
+  }
+
+  console.log("loading", loading);
+  console.log("params", params);
+  console.log("listData", listData);
+  console.log("list", list);
+
   return (
     <div>
       <PageContainer>
         <div className={styles.standardList}>
-          <Card bordered={false}>
-            <Row>
-              <Col sm={8} xs={24}>
-                <Info title="我的待办" value="8个任务" bordered />
-              </Col>
-              <Col sm={8} xs={24}>
-                <Info title="本周任务平均处理时间" value="32分钟" bordered />
-              </Col>
-              <Col sm={8} xs={24}>
-                <Info title="本周完成任务数" value="24个任务" />
-              </Col>
-            </Row>
-          </Card>
-
           <Card
             className={styles.listCard}
             bordered={false}
-            title="基本列表"
+            title="详细列表"
             style={{
               marginTop: 24,
             }}
-            bodyStyle={{
-              padding: '0 32px 40px 32px',
+            styles={{
+              body: {
+                padding: '0 32px 40px 32px',
+              }
             }}
             extra={extraContent}
           >
+
             <List
               size="large"
               rowKey="id"
               loading={loading}
               pagination={paginationProps}
               dataSource={list}
-              renderItem={(item) => (
-                <List.Item
-                  actions={[
-                    <a
-                      key="edit"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        showEditModal(item);
-                      }}
-                    >
-                      编辑
-                    </a>,
-                    <MoreBtn key="more" item={item} />,
-                  ]}
-                >
-                  <List.Item.Meta
-                    avatar={<Avatar src={item.logo} shape="square" size="large" />}
-                    title={<a href={item.href}>{item.title}</a>}
-                    description={item.subDescription}
-                  />
-                  <ListContent data={item} />
-                </List.Item>
-              )}
+              renderItem={renderListItem}
             />
+
           </Card>
         </div>
       </PageContainer>
+
       <Button
         type="dashed"
         onClick={() => {
@@ -240,6 +252,7 @@ export const BasicList: FC = () => {
         <PlusOutlined />
         添加
       </Button>
+
       <OperationModal
         done={done}
         open={open}
@@ -247,7 +260,10 @@ export const BasicList: FC = () => {
         onDone={handleDone}
         onSubmit={handleSubmit}
       />
+
     </div>
   );
+
 };
+
 export default BasicList;
