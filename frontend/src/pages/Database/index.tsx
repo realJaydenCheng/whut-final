@@ -13,15 +13,15 @@ import {
 import dayjs from 'dayjs';
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import OperationModal from './components/OperationModal';
+import OperationModal from './OperationModal';
 import type { BasicListItemDataType } from './data.d';
-import { addFakeList, removeFakeList, updateFakeList } from './service';
 import useStyles from './style.style';
+
+import cookie from 'react-cookies'
 
 import { listDbApiDbListGet } from '@/services/ant-design-pro/listDbApiDbListGet';
 import { deleteDbApiDbDeletePost } from '@/services/ant-design-pro/deleteDbApiDbDeletePost';
 import { createDbApiDbCreatePost } from '@/services/ant-design-pro/createDbApiDbCreatePost';
-import { getDbApiDbDbIdGet } from '@/services/ant-design-pro/getDbApiDbDbIdGet';
 
 
 const { Search } = Input;
@@ -41,13 +41,13 @@ const Info: FC<{
   );
 };
 
-const ListContent = (data: API.DatabaseMeta) => {
+const ListContent = (data: API.DatabaseMetaOutput) => {
   const { styles } = useStyles();
   return (
     <div>
       <div className={styles.listContentItem}>
-        <span>Owner</span>
-        <p>{data.user_id}</p>
+        <span>创建用户</span>
+        <p>{data.user_name}</p>
       </div>
       <div className={styles.listContentItem}>
         <span>创建时间</span>
@@ -59,8 +59,18 @@ const ListContent = (data: API.DatabaseMeta) => {
   );
 };
 
-const databaseMetaToDescription = (item: API.DatabaseMeta) => {
-  return `${item.name}`;
+const databaseMetaToDescription = (item: API.DatabaseMetaOutput) => {
+  // return `${item.id}：` +
+  // `创建用户：${item.user_name}（${item.user_id}）；` +
+  // `创建时间：${item.create_time}；` + 
+  // `所属组织：${item.org_name}；标题字段：${item.title_field}，时间字段：${item.time_field}；` +
+  // `分类字段：${item.cate_fields.join("、")}；` +
+  // `标识字段：${item.id_fields.join("、")}；` +
+  // `描述字段：${item.text_fields.join("、")}`
+
+  return `所属组织：${item.org_name}; ` + 
+  `分类字段：${item.cate_fields.join("、")}; ` +
+  `描述字段：${item.text_fields.join("、")}; `
 }
 
 
@@ -76,27 +86,7 @@ export const BasicList: FC = () => {
   const {
     data: listData,
     loading,
-    params,
-    mutate,
-  } = useRequest<API.DatabaseMeta[]>(listDbApiDbListGet,);
-
-  const { run: postRun } = useRequest(
-    (method, params) => {
-      if (method === 'remove') {
-        return removeFakeList(params);
-      }
-      if (method === 'update') {
-        return updateFakeList(params);
-      }
-      return addFakeList(params);
-    },
-    {
-      manual: true,
-      // onSuccess: (result) => {
-      //   mutate(result);
-      // },
-    },
-  );
+  } = useRequest<API.DatabaseMetaOutput[]>(listDbApiDbListGet,);
 
   const list = listData || [];
 
@@ -107,18 +97,16 @@ export const BasicList: FC = () => {
     total: list.length,
   };
 
-  const showEditModal = (item: API.DatabaseMeta) => {
+  const showEditModal = (item: API.DatabaseMetaOutput) => {
     setVisible(true);
     setCurrent(item);
   };
 
   const deleteItem = (id: string) => {
-    postRun('remove', {
-      id,
-    });
+    deleteDbApiDbDeletePost({ db_id: id });
   };
 
-  const editAndDelete = (key: string | number, currentItem: API.DatabaseMeta) => {
+  const editAndDelete = (key: string | number, currentItem: API.DatabaseMetaOutput) => {
     if (key === 'edit') showEditModal(currentItem);
     else if (key === 'delete') {
       Modal.confirm({
@@ -138,7 +126,7 @@ export const BasicList: FC = () => {
   );
 
   const MoreBtn: React.FC<{
-    item: API.DatabaseMeta;
+    item: API.DatabaseMetaOutput;
   }> = ({ item }) => (
     <Dropdown
       menu={{
@@ -167,13 +155,14 @@ export const BasicList: FC = () => {
     setCurrent({});
   };
 
-  const handleSubmit = (values: API.DatabaseMeta) => {
+  const handleSubmit = (values: API.DatabaseMetaOutput) => {
     setDone(true);
     const method = values?.id ? 'update' : 'add';
-    postRun(method, values);
+    const user_id = cookie.load("user_id")
+    createDbApiDbCreatePost({ user_id }, values)
   };
 
-  const renderListItem = (item: API.DatabaseMeta) => {
+  const renderListItem = (item: API.DatabaseMetaOutput) => {
     return (
       <List.Item
         actions={[
@@ -192,6 +181,9 @@ export const BasicList: FC = () => {
         <List.Item.Meta
           title={item.name}
           description={databaseMetaToDescription(item)}
+          style={{
+            overflow: "hidden"
+          }}
         />
 
         {/* https://stackoverflow.com/questions/59969756/not-assignable-to-type-intrinsicattributes-intrinsicclassattributes-react-js */}
@@ -201,11 +193,6 @@ export const BasicList: FC = () => {
     )
 
   }
-
-  console.log("loading", loading);
-  console.log("params", params);
-  console.log("listData", listData);
-  console.log("list", list);
 
   return (
     <div>
