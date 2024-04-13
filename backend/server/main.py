@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
 from database.user import UserData, User, UserLoginInput
-from database.database_meta import DatabaseMeta, DatabaseMetaData, DatabaseMetaInput
+from database.database_meta import DatabaseMetaData, DatabaseMetaInput, DatabaseMetaOutput
 
 dotenv.load_dotenv()
 
@@ -24,7 +24,7 @@ es_client = Elasticsearch(
 )
 
 user_db = UserData(mongo_client, "final")
-database_meta_db = DatabaseMetaData(es_client)
+database_meta_db = DatabaseMetaData(es_client, user_db)
 
 
 
@@ -95,19 +95,12 @@ def create_db(inputs: DatabaseMetaInput, user_id: Annotated[str, Cookie()] = Non
     return ReturnMessage(message=f"已创建{inputs.name}", status=True)
 
 
-@app.get("/api/db/list", response_model=list[DatabaseMeta])
+@app.get("/api/db/list", response_model=list[DatabaseMetaOutput])
 def list_db(user_id: Annotated[str, Cookie()] = None):
     if user_id is None:
         return database_meta_db.list_database_metas(None)
     user = user_db.get_user_info(user_id)
     return database_meta_db.list_database_metas(user.org_name)
-
-
-@app.get("/api/db/{db_id}", response_model=DatabaseMeta)
-@check_is_login_decorator
-def get_db(db_id: str, user_id: Annotated[str, Cookie()] = None):
-    db_meta = database_meta_db.get_database_meta(db_id)["_source"]
-    return DatabaseMeta(**db_meta)
 
 
 @app.post("/api/db/delete", response_model=ReturnMessage)

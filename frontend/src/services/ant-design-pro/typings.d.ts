@@ -3,7 +3,24 @@ declare namespace API {
     user_id?: string;
   };
 
-  type DatabaseMeta = {
+  type DatabaseMetaInput = {
+    /** Name */
+    name: string;
+    /** Org Name */
+    org_name: string;
+    /** Title Field */
+    title_field: string;
+    /** Time Field */
+    time_field: string;
+    /** Cate Fields */
+    cate_fields: string[];
+    /** Id Fields */
+    id_fields: string[];
+    /** Text Fields */
+    text_fields: string[];
+  };
+
+  type DatabaseMetaOutput = {
     /** Id */
     id: string;
     /** User Id */
@@ -24,31 +41,11 @@ declare namespace API {
     id_fields: string[];
     /** Text Fields */
     text_fields: string[];
-  };
-
-  type DatabaseMetaInput = {
-    /** Name */
-    name: string;
-    /** Org Name */
-    org_name: string;
-    /** Title Field */
-    title_field: string;
-    /** Time Field */
-    time_field: string;
-    /** Cate Fields */
-    cate_fields: string[];
-    /** Id Fields */
-    id_fields: string[];
-    /** Text Fields */
-    text_fields: string[];
+    /** User Name */
+    user_name: string;
   };
 
   type deleteDbApiDbDeletePostParams = {
-    db_id: string;
-    user_id?: string;
-  };
-
-  type getDbApiDbDbIdGetParams = {
     db_id: string;
     user_id?: string;
   };

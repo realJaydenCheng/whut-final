@@ -8,7 +8,7 @@ export async function listDbApiDbListGet(
   params: API.listDbApiDbListGetParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.DatabaseMeta[]>('/api/db/list', {
+  return request<API.DatabaseMetaOutput[]>('/api/db/list', {
     method: 'GET',
     params: { ...params },
     ...(options || {}),

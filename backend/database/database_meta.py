@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from elasticsearch import BadRequestError, Elasticsearch
 import uuid
 
+from .user import UserData
+
 
 class DatabaseMetaInput(BaseModel):
 
@@ -18,6 +20,25 @@ class DatabaseMetaInput(BaseModel):
     cate_fields: list[str]
     id_fields: list[str]
     text_fields: list[str]
+
+
+class DatabaseMetaOutput(BaseModel):
+
+    id: str
+    user_id: str
+    create_time: str
+
+    name: str
+    org_name: str
+
+    title_field: str
+    time_field: str
+
+    cate_fields: list[str]
+    id_fields: list[str]
+    text_fields: list[str]
+
+    user_name: str
 
 
 class DatabaseMeta(BaseModel):
@@ -39,11 +60,12 @@ class DatabaseMeta(BaseModel):
 
 class DatabaseMetaData:
 
-    def __init__(self, client: Elasticsearch) -> None:
+    def __init__(self, client: Elasticsearch, user_db: UserData) -> None:
         self.client = client
         self.index = "server-database-meta"
+        self.user_db = user_db
 
-    def create_database_meta(self, database_meta: DatabaseMetaInput, user_id: str)->DatabaseMeta:
+    def create_database_meta(self, database_meta: DatabaseMetaInput, user_id: str) -> DatabaseMeta:
         database_meta_dict = database_meta.model_dump()
         database_meta_dict["create_time"] = str(
             datetime.datetime.now().strftime("%Y-%m-%d")
@@ -82,12 +104,26 @@ class DatabaseMetaData:
         if org_name not in [None, "public"]:
             query["bool"]["should"].append({"term": {"org_name": org_name}})
 
-        return [ DatabaseMeta(**x["_source"]) for x in  self.client.search(
+        metas = [x["_source"] for x in self.client.search(
             index=self.index, body={"query": query}
-        )["hits"]["hits"] ]
+        )["hits"]["hits"]]
 
-    def get_database_meta(self, db_id: str):
-        return self.client.get(index=self.index, id=db_id)
+        def add_user_name_into_meta(meta: dict):
+            user_id = meta.get("user_id", "")
+            user_name = ""
+            if user_id != "":
+                user_info = self.user_db.get_user_info(user_id)
+                user_name = user_info.name
+            meta["user_name"] = user_name
+            return meta
+
+        return [
+            DatabaseMetaOutput(
+                **add_user_name_into_meta(meta)
+            ) for meta in metas
+        ]
+
+
 
     def create_database(self, meta: DatabaseMeta):
 
