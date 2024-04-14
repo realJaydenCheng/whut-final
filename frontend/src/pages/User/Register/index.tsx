@@ -5,7 +5,7 @@ import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import useStyles from './style.style';
 import { Footer } from '@/components';
-import {registerApiUserRegisterPost} from "@/services/ant-design-pro/registerApiUserRegisterPost"
+import { registerApiUserRegisterPost } from "@/services/ant-design-pro/registerApiUserRegisterPost"
 
 
 const FormItem = Form.Item;
@@ -63,17 +63,17 @@ const Register: FC = () => {
     }
     return 'progress-poor';
   };
-  const { loading: submitting, run: register } = useRequest<{
-    data: API.ReturnMessage;
-  }>(registerApiUserRegisterPost, {
-    manual: true,
-    onSuccess: (data, params) => {
-      if (data.status === true) {
-        message.success(data.message);
-        
-      }
-    },
-  });
+  const { loading: submitting, run: register } = useRequest<API.ReturnMessage>(
+    registerApiUserRegisterPost,
+    {
+      manual: true,
+      onSuccess: (data, params) => {
+        if (data.status === true) {
+          message.success(data.message);
+
+        }
+      },
+    });
   const onFinish = (values: Store) => {
     register(values);
   };

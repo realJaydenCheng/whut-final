@@ -65,21 +65,21 @@ const OperationModal: FC<OperationModalProps> = (props) => {
             name="cate_fields"
             label="分类字段"
           >
-            <TagGroup tagStrings={["分类字段0", "分类字段1"]} />
+            <TagGroup value={["分类字段0", "分类字段1"]} />
           </ProForm.Item>
 
           <ProForm.Item
             name="id_fields"
             label="标识字段"
           >
-            <TagGroup tagStrings={["标识字段0", "标识字段1", "标识字段1"]} />
+            <TagGroup value={["标识字段0", "标识字段1", "标识字段1"]} />
           </ProForm.Item>
 
           <ProForm.Item
             name="text_fields"
             label="描述字段"
           >
-            <TagGroup tagStrings={["文本字段名"]} />
+            <TagGroup value={["文本字段名"]} />
           </ProForm.Item>
 
         </>

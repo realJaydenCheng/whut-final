@@ -6,16 +6,24 @@ import type { InputRef } from 'antd';
 import { Input, Tag, theme } from 'antd';
 
 interface TagGroupProps {
-    tagStrings: string[]
+    value?: string[];
+    onChange?: (value: string[]) => void;
 }
 
-const TagGroup: React.FC<TagGroupProps> = (props) => {
+const TagGroup: React.FC<TagGroupProps> = ({
+    value = [],
+    onChange,
+}) => {
 
     const { token } = theme.useToken();
-    const [tags, setTags] = useState(props.tagStrings);
+    const [tags, setTags] = useState(value);
     const [inputVisible, setInputVisible] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const inputRef = useRef<InputRef>(null);
+
+    const triggerChange = (changedValue: string[]) => {
+        onChange?.(changedValue);
+    }
 
     useEffect(() => {
         if (inputVisible) {
@@ -25,8 +33,8 @@ const TagGroup: React.FC<TagGroupProps> = (props) => {
 
     const handleClose = (removedTag: string) => {
         const newTags = tags.filter((tag) => tag !== removedTag);
-        console.log(newTags);
         setTags(newTags);
+        triggerChange(newTags);
     };
 
     const showInput = () => {
@@ -40,6 +48,7 @@ const TagGroup: React.FC<TagGroupProps> = (props) => {
     const handleInputConfirm = () => {
         if (inputValue && tags.indexOf(inputValue) === -1) {
             setTags([...tags, inputValue]);
+            triggerChange([...tags, inputValue]);
         }
         setInputVisible(false);
         setInputValue('');
