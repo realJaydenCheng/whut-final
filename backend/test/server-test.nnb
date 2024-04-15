@@ -215,52 +215,34 @@
                             "value": [
                                 "[",
                                 "  {",
-                                "    name: 'test_db_00',",
+                                "    id: '3e4a03c2-81f1-4ee6-ab8a-732e88ef10fa',",
+                                "    user_id: '17171140358',",
+                                "    create_time: '2024-04-15',",
+                                "    name: 'test测试03',",
                                 "    org_name: 'public',",
-                                "    title_field: '项目名称',",
-                                "    time_field: '立项时间',",
-                                "    cate_fields: [ '学科', '分类', '类型' ],",
-                                "    id_fields: [ '承办者', '指导老师' ],",
-                                "    text_fields: [ '项目摘要' ],",
-                                "    create_time: '2024-04-07',",
-                                "    id: '829735d1-3183-429b-824f-1737c1df001c',",
-                                "    user_id: '13657290357'",
+                                "    title_field: '研究主题',",
+                                "    time_field: '开题时间',",
+                                "    cate_fields: [ '学院', '专业', '大类', '年级' ],",
+                                "    id_fields: [ '姓名', '学号', '导师' ],",
+                                "    text_fields: [ '课题背景', '研究摘要', '相关综述' ],",
+                                "    user_name: 'Test02'",
+                                "  },",
+                                "  {",
+                                "    id: '7ba43424-eb5c-4e4b-bf68-ecd3edb7beca',",
+                                "    user_id: '13657290357',",
+                                "    create_time: '2024-04-15',",
+                                "    name: 'test_db_temp',",
+                                "    org_name: 'public',",
+                                "    title_field: '名称',",
+                                "    time_field: '时间',",
+                                "    cate_fields: [ '类型', '学科' ],",
+                                "    id_fields: [ '负责人' ],",
+                                "    text_fields: [ '描述' ],",
+                                "    user_name: 'Test00'",
                                 "  }",
                                 "]",
                                 "undefined",
                                 "",
-                                ""
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "language": "typescript",
-            "source": [
-                "// 获取数据库详情\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8000/api/db/list',\r\n).then((response) => {\r\n\r\n    const db_id = response.data[0].id;\r\n\r\n    axios.get(\r\n        'http://127.0.0.1:8000/api/db/' + db_id,\r\n        {\r\n            withCredentials: true,\r\n            headers: {\r\n                Cookie: [\r\n                    'user_id=13657290357; Path=/; SameSite=lax',\r\n                    'user_name=Test00; Path=/; SameSite=lax',\r\n                    'user_privilege=0; Path=/; SameSite=lax',\r\n                ]\r\n            }\r\n        }\r\n    ).then((res) => {\r\n        console.log(res.data);\r\n        console.log(res.headers[\"set-cookie\"]);\r\n    });\r\n\r\n});\r\n\r\n\r\n"
-            ],
-            "outputs": [
-                {
-                    "items": [
-                        {
-                            "mime": "application/vnd.code.notebook.stdout",
-                            "value": [
-                                "",
-                                "{",
-                                "  id: '829735d1-3183-429b-824f-1737c1df001c',",
-                                "  user_id: '13657290357',",
-                                "  create_time: '2024-04-07',",
-                                "  name: 'test_db_00',",
-                                "  org_name: 'public',",
-                                "  title_field: '项目名称',",
-                                "  time_field: '立项时间',",
-                                "  cate_fields: [ '学科', '分类', '类型' ],",
-                                "  id_fields: [ '承办者', '指导老师' ],",
-                                "  text_fields: [ '项目摘要' ]",
-                                "}",
-                                "undefined",
                                 ""
                             ]
                         }
@@ -292,9 +274,24 @@
         {
             "language": "typescript",
             "source": [
-                ""
+                "import axios from 'axios';\r\nimport FormData from 'form-data';\r\nimport fs from 'fs';\r\n\r\n// 创建临时数据库\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/db/create',\r\n    {\r\n        name: \"test_db_temp\",\r\n        org_name: \"public\",\r\n        title_field: \"名称\",\r\n        time_field: \"时间\",\r\n        cate_fields: [\"类型\", \"学科\"],\r\n        id_fields: [\"负责人\"],\r\n        text_fields: [\"描述\"],\r\n    },\r\n    {\r\n        withCredentials: true,\r\n        headers: {\r\n            Cookie: 'user_id=13657290357; user_name=Test00; user_privilege=0',\r\n        }\r\n    }\r\n).then(response => {\r\n    console.log('Database Created:', response.data);\r\n    return axios.get('http://127.0.0.1:8000/api/db/list');\r\n}).then(response => {\r\n    const databases = response.data;\r\n    console.log(\"databases: \", databases)\r\n    const db = databases.find(db => db[\"name\"] === \"test_db_temp\");\r\n    const db_id = db ? db.id : null;\r\n    console.log('Database ID :', db_id);\r\n\r\n    // 上传文件部分\r\n    const formData = new FormData();\r\n    formData.append('db_id', db_id);\r\n    formData.append('data_files', fs.createReadStream('./test-r.csv'));\r\n\r\n    return axios.post(\r\n        'http://127.0.0.1:8000/api/db/import',\r\n        formData,\r\n        {\r\n            headers: {\r\n                ...formData.getHeaders(),\r\n                Cookie: 'user_id=13657290357; user_name=Test00; user_privilege=0',\r\n            }\r\n        }\r\n    );\r\n}).then(response => {\r\n    console.log('File Uploaded:', response.data);\r\n}).catch(error => {\r\n    console.error('Error:', error.response ? error.response.data : error.message);\r\n});\r\n"
             ],
-            "outputs": []
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Database Created: { message: '已创建test_db_temp', status: true }",
+                                "Database ID : b80c725f-4191-43d8-ad4a-0f1bd8186e55",
+                                "File Uploaded: { message: '成功导入数据8条', status: true }",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
         },
         {
             "language": "typescript",

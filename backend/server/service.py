@@ -13,12 +13,13 @@ def transform_files_into_data_frame(
 
     data_list: list[pd.DataFrame] = []
     for index, file in enumerate(files):
-        filename = file.filename
+        file_name = file.filename
+        file_content = file.file
         try:
-            if filename.endswith('.csv'):
-                data_ = pd.read_csv(file, dtype=str)
-            elif filename.endswith('.xls') or filename.endswith('.xlsx'):
-                data_ = pd.read_excel(file, dtype=str)
+            if file_name.endswith('.csv'):
+                data_ = pd.read_csv(file_content, dtype=str)
+            elif file_name.endswith('.xls') or file_name.endswith('.xlsx'):
+                data_ = pd.read_excel(file_content, dtype=str)
             else:
                 raise ValueError(f"第{index + 1}个文件类型有误")
             data_list.append(data_)
@@ -29,6 +30,7 @@ def transform_files_into_data_frame(
 
     data = pd.concat(data_list)
     data = data.drop_duplicates(data.columns)
+    return data
 
 
 def import_data_into_es_from_frame(

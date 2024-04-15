@@ -4,11 +4,11 @@ import functools
 from typing import Optional, Annotated
 
 import dotenv
-from fastapi import FastAPI, Cookie, Response, UploadFile
+from fastapi import FastAPI, Cookie, Response, UploadFile, Form
 from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
-from backend.server.service import import_data_into_es_from_frame, transform_files_into_data_frame
+from server.service import import_data_into_es_from_frame, transform_files_into_data_frame
 from database.user import UserData, User, UserLoginInput
 from database.database_meta import DatabaseMetaData, DatabaseMetaInput, DatabaseMetaOutput
 
@@ -114,11 +114,14 @@ def delete_db(db_id: str, user_id: Annotated[str, Cookie()] = None):
 
 
 @app.post("/api/db/import", response_model=ReturnMessage)
-def import_data(db_id: str, data_files: list[UploadFile]):
+def import_data(data_files: list[UploadFile] | UploadFile, db_id: str = Form()):
     database = database_meta_db.get_database_meta(db_id)
 
     if database is None:
         return ReturnMessage(status=False, message="数据库有误")
+
+    if type(data_files) != list:
+        data_files = [data_files]
 
     try:
         data_frame = transform_files_into_data_frame(data_files)
@@ -128,7 +131,8 @@ def import_data(db_id: str, data_files: list[UploadFile]):
     except KeyError as e:
         return ReturnMessage(status=False, message=f"文件内容不正确: {repr(e)}")
 
-    return ReturnMessage(
-        status=True,
-        message=f"成功导入数据{s}条，但存在以下问题：{f}"
-    )
+    msg = f"成功导入数据{s}条"
+    if f:
+        msg += f"，存在以下问题：{f}"
+
+    return ReturnMessage(status=True, message=msg)
