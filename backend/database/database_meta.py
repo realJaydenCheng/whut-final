@@ -123,8 +123,6 @@ class DatabaseMetaData:
             ) for meta in metas
         ]
 
-
-
     def create_database(self, meta: DatabaseMeta):
 
         # 构建es映射
@@ -203,3 +201,9 @@ class DatabaseMetaData:
 
     def delete_database(self, db_id: str):
         self.client.indices.delete(index=db_id)
+
+    def get_database_meta(self, db_id: str) -> DatabaseMeta:
+        database_meta = self.client.get(index=self.index, id=db_id)
+        if database_meta["found"]:
+            return DatabaseMeta(**database_meta["_source"])
+        return None

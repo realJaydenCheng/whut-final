@@ -5,6 +5,7 @@
         "astype",
         "cond",
         "dotenv",
+        "dtype",
         "fastapi",
         "fielddata",
         "KHTML",

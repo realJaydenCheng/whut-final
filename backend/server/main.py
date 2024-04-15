@@ -1,14 +1,14 @@
 
 import os
 import functools
-
 from typing import Optional, Annotated
 
 import dotenv
-from fastapi import FastAPI, Cookie, Response
+from fastapi import FastAPI, Cookie, Response, UploadFile
 from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
+from backend.server.service import import_data_into_es_from_frame, transform_files_into_data_frame
 from database.user import UserData, User, UserLoginInput
 from database.database_meta import DatabaseMetaData, DatabaseMetaInput, DatabaseMetaOutput
 
@@ -25,7 +25,6 @@ es_client = Elasticsearch(
 
 user_db = UserData(mongo_client, "final")
 database_meta_db = DatabaseMetaData(es_client, user_db)
-
 
 
 class ReturnMessage(BaseModel):
@@ -112,3 +111,24 @@ def delete_db(db_id: str, user_id: Annotated[str, Cookie()] = None):
         return ReturnMessage(message=f"已删除{db_id}", status=True)
     else:
         return ReturnMessage(message="没有操作权限", status=False)
+
+
+@app.post("/api/db/import", response_model=ReturnMessage)
+def import_data(db_id: str, data_files: list[UploadFile]):
+    database = database_meta_db.get_database_meta(db_id)
+
+    if database is None:
+        return ReturnMessage(status=False, message="数据库有误")
+
+    try:
+        data_frame = transform_files_into_data_frame(data_files)
+        s, f = import_data_into_es_from_frame(es_client, database, data_frame)
+    except ValueError as e:
+        return ReturnMessage(status=False, message=repr(e))
+    except KeyError as e:
+        return ReturnMessage(status=False, message=f"文件内容不正确: {repr(e)}")
+
+    return ReturnMessage(
+        status=True,
+        message=f"成功导入数据{s}条，但存在以下问题：{f}"
+    )
