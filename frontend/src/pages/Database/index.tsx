@@ -10,11 +10,9 @@ import {
   Modal,
   Progress,
 } from 'antd';
-import dayjs from 'dayjs';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import OperationModal from './OperationModal';
-import type { BasicListItemDataType } from './data.d';
 import useStyles from './style.style';
 
 import cookie from 'react-cookies'
@@ -25,21 +23,6 @@ import { createDbApiDbCreatePost } from '@/services/ant-design-pro/createDbApiDb
 
 
 const { Search } = Input;
-
-const Info: FC<{
-  title: React.ReactNode;
-  value: React.ReactNode;
-  bordered?: boolean;
-}> = ({ title, value, bordered }) => {
-  const { styles } = useStyles();
-  return (
-    <div className={styles.headerInfo}>
-      <span>{title}</span>
-      <p>{value}</p>
-      {bordered && <em />}
-    </div>
-  );
-};
 
 const ListContent = (data: API.DatabaseMetaOutput) => {
   const { styles } = useStyles();
@@ -79,7 +62,7 @@ export const BasicList: FC = () => {
   const { styles } = useStyles();
   const [done, setDone] = useState<boolean>(false);
   const [open, setVisible] = useState<boolean>(false);
-  const [current, setCurrent] = useState<Partial<BasicListItemDataType> | undefined>(undefined);
+  const [current, setCurrent] = useState<Partial<API.DatabaseMetaOutput> | undefined>(undefined);
 
   // see:
   // https://ahooks.js.org/zh-CN/hooks/use-request/basic/#%E7%AB%8B%E5%8D%B3%E5%8F%98%E6%9B%B4%E6%95%B0%E6%8D%AE
@@ -111,7 +94,7 @@ export const BasicList: FC = () => {
     else if (key === 'delete') {
       Modal.confirm({
         title: '删除任务',
-        content: '确定删除该任务吗？',
+        content: '确定删除该数据库吗？',
         okText: '确认',
         cancelText: '取消',
         onOk: () => deleteItem(currentItem.id),
@@ -157,7 +140,6 @@ export const BasicList: FC = () => {
 
   const handleSubmit = (values: API.DatabaseMetaOutput) => {
     setDone(true);
-    const method = values?.id ? 'update' : 'add';
     const user_id = cookie.load("user_id")
     createDbApiDbCreatePost({ user_id }, values)
   };

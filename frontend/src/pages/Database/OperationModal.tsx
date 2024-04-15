@@ -22,6 +22,7 @@ type OperationModalProps = {
 };
 
 const OperationModal: FC<OperationModalProps> = (props) => {
+
   const { styles } = useStyles();
   const { done, open, current, onDone, onSubmit, children } = props;
   if (!open) {
@@ -31,7 +32,7 @@ const OperationModal: FC<OperationModalProps> = (props) => {
 
     <ModalForm<API.DatabaseMetaOutput>
       open={open}
-      title={done ? null : `任务${current ? '编辑' : '添加'}`}
+      title="数据库编辑"
       className={styles.standardListForm}
       width={640}
       onFinish={async (values) => {
@@ -59,27 +60,51 @@ const OperationModal: FC<OperationModalProps> = (props) => {
             name="name"
             label="数据库名称"
             placeholder="请输入"
+            initialValue={current?.name}
+          />
+
+
+          <ProFormText
+            name="org_name"
+            label="所属组织"
+            placeholder="请输入"
+            initialValue={current?.org_name || "public"}
+          />
+
+
+          <ProFormText
+            name="title_field"
+            label="选题字段"
+            placeholder="请输入"
+            initialValue={current?.title_field}
+          />
+
+          <ProFormText
+            name="time_field"
+            label="时间字段名称"
+            placeholder="请输入"
+            initialValue={current?.time_field}
           />
 
           <ProForm.Item
             name="cate_fields"
             label="分类字段"
           >
-            <TagGroup value={["分类字段0", "分类字段1"]} />
+            <TagGroup value={current?.cate_fields} />
           </ProForm.Item>
 
           <ProForm.Item
             name="id_fields"
             label="标识字段"
           >
-            <TagGroup value={["标识字段0", "标识字段1", "标识字段1"]} />
+            <TagGroup value={current?.id_fields} />
           </ProForm.Item>
 
           <ProForm.Item
             name="text_fields"
             label="描述字段"
           >
-            <TagGroup value={["文本字段名"]} />
+            <TagGroup value={current?.text_fields} />
           </ProForm.Item>
 
         </>
@@ -87,7 +112,6 @@ const OperationModal: FC<OperationModalProps> = (props) => {
         <Result
           status="success"
           title="操作成功"
-          subTitle="一系列的信息描述，很短同样也可以带标点。"
           extra={
             <Button type="primary" onClick={onDone}>
               知道了
