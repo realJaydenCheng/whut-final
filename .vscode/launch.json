@@ -14,19 +14,19 @@
             "userDataDir": "${workspaceRoot}/.vscode/chrome"
         },
         {
-            "name": "detail crawler",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "crawler.main",
-            "args": ["--mode", "item-detail"],
-            "cwd": "${workspaceFolder}/backend/"
-        },
-        {
-            "name": "server fastapi",
+            "name": "Server fastapi",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
             "args": ["--reload", "server.main:app"],
+            "cwd": "${workspaceFolder}/backend/"
+        },
+        {
+            "name": "Detail crawler",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "crawler.main",
+            "args": ["--mode", "item-detail"],
             "cwd": "${workspaceFolder}/backend/"
         },
     ]

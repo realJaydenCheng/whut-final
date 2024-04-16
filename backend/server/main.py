@@ -35,9 +35,9 @@ class ReturnMessage(BaseModel):
 def check_is_login_decorator(func):
     @functools.wraps(func)
     def wrapper(user_id: Annotated[str, Cookie()] = None, *args, **kwargs):
-        if user_id is None:
-            return ReturnMessage(message="您还没有登录", status=False)
-        else:
+        # if user_id is None:
+        #     return ReturnMessage(message="您还没有登录", status=False)
+        # else:
             return func(user_id=user_id, *args, **kwargs)
     return wrapper
 

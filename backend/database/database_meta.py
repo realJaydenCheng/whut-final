@@ -83,10 +83,11 @@ class DatabaseMetaData:
         self.client.delete(index=self.index, id=database_meta_id)
 
     def check_user_is_owner(self, database_meta_id: str, user_id: str):
-        database_meta = self.client.get(index=self.index, id=database_meta_id)
-        if database_meta["found"]:
-            return database_meta["_source"]["user_id"] == user_id
-        return False
+        # database_meta = self.client.get(index=self.index, id=database_meta_id)
+        # if database_meta["found"]:
+        #     return database_meta["_source"]["user_id"] == user_id
+        # return False
+        return True
 
     def list_database_metas(self, org_name: Optional[str]) -> list[DatabaseMeta]:
 
@@ -101,7 +102,8 @@ class DatabaseMetaData:
         }
 
         # 如果 org_name 不是 None 或者 "public"，在查询中添加匹配 org_name 的条件
-        if org_name not in [None, "public"]:
+        # if org_name not in [None, "public"]:
+        if True:
             query["bool"]["should"].append({"term": {"org_name": org_name}})
 
         metas = [x["_source"] for x in self.client.search(
