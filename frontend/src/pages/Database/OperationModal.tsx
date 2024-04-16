@@ -46,11 +46,9 @@ const OperationModal: FC<OperationModalProps> = (props) => {
       modalProps={{
         onCancel: () => onDone(),
         destroyOnClose: true,
-        bodyStyle: done
-          ? {
-            padding: '72px 0',
-          }
-          : {},
+        styles: {
+          body: done ? { padding: '72px 0', } : {},
+        }
       }}
     >
       {!done ? (
