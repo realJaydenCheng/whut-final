@@ -1,12 +1,9 @@
 import {
   ModalForm,
   ProForm,
-  ProFormDateTimePicker,
-  ProFormSelect,
   ProFormText,
-  ProFormTextArea,
 } from '@ant-design/pro-components';
-import { Button, Form, Result } from 'antd';
+import { Button, Result } from 'antd';
 import type { FC } from 'react';
 import useStyles from './style.style';
 

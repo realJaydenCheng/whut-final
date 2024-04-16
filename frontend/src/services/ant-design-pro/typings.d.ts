@@ -1,4 +1,11 @@
 declare namespace API {
+  type BodyImportDataApiDbImportPost = {
+    /** Data Files */
+    data_files: string[] | string;
+    /** Db Id */
+    db_id: string;
+  };
+
   type createDbApiDbCreatePostParams = {
     user_id?: string;
   };

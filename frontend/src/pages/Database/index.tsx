@@ -20,6 +20,8 @@ import cookie from 'react-cookies'
 import { listDbApiDbListGet } from '@/services/ant-design-pro/listDbApiDbListGet';
 import { deleteDbApiDbDeletePost } from '@/services/ant-design-pro/deleteDbApiDbDeletePost';
 import { createDbApiDbCreatePost } from '@/services/ant-design-pro/createDbApiDbCreatePost';
+import UploadModal from './UploadModal';
+import { importDataApiDbImportPost } from '@/services/ant-design-pro/importDataApiDbImportPost';
 
 
 const { Search } = Input;
@@ -51,9 +53,9 @@ const databaseMetaToDescription = (item: API.DatabaseMetaOutput) => {
   // `标识字段：${item.id_fields.join("、")}；` +
   // `描述字段：${item.text_fields.join("、")}`
 
-  return `所属组织：${item.org_name}; ` + 
-  `分类字段：${item.cate_fields.join("、")}; ` +
-  `描述字段：${item.text_fields.join("、")}; `
+  return `所属组织：${item.org_name}; ` +
+    `分类字段：${item.cate_fields.join("、")}; ` +
+    `描述字段：${item.text_fields.join("、")}; `
 }
 
 
@@ -89,16 +91,23 @@ export const BasicList: FC = () => {
     deleteDbApiDbDeletePost({ db_id: id });
   };
 
-  const editAndDelete = (key: string | number, currentItem: API.DatabaseMetaOutput) => {
-    if (key === 'edit') showEditModal(currentItem);
-    else if (key === 'delete') {
-      Modal.confirm({
-        title: '删除任务',
-        content: '确定删除该数据库吗？',
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => deleteItem(currentItem.id),
-      });
+  const showDeleteConfirm = (currentItem: API.DatabaseMetaOutput) => {
+    Modal.confirm({
+      title: '删除任务',
+      content: '确定删除该数据库吗？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => deleteItem(currentItem.id),
+    });
+  };
+
+  const handleItemOperation = (key: string | number, currentItem: API.DatabaseMetaOutput) => {
+    if (key === 'edit') {
+      showEditModal(currentItem);
+    } else if (key === 'delete') {
+      showDeleteConfirm(currentItem);
+    } else if (key === 'import') {
+      showUploadModal(currentItem);
     }
   };
 
@@ -108,13 +117,15 @@ export const BasicList: FC = () => {
     </div>
   );
 
-  const MoreBtn: React.FC<{
-    item: API.DatabaseMetaOutput;
-  }> = ({ item }) => (
+  const MoreBtn: React.FC<{ item: API.DatabaseMetaOutput }> = ({ item }) => (
     <Dropdown
       menu={{
-        onClick: ({ key }) => editAndDelete(key, item),
+        onClick: ({ key }) => handleItemOperation(key, item),
         items: [
+          {
+            key: 'import',
+            label: '导入',
+          },
           {
             key: 'edit',
             label: '编辑',
@@ -148,18 +159,33 @@ export const BasicList: FC = () => {
     return (
       <List.Item
         actions={[
+
           <a
-            key="edit"
+            key="import"
             onClick={(e) => {
               e.preventDefault();
-              showEditModal(item);
+              showUploadModal(item);
             }}
           >
-            编辑
+            导入
           </a>,
+
+          <a
+            key="delete"
+            onClick={(e) => {
+              e.preventDefault();
+              showDeleteConfirm(item);
+            }}
+            style={{ color: 'red' }}
+          >
+            删除
+          </a>,
+
           <MoreBtn key="more" item={item} />,
+
         ]}
       >
+
         <List.Item.Meta
           title={item.name}
           description={databaseMetaToDescription(item)}
@@ -176,8 +202,30 @@ export const BasicList: FC = () => {
 
   }
 
+  const [openUpload, setOpenUpload] = useState<boolean>(false);
+  const [doneUpload, setDoneUpload] = useState<boolean>(false);
+  const [uploadingCur, setUploadCur] = useState<API.BodyImportDataApiDbImportPost | undefined>(undefined);
+  const showUploadModal = (item: API.DatabaseMetaOutput) => {
+    setOpenUpload(true);
+    const uploading: API.BodyImportDataApiDbImportPost = {
+      db_id: item.id,
+      data_files: []
+    };
+    setUploadCur(uploading)
+  };
+  const handleDoneUpload = () => {
+    setDoneUpload(false);
+    setOpenUpload(false);
+    setUploadCur(undefined);
+  };
+  const handleSubmitUpload = (values: API.BodyImportDataApiDbImportPost) => {
+    setDoneUpload(true);
+    importDataApiDbImportPost(values);
+  };
+
   return (
     <div>
+
       <PageContainer>
         <div className={styles.standardList}>
           <Card
@@ -228,6 +276,14 @@ export const BasicList: FC = () => {
         current={current}
         onDone={handleDone}
         onSubmit={handleSubmit}
+      />
+
+      <UploadModal
+        done={doneUpload}
+        open={openUpload}
+        current={uploadingCur}
+        onDone={handleDoneUpload}
+        onSubmit={handleSubmitUpload}
       />
 
     </div>
