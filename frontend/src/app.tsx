@@ -22,7 +22,7 @@ interface Cookies {
   org_name: string,
 }
 
-function get_user_info(): Cookies {
+function getUserInfo(): Cookies {
   return {
     user_id: cookie.load("user_id", true),
     user_name: cookie.load("user_name", true),
@@ -41,8 +41,8 @@ export async function getInitialState(): Promise<{
   fetchUserInfo?: () => Promise<Cookies | undefined>;
 }> {
   const fetchUserInfo = async () => {
-    const cookies = get_user_info();
-    if (cookies.user_id != ""){
+    const cookies = getUserInfo();
+    if (cookies.user_id != "") {
       return cookies;
     } else {
       return {
@@ -71,6 +71,7 @@ export async function getInitialState(): Promise<{
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+
   return {
 
     actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
@@ -78,6 +79,10 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     waterMarkProps: {
       content: initialState?.currentUser?.user_name,
     },
+
+    title: "大学生科研项目选题智能辅助系统",
+    // see: https://blog.csdn.net/rock_23/article/details/119840134
+    logo: <img alt="logo" src="/logo.png" />,
 
     avatarProps: {
       title: <AvatarName />,
@@ -88,26 +93,6 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
 
     footerRender: () => <Footer />,
 
-    bgLayoutImgList: [
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr',
-        left: 85,
-        bottom: 100,
-        height: '303px',
-      },
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/C2TWRpJpiC0AAAAAAAAAAAAAFl94AQBr',
-        bottom: -68,
-        right: -45,
-        height: '303px',
-      },
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/F6vSTbj8KpYAAAAAAAAAAAAAFl94AQBr',
-        bottom: 0,
-        left: 0,
-        width: '331px',
-      },
-    ],
 
     links: isDev
       ? [

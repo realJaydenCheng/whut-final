@@ -14,7 +14,6 @@ const Settings: ProLayoutProps & {
   "fixedHeader": true,
   "fixSiderbar": true,
   "pwa": true,
-  "logo": "https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg",
   "token": {},
   "siderMenuType": "sub",
   "splitMenus": false

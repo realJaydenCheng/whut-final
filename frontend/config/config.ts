@@ -76,7 +76,7 @@ export default defineConfig({
    * @name layout 插件
    * @doc https://umijs.org/docs/max/layout-menu
    */
-  title: 'Ant Design Pro',
+  title: '大学生科研项目选题智能辅助系统',
   layout: {
     locale: false,
     ...defaultSettings,

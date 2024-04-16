@@ -6,8 +6,6 @@ import {
 } from '@ant-design/icons';
 import {
   LoginForm,
-  ProFormCaptcha,
-  ProFormCheckbox,
   ProFormText,
 } from '@ant-design/pro-components';
 import { history, useModel, Helmet } from '@umijs/max';
@@ -61,7 +59,7 @@ interface LoginState {
 }
 
 const Login: React.FC = () => {
-  const [userLoginState, setUserLoginState] = useState<LoginState>({status: null});
+  const [userLoginState, setUserLoginState] = useState<LoginState>({ status: null });
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
@@ -80,20 +78,20 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (values: API.UserLoginInput) => {
 
-      // 登录
-      const msg = await loginApiUserLoginPost(values);
-      if (msg.status === true) {
-        const defaultLoginSuccessMessage = '登录成功！'
-        message.success(defaultLoginSuccessMessage);
-        await fetchUserInfo();
-        const urlParams = new URL(window.location.href).searchParams;
-        history.push(urlParams.get('redirect') || '/');
-        return;
-      }
-      console.log(msg);
-      // 如果失败去设置用户错误信息
-      setUserLoginState(msg);
-    
+    // 登录
+    const msg = await loginApiUserLoginPost(values);
+    if (msg.status === true) {
+      const defaultLoginSuccessMessage = '登录成功！'
+      message.success(defaultLoginSuccessMessage);
+      await fetchUserInfo();
+      const urlParams = new URL(window.location.href).searchParams;
+      history.push(urlParams.get('redirect') || '/');
+      return;
+    }
+    console.log(msg);
+    // 如果失败去设置用户错误信息
+    setUserLoginState(msg);
+
   };
   const { status } = userLoginState;
 
@@ -112,7 +110,7 @@ const Login: React.FC = () => {
             minWidth: 280,
             maxWidth: '75vw',
           }}
-          logo={<img alt="logo" src="/logo.webp" />}
+          logo={<img alt="logo" src="/logo.png" />}
           title="大学生科研项目选题智能辅助系统"
           subTitle="实现大学生创新项目选题场景下的“文本检索-信息抽取-数据统计-智能生成”一条龙！"
           initialValues={{

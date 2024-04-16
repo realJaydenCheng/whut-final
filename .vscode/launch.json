@@ -5,9 +5,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Edge",
+            "name": "Browser",
             "request": "launch",
-            "type": "msedge",
+            "type": "chrome",
             "url": "http://localhost:8001",
             "sourceMaps": true,
             "webRoot": "${workspaceRoot}",
