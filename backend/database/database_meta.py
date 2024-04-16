@@ -91,20 +91,23 @@ class DatabaseMetaData:
 
     def list_database_metas(self, org_name: Optional[str]) -> list[DatabaseMeta]:
 
-        query = {
-            "bool": {
-                "should": [
-                    {"bool": {"must_not": {"exists": {"field": "org_name"}}}},
-                    {"term": {"org_name": "public"}}
-                ],
-                "minimum_should_match": 1
-            }
-        }
+        # query = {
+        #     "bool": {
+        #         "should": [
+        #             {"bool": {"must_not": {"exists": {"field": "org_name"}}}},
+        #             {"term": {"org_name": "public"}}
+        #         ],
+        #         "minimum_should_match": 1
+        #     }
+        # }
 
-        # 如果 org_name 不是 None 或者 "public"，在查询中添加匹配 org_name 的条件
+        # # 如果 org_name 不是 None 或者 "public"，在查询中添加匹配 org_name 的条件
         # if org_name not in [None, "public"]:
-        if True:
-            query["bool"]["should"].append({"term": {"org_name": org_name}})
+        #     query["bool"]["should"].append({"term": {"org_name": org_name}})
+
+        query = {
+            "match_all": {}
+        }
 
         metas = [x["_source"] for x in self.client.search(
             index=self.index, body={"query": query}

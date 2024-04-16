@@ -1,4 +1,5 @@
 
+from io import BytesIO
 import pandas as pd
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
@@ -16,10 +17,15 @@ def transform_files_into_data_frame(
         file_name = file.filename
         file_content = file.file
         try:
+            file_content = file.file.read()
+            file.file.close()
+            # 将内容转换为 BytesIO 对象
+            content_stream = BytesIO(file_content)
+            
             if file_name.endswith('.csv'):
-                data_ = pd.read_csv(file_content, dtype=str)
+                data_ = pd.read_csv(content_stream, dtype=str)
             elif file_name.endswith('.xls') or file_name.endswith('.xlsx'):
-                data_ = pd.read_excel(file_content, dtype=str)
+                data_ = pd.read_excel(content_stream, dtype=str)
             else:
                 raise ValueError(f"第{index + 1}个文件类型有误")
             data_list.append(data_)

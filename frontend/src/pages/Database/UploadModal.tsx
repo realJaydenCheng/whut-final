@@ -1,33 +1,34 @@
 import {
-    ModalForm,
-    ProFormText,
-    ProFormUploadDragger,
+  ModalForm,
+  ProFormText,
+  ProFormUploadDragger,
 } from '@ant-design/pro-components';
 import { Button, Result } from 'antd';
 import type { FC } from 'react';
 import useStyles from './style.style';
+import { BodyImportDataApiDbImportPost } from './service';
 
 interface UploadModalProps {
-    done: boolean;
-    open: boolean;
-    current?: API.BodyImportDataApiDbImportPost;
-    onDone: () => void;
-    onSubmit: (values: API.BodyImportDataApiDbImportPost) => void;
-    children?: React.ReactNode;
+  done: boolean;
+  open: boolean;
+  current?: BodyImportDataApiDbImportPost;
+  onDone: () => void;
+  onSubmit: (values: BodyImportDataApiDbImportPost) => void;
+  children?: React.ReactNode;
 }
 
 const UploadModal: FC<UploadModalProps> = (props: UploadModalProps) => {
 
-    const { styles } = useStyles();
+  const { styles } = useStyles();
 
-    const { done, open, current, onDone, onSubmit, children } = props;
+  const { done, open, current, onDone, onSubmit, children } = props;
 
   if (!open) {
     return null;
   }
   return (
 
-    <ModalForm<API.BodyImportDataApiDbImportPost>
+    <ModalForm<BodyImportDataApiDbImportPost>
       open={open}
       title="上传数据"
       className={styles.standardListForm}
@@ -35,7 +36,6 @@ const UploadModal: FC<UploadModalProps> = (props: UploadModalProps) => {
       onFinish={async (values) => {
         onSubmit(values);
       }}
-      initialValues={current}
       submitter={{
         render: (_, dom) => (done ? null : dom),
       }}
@@ -58,8 +58,10 @@ const UploadModal: FC<UploadModalProps> = (props: UploadModalProps) => {
             initialValue={current?.db_id}
           />
 
-
-        <ProFormUploadDragger max={4} label="上传文件" name="data_files" />
+          <ProFormUploadDragger
+            label="上传文件"
+            name="data_files"
+          />
 
         </>
       ) : (

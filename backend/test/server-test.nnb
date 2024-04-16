@@ -283,8 +283,7 @@
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
                                 "Database Created: { message: '已创建test_db_temp', status: true }",
-                                "Database ID : b80c725f-4191-43d8-ad4a-0f1bd8186e55",
-                                "File Uploaded: { message: '成功导入数据8条', status: true }",
+                                "Database ID : 395c496f-0b3b-4ead-b068-a9f458b7b21f",
                                 "",
                                 ""
                             ]
@@ -292,6 +291,13 @@
                     ]
                 }
             ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                ""
+            ],
+            "outputs": []
         },
         {
             "language": "typescript",

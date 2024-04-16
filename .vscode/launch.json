@@ -19,7 +19,8 @@
             "request": "launch",
             "module": "uvicorn",
             "args": ["--reload", "server.main:app"],
-            "cwd": "${workspaceFolder}/backend/"
+            "cwd": "${workspaceFolder}/backend/",
+            "justMyCode": false,
         },
         {
             "name": "Detail crawler",

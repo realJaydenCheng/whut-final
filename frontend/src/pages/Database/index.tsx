@@ -21,7 +21,7 @@ import { listDbApiDbListGet } from '@/services/ant-design-pro/listDbApiDbListGet
 import { deleteDbApiDbDeletePost } from '@/services/ant-design-pro/deleteDbApiDbDeletePost';
 import { createDbApiDbCreatePost } from '@/services/ant-design-pro/createDbApiDbCreatePost';
 import UploadModal from './UploadModal';
-import { importDataApiDbImportPost } from '@/services/ant-design-pro/importDataApiDbImportPost';
+import { importDataApiDbImportPost, BodyImportDataApiDbImportPost } from './service'
 
 
 const { Search } = Input;
@@ -204,10 +204,10 @@ export const BasicList: FC = () => {
 
   const [openUpload, setOpenUpload] = useState<boolean>(false);
   const [doneUpload, setDoneUpload] = useState<boolean>(false);
-  const [uploadingCur, setUploadCur] = useState<API.BodyImportDataApiDbImportPost | undefined>(undefined);
+  const [uploadingCur, setUploadCur] = useState<BodyImportDataApiDbImportPost | undefined>(undefined);
   const showUploadModal = (item: API.DatabaseMetaOutput) => {
     setOpenUpload(true);
-    const uploading: API.BodyImportDataApiDbImportPost = {
+    const uploading: BodyImportDataApiDbImportPost = {
       db_id: item.id,
       data_files: []
     };
@@ -218,9 +218,16 @@ export const BasicList: FC = () => {
     setOpenUpload(false);
     setUploadCur(undefined);
   };
-  const handleSubmitUpload = (values: API.BodyImportDataApiDbImportPost) => {
+  const handleSubmitUpload = (values: {
+    db_id: string;
+    data_files: any[];
+  }) => {
     setDoneUpload(true);
-    importDataApiDbImportPost(values);
+    const upload_value: BodyImportDataApiDbImportPost = {
+      db_id: values.db_id,
+      data_files: values.data_files.map(file => file["originFileObj"])
+    }
+    importDataApiDbImportPost(upload_value);
   };
 
   return (
