@@ -133,5 +133,5 @@ class EsSearchQuery:
             })
 
     def get_search_list(self, es_client: Elasticsearch) -> list[dict]:
-        res = es_client.search(index=self.database.id, body=self.query)
+        res = es_client.search(index=self.database.id, query=self.query)
         return [x["_source"] for x in res["hits"]["hits"]]

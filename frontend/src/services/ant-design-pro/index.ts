@@ -4,6 +4,8 @@
 // API 唯一标识：
 import * as createDbApiDbCreatePost from './createDbApiDbCreatePost';
 import * as deleteDbApiDbDeletePost from './deleteDbApiDbDeletePost';
+import * as getDbDetailApiDbDetailGet from './getDbDetailApiDbDetailGet';
+import * as getSearchResultApiSearchPost from './getSearchResultApiSearchPost';
 import * as importDataApiDbImportPost from './importDataApiDbImportPost';
 import * as listDbApiDbListGet from './listDbApiDbListGet';
 import * as loginApiUserLoginPost from './loginApiUserLoginPost';
@@ -19,4 +21,6 @@ export default {
   listDbApiDbListGet,
   deleteDbApiDbDeletePost,
   importDataApiDbImportPost,
+  getDbDetailApiDbDetailGet,
+  getSearchResultApiSearchPost,
 };

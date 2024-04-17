@@ -228,7 +228,7 @@ class DatabaseMetaData:
             return DatabaseMeta(**database_meta["_source"])
         return None
 
-    def get_database_meta_detail(self, db_id: str) -> DatabaseMetaOutput:
+    def get_database_meta_detail(self, db_id: str) -> DatabaseMetaDetail:
         res = self.client.get(index=self.index, id=db_id)
         database_meta = DatabaseMeta(**res["_source"])
         cate_details = {
@@ -236,7 +236,7 @@ class DatabaseMetaData:
             self._get_field_categories(db_id, cate_filed)
             for cate_filed in database_meta.cate_fields
         }
-        return DatabaseMetaOutput(
+        return DatabaseMetaDetail(
             **res["_source"],
             cate_fields_detail=cate_details
         )

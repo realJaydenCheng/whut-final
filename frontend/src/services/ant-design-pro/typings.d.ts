@@ -10,6 +10,23 @@ declare namespace API {
     user_id?: string;
   };
 
+  type DatabaseMetaDetail = {
+    /** Id */
+    id: string;
+    /** Name */
+    name: string;
+    /** Title Field */
+    title_field: string;
+    /** Time Field */
+    time_field: string;
+    /** Id Fields */
+    id_fields: string[];
+    /** Text Fields */
+    text_fields: string[];
+    /** Cate Fields Detail */
+    cate_fields_detail: Record<string, any>;
+  };
+
   type DatabaseMetaInput = {
     /** Name */
     name: string;
@@ -57,6 +74,10 @@ declare namespace API {
     user_id?: string;
   };
 
+  type getDbDetailApiDbDetailGetParams = {
+    db_id: string;
+  };
+
   type HTTPValidationError = {
     /** Detail */
     detail?: ValidationError[];
@@ -71,6 +92,17 @@ declare namespace API {
     message: string;
     /** Status */
     status: boolean;
+  };
+
+  type SearchRequest = {
+    /** Terms */
+    terms: string[] | null;
+    /** Db Id */
+    db_id: string;
+    /** Date Range */
+    date_range: any[] | null;
+    /** Filters */
+    filters: Record<string, any> | null;
   };
 
   type User = {
