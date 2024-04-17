@@ -1,14 +1,18 @@
 
 import os
 import functools
-from typing import Optional, Annotated
+from typing import Annotated
 
 import dotenv
-from fastapi import FastAPI, Cookie, Response, UploadFile, Form
+from fastapi import Depends, FastAPI, Cookie, Response, UploadFile, Form
 from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
-from server.service import import_data_into_es_from_frame, transform_files_into_data_frame
+
+from server.service import (
+    EsSearchQuery, SearchRequest,
+    import_data_into_es_from_frame, transform_files_into_data_frame
+)
 from database.user import UserData, User, UserLoginInput
 from database.database_meta import DatabaseMetaData, DatabaseMetaInput, DatabaseMetaOutput
 
@@ -38,7 +42,7 @@ def check_is_login_decorator(func):
         # if user_id is None:
         #     return ReturnMessage(message="您还没有登录", status=False)
         # else:
-            return func(user_id=user_id, *args, **kwargs)
+        return func(user_id=user_id, *args, **kwargs)
     return wrapper
 
 
@@ -136,3 +140,9 @@ def import_data(data_files: list[UploadFile] | UploadFile, db_id: str = Form()):
         msg += f"，存在以下问题：{f}"
 
     return ReturnMessage(status=True, message=msg)
+
+
+@app.post("/api/search", response_model=list[dict])
+def get_search_result(s_requests: SearchRequest):
+    es_query = EsSearchQuery(s_requests, database_meta_db)
+    return es_query.get_search_list(es_client)
