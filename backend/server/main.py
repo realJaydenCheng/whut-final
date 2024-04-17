@@ -11,10 +11,14 @@ from elasticsearch import Elasticsearch
 
 from server.service import (
     EsSearchQuery, SearchRequest,
-    import_data_into_es_from_frame, transform_files_into_data_frame
+    import_data_into_es_from_frame,
+    transform_files_into_data_frame,
 )
 from database.user import UserData, User, UserLoginInput
-from database.database_meta import DatabaseMetaData, DatabaseMetaInput, DatabaseMetaOutput
+from database.database_meta import (
+    DatabaseMetaData, DatabaseMetaDetail,
+    DatabaseMetaInput, DatabaseMetaOutput,
+)
 
 dotenv.load_dotenv()
 
@@ -140,6 +144,11 @@ def import_data(data_files: list[UploadFile] | UploadFile, db_id: str = Form()):
         msg += f"，存在以下问题：{f}"
 
     return ReturnMessage(status=True, message=msg)
+
+
+@app.get("/api/db/detail", response_model=DatabaseMetaDetail)
+def get_db_detail(db_id: str):
+    return database_meta_db.get_database_meta_detail(db_id)
 
 
 @app.post("/api/search", response_model=list[dict])

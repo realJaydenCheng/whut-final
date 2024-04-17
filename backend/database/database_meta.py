@@ -1,10 +1,11 @@
 
 import datetime
+import uuid
 from typing import Optional
 
 from pydantic import BaseModel
 from elasticsearch import BadRequestError, Elasticsearch
-import uuid
+
 
 from .user import UserData
 
@@ -39,6 +40,20 @@ class DatabaseMetaOutput(BaseModel):
     text_fields: list[str]
 
     user_name: str
+
+
+class DatabaseMetaDetail(BaseModel):
+
+    id: str
+    name: str
+
+    title_field: str
+    time_field: str
+
+    id_fields: list[str]
+    text_fields: list[str]
+
+    cate_fields_detail: dict[str, list[str]]
 
 
 class DatabaseMeta(BaseModel):
@@ -82,7 +97,7 @@ class DatabaseMetaData:
     def delete_database_meta(self, database_meta_id: str):
         self.client.delete(index=self.index, id=database_meta_id)
 
-    def check_user_is_owner(self, database_meta_id: str, user_id: str):
+    def check_user_is_owner(self, database_meta_id: str, user_id: str) -> bool:
         # database_meta = self.client.get(index=self.index, id=database_meta_id)
         # if database_meta["found"]:
         #     return database_meta["_source"]["user_id"] == user_id
@@ -212,3 +227,38 @@ class DatabaseMetaData:
         if database_meta["found"]:
             return DatabaseMeta(**database_meta["_source"])
         return None
+
+    def get_database_meta_detail(self, db_id: str) -> DatabaseMetaOutput:
+        res = self.client.get(index=self.index, id=db_id)
+        database_meta = DatabaseMeta(**res["_source"])
+        cate_details = {
+            cate_filed:
+            self._get_field_categories(db_id, cate_filed)
+            for cate_filed in database_meta.cate_fields
+        }
+        return DatabaseMetaOutput(
+            **res["_source"],
+            cate_fields_detail=cate_details
+        )
+
+    def _get_field_categories(
+        self, db_id: str, field: str,
+        limit: int = 32, order: str = "desc"
+    ) -> list[str]:
+        es_res = self.client.search(
+            index=db_id, size=0,
+            aggs={
+                "unique": {
+                    "terms": {
+                        "field": field,
+                        "size": limit
+                    }
+                }
+            },
+            sort={
+                field: {
+                    "order": order
+                }
+            }
+        )["aggregations"]["unique"]["buckets"]
+        return [category["key"] for category in es_res]
