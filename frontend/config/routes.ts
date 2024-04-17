@@ -12,6 +12,24 @@
  */
 export default [
   {
+    path: '/welcome',
+    name: '欢迎',
+    icon: 'smile',
+    component: './Welcome',
+  },
+  {
+    path: '/search',
+    name: '检索分析',
+    icon: 'search',
+    component: './Search',
+  },
+  {
+    path: '/database',
+    name: '数据库',
+    icon: 'database',
+    component: './Database',
+  },
+  {
     path: '/user',
     layout: false,
     routes: [
@@ -24,34 +42,6 @@ export default [
         name: '注册',
         path: '/user/register',
         component: './User/Register',
-      },
-    ],
-  },
-  {
-    path: '/database',
-    name: '数据库',
-    icon: 'database',
-    component: './Database',
-  },
-  {
-    path: '/welcome',
-    name: 'welcome',
-    icon: 'smile',
-    component: './Welcome',
-  },
-  {
-    path: '/admin',
-    name: 'admin',
-    icon: 'crown',
-    routes: [
-      {
-        path: '/admin',
-        redirect: '/admin/sub-page',
-      },
-      {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        component: './Admin',
       },
     ],
   },
