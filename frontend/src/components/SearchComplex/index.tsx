@@ -23,11 +23,10 @@ interface SearchComplexProps {
 
 const SearchComplex: React.FC<SearchComplexProps> = (props) => {
 
-    const [selectOptions, setSelectOptions] = useState<{label: string, value: string}[]>([]);
+    const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
     const [selectedDbId, setSelectedDbId] = useState<string>();
     const [cateFieldsTagSelects, setCateFieldsTagSelects] = useState<React.ReactNode[]>([]);
     const [otherFieldsTexts, setOtherFieldsTexts] = useState<React.ReactNode[]>([]);
-
     const { run: fetchDbDetails } = useRequest(getDbDetailApiDbDetailGet, {
         manual: true,
         onSuccess: (data) => {
@@ -43,8 +42,6 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                 (meta) => ({ label: meta.name, value: meta.id })
             ));
             fetchDbDetails({ db_id: props.databaseMetas[0].id });
-            console.log("selectedDbId: ", selectedDbId);
-            console.log("props.databaseMetas[0].id: ", props.databaseMetas[0].id);
         }
     }, [props.databaseMetas]);
 
@@ -58,7 +55,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
         for (const field_name in detail?.cate_fields_detail) {
             const categoryOptions = detail?.cate_fields_detail[field_name];
             nodes.push(
-                <StandardFormRow title={field_name} block style={{ padding: 0, marginTop: 0, marginBottom: 3 }}>
+                <StandardFormRow key={field_name} title={field_name} block style={{ padding: 0, marginTop: 0, marginBottom: 3 }}>
                     <FormItem name={field_name} style={{ padding: 0, marginTop: 0, marginBottom: 3 }}>
                         <TagSelect expandable>
                             {categoryOptions.map((category: string) => (
@@ -74,16 +71,24 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
         setCateFieldsTagSelects(nodes);
     };
     const renderOtherFieldsText = (detail: API.DatabaseMetaDetail) => {
-        const fields = detail?.id_fields.concat(detail?.text_fields);
-        // TODO: remove duplicated field_name in fields
+        const fields = Array.from(
+            new Set(detail?.id_fields.concat(detail?.text_fields))
+        );
+
         const nodes = fields?.map((field_name) => {
-            return <FormItem name={field_name} label={field_name} style={{ marginBottom: 3 }}>
+            return <FormItem
+                name={field_name}
+                label={field_name}
+                style={{ marginBottom: 3 }}
+                // see: https://sentry.io/answers/unique-key-prop/
+                key={field_name}
+            >
                 <Input size="small" style={{ width: '80%' }} />
             </FormItem>
 
         }) || [];
         setOtherFieldsTexts(nodes);
-    }
+    };
 
     return (
         <>
@@ -97,6 +102,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                                 value={selectedDbId}
                                 options={selectOptions}
                                 onChange={handleDbSelectChange}
+                            // FIXME: need to add default values.
                             />
                         </FormItem>
                     </Col>
