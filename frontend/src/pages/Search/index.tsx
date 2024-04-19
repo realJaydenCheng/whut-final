@@ -1,17 +1,23 @@
-import React from "react";
-import SearchComplex from "@/components/SearcgComplex";
+import React, { useState } from "react";
+import SearchComplex from "@/components/SearchComplex";
 import { listDbApiDbListGet } from "@/services/ant-design-pro/listDbApiDbListGet";
 import { useRequest } from "@umijs/max";
 
 const SearchPage: React.FC<{}> = () => {
 
-    const {data: dbMetas} = useRequest(listDbApiDbListGet);
+    const [dbMetas, setDbMetas] = useState<API.DatabaseMetaOutput[]>([]);
+    useRequest(listDbApiDbListGet,
+        {
+            onSuccess: (data) => {
+                setDbMetas(data||[]);
+            }
+        }
+    );
 
     return <SearchComplex
         onSearch={() => { }}
-        databaseMetas={dbMetas||[]}
-
-    ></SearchComplex>;
+        databaseMetas={dbMetas}
+    />;
 };
 
 export default SearchPage;

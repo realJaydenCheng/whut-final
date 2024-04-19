@@ -103,6 +103,8 @@ declare namespace API {
     date_range: any[] | null;
     /** Filters */
     filters: Record<string, any> | null;
+    /** Sub Terms */
+    sub_terms: Record<string, any> | null;
   };
 
   type User = {
