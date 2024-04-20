@@ -7,7 +7,7 @@ export async function getSearchResultApiSearchPost(
   body: API.SearchRequest,
   options?: { [key: string]: any },
 ) {
-  return request<Record<string, any>[]>('/api/search', {
+  return request<API.SearchedData>('/api/search', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -26,7 +26,7 @@ declare namespace API {
     /** Cate Fields Detail */
     cate_fields_detail: Record<string, any>;
     /** Date Range */
-    date_range: any[];
+    date_range: any[] | null;
   };
 
   type DatabaseMetaInput = {
@@ -96,17 +96,28 @@ declare namespace API {
     status: boolean;
   };
 
+  type SearchedData = {
+    /** Data */
+    data: Record<string, any>[];
+    /** Total */
+    total: number;
+  };
+
   type SearchRequest = {
-    /** Terms */
-    terms: string[] | null;
     /** Db Id */
     db_id: string;
+    /** Terms */
+    terms: string[] | null;
     /** Date Range */
     date_range: any[] | null;
     /** Filters */
     filters: Record<string, any> | null;
     /** Sub Terms */
     sub_terms: Record<string, any> | null;
+    /** Page */
+    page: number | null;
+    /** Page Size */
+    page_size: number | null;
   };
 
   type User = {

@@ -80,11 +80,22 @@ def import_data_into_es_from_frame(
 
 
 class SearchRequest(BaseModel):
-    terms: list[str] | None
     db_id: str
+
+    terms: list[str] | None
     date_range: tuple[int, int] | None
+    
     filters: dict[str, list[str]] | None
     sub_terms: dict[str, list[str]] | None
+
+    page: int | None
+    page_size: int | None
+
+
+class SearchedData(BaseModel):
+
+    data: list[dict]
+    total: int
 
 
 class EsSearchQuery:
@@ -93,6 +104,9 @@ class EsSearchQuery:
 
         # 查询数据库元数据
         self.database = database_meta_db.get_database_meta(s_request.db_id)
+        
+        self.page_size = s_request.page_size
+        self.page = s_request.page
 
         # 构造query，用于后续查询
         self.query = {
@@ -145,5 +159,18 @@ class EsSearchQuery:
                 })
 
     def get_search_list(self, es_client: Elasticsearch) -> list[dict]:
-        res = es_client.search(index=self.database.id, query=self.query)
-        return [x["_source"] for x in res["hits"]["hits"]]
+
+        size = self.page_size if self.page_size else 10 
+        page = self.page if self.page else 1
+        
+        res = es_client.search(
+            index=self.database.id, 
+            query=self.query,
+            size=size, 
+            from_=size * (page - 1),
+        )["hits"]
+
+        return SearchedData(
+            data=[x["_source"] for x in res["hits"]],
+            total=res['total']["value"],
+        )

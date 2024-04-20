@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from elasticsearch import Elasticsearch
 
 from server.service import (
-    EsSearchQuery, SearchRequest,
+    EsSearchQuery, SearchRequest, SearchedData,
     import_data_into_es_from_frame,
     transform_files_into_data_frame,
 )
@@ -151,7 +151,7 @@ def get_db_detail(db_id: str):
     return database_meta_db.get_database_meta_detail(db_id)
 
 
-@app.post("/api/search", response_model=list[dict])
+@app.post("/api/search", response_model=SearchedData)
 def get_search_result(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
     return es_query.get_search_list(es_client)

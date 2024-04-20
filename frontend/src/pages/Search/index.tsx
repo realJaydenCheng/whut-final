@@ -10,6 +10,9 @@ const SearchPage: React.FC<{}> = () => {
 
     const [dbMetas, setDbMetas] = useState<API.DatabaseMetaOutput[]>([]);
     const [currentMeta, setCurrentMeta] = useState<API.DatabaseMetaOutput>();
+    const [cFormData, setCFormData] = useState<API.SearchRequest>();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     useRequest(listDbApiDbListGet,
         {
@@ -64,7 +67,12 @@ const SearchPage: React.FC<{}> = () => {
 
         <SearchComplex
             onSearchAndSubmit={(value, formData, form, event, info, databaseMeta) => {
-                postForm(formData);
+                postForm({
+                    ...formData,
+                    page: page,
+                    page_size: pageSize,
+                });
+                setCFormData(formData);
                 setCurrentMeta(databaseMeta);
             }}
             databaseMetas={dbMetas}
@@ -72,17 +80,27 @@ const SearchPage: React.FC<{}> = () => {
 
         <Table
             pagination={{
-                total: data?.length,
+                total: data?.total,
                 showTotal: (total) => `共检索到 ${total} 条数据`,
                 showSizeChanger: true,
                 showQuickJumper: true,
+                onChange: (p, ps) => {
+                    setPage(p);
+                    setPageSize(ps);
+                    postForm({
+                        ...cFormData!,
+                        page: p,
+                        page_size: ps,
+                    });
+                }
             }}
-            dataSource={data}
+            dataSource={data?.data}
             scroll={{ x: "max-content" }}
             loading={loading}
             columns={columns}
             showHeader
             style={{marginTop: 20}}
+            
         />
 
 
