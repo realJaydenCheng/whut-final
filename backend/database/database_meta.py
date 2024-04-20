@@ -54,7 +54,7 @@ class DatabaseMetaDetail(BaseModel):
     text_fields: list[str]
 
     cate_fields_detail: dict[str, list[str]]
-    date_range: tuple[int, int]
+    date_range: tuple[int, int] | None
 
 
 class DatabaseMeta(BaseModel):
@@ -255,13 +255,15 @@ class DatabaseMetaData:
             }
         }
         response = self.client.search(index=db_id, size=0, aggs=aggs)
-        max_year = response['aggregations']['max_year']['value_as_string']
-        min_year = response['aggregations']['min_year']['value_as_string']
+
+        max_year = response['aggregations']['max_year'].get('value_as_string', None)
+        min_year = response['aggregations']['min_year'].get('value_as_string', None)
+        date_range = (min_year, max_year) if min_year and max_year else None
 
         return DatabaseMetaDetail(
             **res["_source"],
             cate_fields_detail=cate_details,
-            date_range=(min_year, max_year),
+            date_range=date_range,
         )
 
     def _get_field_categories(

@@ -19,7 +19,7 @@ export default [
   },
   {
     path: '/search',
-    name: '检索分析',
+    name: '项目检索',
     icon: 'search',
     component: './Search',
   },

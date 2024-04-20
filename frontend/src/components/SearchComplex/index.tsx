@@ -22,6 +22,7 @@ interface SearchComplexProps {
         formInstance: FormInstance<any>,
         event?: tEvent,
         info?: tInfo,
+        currentDbMeta?: API.DatabaseMetaOutput,
     ) => void;
     databaseMetas: API.DatabaseMetaOutput[]
 }
@@ -30,13 +31,13 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
 
     const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
     const [selectedDbId, setSelectedDbId] = useState<string>();  // TODO: remove vars about default select value.
-    const [cateFieldsTagSelects, setCateFieldsTagSelects] = useState<React.ReactNode[]>([]);
-    const [otherFieldsTexts, setOtherFieldsTexts] = useState<React.ReactNode[]>([]);
+
     const { run: fetchDbDetails } = useRequest(getDbDetailApiDbDetailGet, {
         manual: true,
         onSuccess: (data) => {
             renderCateFieldsTagSelects(data);
             renderOtherFieldsText(data);
+            renderDateRangeSlider(data);
         }
     });
 
@@ -54,6 +55,10 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
         setSelectedDbId(value);
         fetchDbDetails({ db_id: value });
     };
+
+    const [cateFieldsTagSelects, setCateFieldsTagSelects] = useState<React.ReactNode[]>([]);
+    const [otherFieldsTexts, setOtherFieldsTexts] = useState<React.ReactNode[]>([]);
+    const [dateRangeSlider, setDateRangeSlider] = useState<React.ReactNode>();
 
     const renderCateFieldsTagSelects = (detail: API.DatabaseMetaDetail) => {
         const nodes = [];
@@ -102,6 +107,32 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
         setOtherFieldsTexts(nodes);
     };
 
+    const renderDateRangeSlider = (detail: API.DatabaseMetaDetail) => {
+        setDateRangeSlider(
+            <FormItem
+                name="date_range"
+                label="时间范围"
+            >
+                <Slider
+                    range={{ draggableTrack: true }}
+                    min={detail?.date_range[0]}
+                    max={detail?.date_range[1]}
+                    step={1}
+                />
+                {/* <InputNumber
+                    min={2016}
+                    max={2023}
+                    step={1}
+                />  
+                <InputNumber
+                    min={2016}
+                    max={2023}
+                    step={1}
+                />  TODO: show text input*/}
+            </FormItem>
+        )
+    };
+
     const [form] = Form.useForm();
     const pairs = new Map<string, string>(Object.entries({
         "cateField": "filters",
@@ -144,7 +175,8 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
             sub_terms: nestedData["sub_terms"] || null,
             date_range: formData["date_range"] || null,
         }
-        props.onSearchAndSubmit(value, searchRequest, form, event, info);
+        const databaseMeta = props.databaseMetas.find(meta => meta.id === searchRequest.db_id);
+        props.onSearchAndSubmit(value, searchRequest, form, event, info, databaseMeta);
     };
 
     return (
@@ -152,7 +184,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
             <div style={{ textAlign: 'center' }}>
                 <Row>
 
-                    <Col span={5} offset={5}>
+                    <Col span={5} offset={4}>
                         <FormItem name="db_id" initialValue='65e94e64-e526-4298-981b-8168eb142605'>
                             <Select  // FIXME: need to add dynamic default values.
                                 // initValue and defaultValue are not working.
@@ -168,7 +200,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                         <FormItem name="terms">
                             <Input.Search
                                 placeholder="请输入"
-                                enterButton="搜索"
+                                enterButton="检索"
                                 size="large"
                                 onSearch={searchToSubmit}
                                 style={{ width: '90%' }}
@@ -179,27 +211,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                 </Row>
             </div>
 
-            <FormItem
-                name="date_range"
-                label="时间范围"
-            >
-                <Slider
-                    range={{ draggableTrack: true }}
-                    min={2016}
-                    max={2023}
-                    step={1}
-                />
-                {/* <InputNumber
-                    min={2016}
-                    max={2023}
-                    step={1}
-                />  
-                <InputNumber
-                    min={2016}
-                    max={2023}
-                    step={1}
-                />  TODO: show text input*/}
-            </FormItem>
+            {dateRangeSlider}
 
             {cateFieldsTagSelects}
 
