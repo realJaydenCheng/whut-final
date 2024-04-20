@@ -101,12 +101,12 @@ const useStyles = createStyles(({ token }) => {
       '> p': { marginTop: '4px', marginBottom: '0', lineHeight: '22px' },
     },
     extraContentSearch: {
-      width: '272px',
+      width: '280px',
       marginLeft: '16px',
-      [`@media screen and (max-width: ${token.screenSM}px)`]: {
-        width: '100%',
-        marginLeft: '0',
-      },
+      // [`@media screen and (max-width: ${token.screenSM}px)`]: {
+      //   width: '100%',
+      //   marginLeft: '0',
+      // },
     },
     listCard: {
       [`@media screen and (max-width: ${token.screenXS}px)`]: {

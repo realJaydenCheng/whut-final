@@ -49,6 +49,7 @@ const SearchPage: React.FC<{}> = () => {
             width: 200,
             ellipsis: true,
             textWrap: 'word-break',
+            fixed: true
         },
         {
             title: currentMeta.time_field,
@@ -81,6 +82,7 @@ const SearchPage: React.FC<{}> = () => {
             loading={loading}
             columns={columns}
             showHeader
+            style={{marginTop: 20}}
         />
 
 

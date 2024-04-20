@@ -238,16 +238,14 @@ export const BasicList: FC = () => {
           <Card
             className={styles.listCard}
             bordered={false}
-            title="详细列表"
-            style={{
-              marginTop: 24,
-            }}
+
             styles={{
               body: {
                 padding: '0 32px 40px 32px',
               }
             }}
             extra={extraContent}
+            
           >
 
             <List
