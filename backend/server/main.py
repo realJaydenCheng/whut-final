@@ -157,13 +157,29 @@ def get_search_result(s_requests: SearchRequest):
     return es_query.get_search_list(es_client)
 
 
-@app.post("/api/charts/vice-trends", response_model=dict[str, TimeSeriesStat])
+@app.post("/api/charts/vice-trends/new", response_model=dict[str, TimeSeriesStat])
 def get_vice_trends(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
     meta_detail = database_meta_db.get_database_meta_detail(
         es_query.database.id
     )
     new_words_list = es_query.get_new_words_list(
+        es_client, start=meta_detail.date_range[1]-3
+    )
+    return {
+        word: EsSearchQuery.new_query_with_terms(
+            [word], s_requests, database_meta_db
+        ).get_vice_trend(es_client)
+        for word in new_words_list
+    }
+
+@app.post("/api/charts/vice-trends/hot", response_model=dict[str, TimeSeriesStat])
+def get_vice_trends(s_requests: SearchRequest):
+    es_query = EsSearchQuery(s_requests, database_meta_db)
+    meta_detail = database_meta_db.get_database_meta_detail(
+        es_query.database.id
+    )
+    new_words_list = es_query.get_hot_words_list(
         es_client, start=meta_detail.date_range[1]-3
     )
     return {

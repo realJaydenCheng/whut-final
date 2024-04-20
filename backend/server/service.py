@@ -190,8 +190,8 @@ class EsSearchQuery:
 
     @staticmethod
     def new_query_with_terms(
-        terms: list[str], 
-        s_request: SearchRequest, 
+        terms: list[str],
+        s_request: SearchRequest,
         database_meta_db: DatabaseMetaData
     ):
         s_request.terms = terms
@@ -215,11 +215,11 @@ class EsSearchQuery:
         )
 
     def get_new_words_list(
-            self, 
-            es_client: Elasticsearch,
-            limit = 10,
-            start = None,
-        ) -> list[str]:
+        self,
+        es_client: Elasticsearch,
+        limit=10,
+        start=None,
+    ) -> list[str]:
 
         # 获取与处理参数
         now = int(datetime.now().strftime("%Y"))
@@ -301,6 +301,61 @@ class EsSearchQuery:
 
         if "标下" in res:
             res.remove("标下")
+
+        return res
+
+    # TODO: refactor redundancy code of get new query
+    def get_hot_words_list(
+            self,
+            es_client: Elasticsearch,
+            limit=10,
+            start=None,
+    ) -> list[str]:
+        new_query = deepcopy(self.query)
+        now = int(datetime.now().strftime("%Y"))
+        start = start if start else now - 3
+        start_date = datetime(start, 1, 1)
+
+        for i, filter_ in enumerate(self.query["bool"]["filter"]):
+            if filter_.get("range", None) is not None:
+                new_query["bool"]["filter"][i] = {
+                    "range": {
+                        self.database.time_field: {
+                            "gte": start_date.strftime('%Y-%m-%d'),
+                        }
+                    }
+                }
+                break
+        else:
+            new_query["bool"]["filter"].append({
+                "range": {
+                    self.database.time_field: {
+                        "gte": start_date.strftime('%Y-%m-%d'),
+                    }
+                }
+            })
+
+        word_aggs = {"word_aggs": {
+            "terms": {
+                "field": self.database.title_field,
+                "size": limit * 50
+            }
+        }}
+
+        es_res = es_client.search(
+            index=self.database.id, query=new_query,
+            aggs=word_aggs, size=0
+        )
+        new_words_dict: dict = {
+            item["key"]: item["doc_count"] for item in
+            self.filter_stop_words_buckets(
+                es_res["aggregations"]["word_aggs"]["buckets"], [], limit * 50
+            )
+        }
+        res = sorted(
+            new_words_dict.keys(), reverse=True,
+            key=lambda x: new_words_dict[x]
+        )[:limit]
 
         return res
 
