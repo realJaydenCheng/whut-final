@@ -25,6 +25,8 @@ declare namespace API {
     text_fields: string[];
     /** Cate Fields Detail */
     cate_fields_detail: Record<string, any>;
+    /** Date Range */
+    date_range: any[];
   };
 
   type DatabaseMetaInput = {

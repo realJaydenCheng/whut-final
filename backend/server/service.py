@@ -124,23 +124,25 @@ class EsSearchQuery:
                 }
             })
 
-        for field, values in s_request.filters.items():
-            field_or = [
-                {"term": {field: value}}
-                for value in values
-            ]
-            self.query["bool"]["filter"].append({
-                "bool": {"should": field_or}
-            })
+        if filters := s_request.filters:
+            for field, values in filters.items():
+                field_or = [
+                    {"term": {field: value}}
+                    for value in values
+                ]
+                self.query["bool"]["filter"].append({
+                    "bool": {"should": field_or}
+                })
 
-        for field, values in s_request.sub_terms.items():
-            field_or = [
-                {"wildcard": {f"{field}.like": f"*{value}*"}}
-                for value in values
-            ]
-            self.query["bool"]["should"].append({
-                "bool": {"must": field_or}
-            })
+        if sub_terms := s_request.sub_terms:
+            for field, values in sub_terms.items():
+                field_or = [
+                    {"wildcard": {f"{field}.like": f"*{value}*"}}
+                    for value in values
+                ]
+                self.query["bool"]["should"].append({
+                    "bool": {"must": field_or}
+                })
 
     def get_search_list(self, es_client: Elasticsearch) -> list[dict]:
         res = es_client.search(index=self.database.id, query=self.query)

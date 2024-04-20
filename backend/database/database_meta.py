@@ -54,6 +54,7 @@ class DatabaseMetaDetail(BaseModel):
     text_fields: list[str]
 
     cate_fields_detail: dict[str, list[str]]
+    date_range: tuple[int, int]
 
 
 class DatabaseMeta(BaseModel):
@@ -229,6 +230,7 @@ class DatabaseMetaData:
         return None
 
     def get_database_meta_detail(self, db_id: str) -> DatabaseMetaDetail:
+
         res = self.client.get(index=self.index, id=db_id)
         database_meta = DatabaseMeta(**res["_source"])
         cate_details = {
@@ -236,9 +238,30 @@ class DatabaseMetaData:
             self._get_field_categories(db_id, cate_filed)
             for cate_filed in database_meta.cate_fields
         }
+
+        # 构建聚合查询
+        aggs = {
+            "max_year": {
+                "max": {
+                    "field": database_meta.time_field,
+                    "format": "yyyy"  # 使用日期格式化以提取年份
+                }
+            },
+            "min_year": {
+                "min": {
+                    "field": database_meta.time_field,
+                    "format": "yyyy"
+                }
+            }
+        }
+        response = self.client.search(index=db_id, size=0, aggs=aggs)
+        max_year = response['aggregations']['max_year']['value_as_string']
+        min_year = response['aggregations']['min_year']['value_as_string']
+
         return DatabaseMetaDetail(
             **res["_source"],
-            cate_fields_detail=cate_details
+            cate_fields_detail=cate_details,
+            date_range=(min_year, max_year),
         )
 
     def _get_field_categories(

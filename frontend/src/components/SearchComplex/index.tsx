@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Col, Form, FormInstance, Input, Row, Select } from "antd";
+import { Col, Form, FormInstance, Input, InputNumber, Row, Select, Slider } from "antd";
 import StandardFormRow from "./StandardFormRow";
 import TagSelect from "./TagSelect";
 import { useRequest } from "@umijs/max";
 import { getDbDetailApiDbDetailGet } from "@/services/ant-design-pro/getDbDetailApiDbDetailGet";
 import FormItem from "antd/es/form/FormItem";
-import { ProFormSelect, ProFormText } from "@ant-design/pro-components";
+import { ProFormSelect, ProFormSlider, ProFormText } from "@ant-design/pro-components";
 import { listDbApiDbListGet } from "@/services/ant-design-pro/listDbApiDbListGet";
 import { from } from "form-data";
 
@@ -29,7 +29,7 @@ interface SearchComplexProps {
 const SearchComplex: React.FC<SearchComplexProps> = (props) => {
 
     const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
-    const [selectedDbId, setSelectedDbId] = useState<string>();
+    const [selectedDbId, setSelectedDbId] = useState<string>();  // TODO: remove vars about default select value.
     const [cateFieldsTagSelects, setCateFieldsTagSelects] = useState<React.ReactNode[]>([]);
     const [otherFieldsTexts, setOtherFieldsTexts] = useState<React.ReactNode[]>([]);
     const { run: fetchDbDetails } = useRequest(getDbDetailApiDbDetailGet, {
@@ -129,21 +129,21 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                 } else if (value instanceof Array) {
                     res[target][realKey] = value;
                 }
-                
+
             }
         }
         return res;
     };
     const searchToSubmit = (value: string, event: tEvent, info: tInfo) => {
         const formData = form.getFieldsValue(true);
-            const nestedDate = extractCombinedToNestedObj(pairs, formData)
-            const searchRequest: API.SearchRequest = {
-                terms: (formData["terms"] as string).split(" "),
-                db_id: formData["db_id"],
-                date_range: null,  //FIXME: implement data range.
-                filters: nestedDate["filters"],
-                sub_terms: nestedDate["sub_terms"],
-            }
+        const nestedData = extractCombinedToNestedObj(pairs, formData)
+        const searchRequest: API.SearchRequest = {
+            terms: formData["terms"] ? (formData["terms"] as string).split(" ") : null,
+            db_id: formData["db_id"],
+            filters: nestedData["filters"] || null,
+            sub_terms: nestedData["sub_terms"] || null,
+            date_range: formData["date_range"] || null,
+        }
         props.onSearchAndSubmit(value, searchRequest, form, event, info);
     };
 
@@ -178,6 +178,28 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
 
                 </Row>
             </div>
+
+            <FormItem
+                name="date_range"
+                label="时间范围"
+            >
+                <Slider
+                    range={{ draggableTrack: true }}
+                    min={2016}
+                    max={2023}
+                    step={1}
+                />
+                {/* <InputNumber
+                    min={2016}
+                    max={2023}
+                    step={1}
+                />  
+                <InputNumber
+                    min={2016}
+                    max={2023}
+                    step={1}
+                />  TODO: show text input*/}
+            </FormItem>
 
             {cateFieldsTagSelects}
 
