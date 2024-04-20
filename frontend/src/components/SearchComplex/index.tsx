@@ -115,8 +115,8 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
             >
                 <Slider
                     range={{ draggableTrack: true }}
-                    min={detail?.date_range[0]}
-                    max={detail?.date_range[1]}
+                    min={detail?.date_range ? detail?.date_range[0] : undefined}
+                    max={detail?.date_range ? detail?.date_range[1] : undefined}
                     step={1}
                 />
                 {/* <InputNumber
@@ -174,6 +174,8 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
             filters: nestedData["filters"] || null,
             sub_terms: nestedData["sub_terms"] || null,
             date_range: formData["date_range"] || null,
+            page: null,
+            page_size: null,
         }
         const databaseMeta = props.databaseMetas.find(meta => meta.id === searchRequest.db_id);
         props.onSearchAndSubmit(value, searchRequest, form, event, info, databaseMeta);

@@ -5,6 +5,7 @@ import { useRequest } from "@umijs/max";
 import { getSearchResultApiSearchPost } from "@/services/ant-design-pro/getSearchResultApiSearchPost";
 import { Pagination, Table, TableProps } from "antd";
 import { max } from "lodash";
+import { PageContainer } from "@ant-design/pro-components";
 
 const SearchPage: React.FC<{}> = () => {
 
@@ -63,7 +64,7 @@ const SearchPage: React.FC<{}> = () => {
     const columns: TableProps['columns'] = mainCols.concat(idCols).concat(cateCols).concat(textCols);
 
     
-    return <>
+    return <PageContainer>
 
         <SearchComplex
             onSearchAndSubmit={(value, formData, form, event, info, databaseMeta) => {
@@ -104,7 +105,7 @@ const SearchPage: React.FC<{}> = () => {
         />
 
 
-    </>;
+    </PageContainer>;
 };
 
 export default SearchPage;
