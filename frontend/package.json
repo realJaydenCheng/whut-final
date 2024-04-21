@@ -55,6 +55,7 @@
     "classnames": "^2.5.1",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
+    "numeral": "^2.0.6",
     "omit.js": "^2.0.2",
     "querystring": "^0.2.1",
     "rc-menu": "^9.12.4",
