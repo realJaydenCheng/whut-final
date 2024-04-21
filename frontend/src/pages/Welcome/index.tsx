@@ -9,6 +9,7 @@ import useStylesA from './styleA';
 import IntroduceRow from './IntroduceRow';
 import { AnalysisData } from './data';
 import getFakeChartData from "./_mock"
+import HotNewTopics from './HotNewTopics';
 
 const Info: React.FC<{
   title: React.ReactNode;
@@ -60,6 +61,8 @@ const Welcome: React.FC = () => {
         getFakeChartData.visitData
       }
     />
+
+    <HotNewTopics/>
 
 
   </PageContainer>

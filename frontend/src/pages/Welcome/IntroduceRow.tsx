@@ -22,8 +22,6 @@ const topColResponsiveProps = {
 const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: DataItem[] }) => {
   const { styles } = useStylesB();
 
-  console.log(visitData)
-
   return (
     <Row gutter={24}>
       <Col {...topColResponsiveProps}>
