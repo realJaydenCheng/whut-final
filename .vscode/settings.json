@@ -17,6 +17,7 @@
         "pydantic",
         "substr",
         "thead",
+        "Treemap",
         "umijs",
         "upserted",
         "webp",

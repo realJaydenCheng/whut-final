@@ -1,5 +1,5 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Area, Column } from '@ant-design/charts';
+import { Area, Bar, Column, Pie, Treemap } from '@ant-design/charts';
 import { Col, Progress, Row, Tooltip } from 'antd';
 import numeral from 'numeral';
 import type { DataItem } from './data.d';
@@ -7,6 +7,7 @@ import useStylesB from './style.B';
 
 import { ChartCard, Field } from './Charts';
 import Trend from './Trend';
+import { Children } from 'react';
 
 const topColResponsiveProps = {
   xs: 24,
@@ -20,20 +21,23 @@ const topColResponsiveProps = {
 };
 const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: DataItem[] }) => {
   const { styles } = useStylesB();
+
+  console.log(visitData)
+
   return (
     <Row gutter={24}>
       <Col {...topColResponsiveProps}>
         <ChartCard
           bordered={false}
-          title="总销售额"
+          title="数据库数据量"
           action={
             <Tooltip title="指标说明">
               <InfoCircleOutlined />
             </Tooltip>
           }
           loading={loading}
-          total={() => 126560}
-          footer={<Field label="日销售额" value={`￥${numeral(12423).format('0,0')}`} />}
+          total={() => "126,560 条"}
+          footer={<Field label="当年数据" value={`12,423 条`} />}
           contentHeight={46}
         >
           <Trend
@@ -42,11 +46,11 @@ const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: Dat
               marginRight: 16,
             }}
           >
-            周同比
+            年数据量同比
             <span className={styles.trendText}>12%</span>
           </Trend>
           <Trend flag="down">
-            日同比
+            平均数量相比
             <span className={styles.trendText}>11%</span>
           </Trend>
         </ChartCard>
@@ -56,14 +60,14 @@ const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: Dat
         <ChartCard
           bordered={false}
           loading={loading}
-          title="访问量"
+          title="总体立项趋势"
           action={
             <Tooltip title="指标说明">
               <InfoCircleOutlined />
             </Tooltip>
           }
-          total={numeral(8846).format('0,0')}
-          footer={<Field label="日访问量" value={numeral(1234).format('0,0')} />}
+          total={`12,423 条`}
+          footer={<Field label="总量" value={"126,560 条"} />}
           contentHeight={46}
         >
           <Area
@@ -77,47 +81,47 @@ const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: Dat
               fillOpacity: 0.6,
               width: '100%',
             }}
-            padding={-20}
+            padding={-25}
             data={visitData}
           />
+
         </ChartCard>
       </Col>
+
       <Col {...topColResponsiveProps}>
         <ChartCard
           bordered={false}
           loading={loading}
-          title="支付笔数"
+          title="立项类型占比"
           action={
             <Tooltip title="指标说明">
               <InfoCircleOutlined />
             </Tooltip>
           }
-          total={numeral(6560).format('0,0')}
-          footer={<Field label="转化率" value="60%" />}
+          total={`26.12 %`}
+          footer={"222  232  323 "}
           contentHeight={46}
         >
-          <Column
-            xField="x"
-            yField="y"
-            padding={-20}
-            axis={false}
-            height={46}
-            data={visitData}
-            scale={{ x: { paddingInner: 0.4 } }}
+          <Column 
+          data={visitData} 
+          height={46} 
+          padding={-25}
+          yField="y" xField="x" 
+          axis={false}
           />
         </ChartCard>
       </Col>
+
       <Col {...topColResponsiveProps}>
         <ChartCard
           loading={loading}
           bordered={false}
-          title="运营活动效果"
+          title="学科分类占比"
           action={
             <Tooltip title="指标说明">
               <InfoCircleOutlined />
             </Tooltip>
           }
-          total="78%"
           footer={
             <div
               style={{
@@ -140,9 +144,24 @@ const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: Dat
               </Trend>
             </div>
           }
+          total={"31.41%"}
           contentHeight={46}
         >
-          <Progress percent={78} strokeColor={{ from: '#108ee9', to: '#87d068' }} status="active" />
+          <Treemap
+            data={
+              {
+                name: "root",
+                children: visitData.map((e)=>({
+                  name: e.x,
+                  value: e.y,
+                })).slice(0, 5),
+              }
+            } 
+            height={46} 
+            padding={-25}
+            valueField="value" colorField="value" 
+            legend={false}
+          />
         </ChartCard>
       </Col>
     </Row>

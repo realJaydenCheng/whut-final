@@ -17,7 +17,7 @@ const Info: React.FC<{
 }> = ({ title, value, bordered }) => {
   const { styles } = useStylesA();
   return (
-    <div  className={styles.headerInfo} >
+    <div className={styles.headerInfo} >
       <span>{title}</span>
       <p>{value}</p>
       {bordered && <em />}
@@ -32,7 +32,7 @@ const Welcome: React.FC = () => {
   })
 
   return <PageContainer>
-    
+
     <Card bordered={false} style={{ margin: 25 }}>
       <Row>
         <Col sm={8} xs={24}>
@@ -47,10 +47,12 @@ const Welcome: React.FC = () => {
       </Row>
     </Card>
 
-    <SearchLite
-      onSearchAndSubmit={() => { }}
-      databaseMetas={dbMetas || []}
-    />
+    <div style={{ margin: 48 }}>
+      <SearchLite
+        onSearchAndSubmit={() => { }}
+        databaseMetas={dbMetas || []}
+      />
+    </div>
 
     <IntroduceRow
       loading={false}
