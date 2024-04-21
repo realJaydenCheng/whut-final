@@ -1,12 +1,14 @@
 import SearchLite from '@/components/SearchComplex/SearchLite';
 import { listDbApiDbListGet } from '@/services/ant-design-pro/listDbApiDbListGet';
 import { PageContainer } from '@ant-design/pro-components';
-import { useModel, useRequest } from '@umijs/max';
+import { request, useModel, useRequest } from '@umijs/max';
 import { Card, Col, Row, theme } from 'antd';
-import { Line } from '@ant-design/plots';
 import React, { useState } from 'react';
 
 import useStylesA from './styleA';
+import IntroduceRow from './IntroduceRow';
+import { AnalysisData } from './data';
+import getFakeChartData from "./_mock"
 
 const Info: React.FC<{
   title: React.ReactNode;
@@ -22,6 +24,7 @@ const Info: React.FC<{
     </div>
   );
 };
+
 
 const Welcome: React.FC = () => {
 
@@ -48,6 +51,15 @@ const Welcome: React.FC = () => {
       onSearchAndSubmit={() => { }}
       databaseMetas={dbMetas || []}
     />
+
+    <IntroduceRow
+      loading={false}
+      visitData={
+        getFakeChartData.visitData
+      }
+    />
+
+
   </PageContainer>
 
 };
