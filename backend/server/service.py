@@ -108,6 +108,13 @@ class TimeSeriesStat(BaseModel):
     rates: list[int | float]
 
 
+class CatePercent(BaseModel):
+
+    cate: str
+    percentage: float
+    value: int
+
+
 class EsSearchQuery:
 
     def __init__(self, s_request: SearchRequest, database_meta_db: DatabaseMetaData) -> None:
@@ -402,10 +409,42 @@ class EsSearchQuery:
         words_list = self.filter_stop_words_buckets(es_res, keywords, limit)
 
         return {
-            str(item["key"]) : int(item["doc_count"])
+            str(item["key"]): int(item["doc_count"])
             for item in words_list
         }
-        
+
+    def get_categories_percent(self, es_client: Elasticsearch, field: str, limit=10):
+        """
+        根据指定的分类字段聚合查询，并返回总数和比例数据
+        """
+        # 查询es
+        c_aggs = {
+            "subject_aggs": {
+                "terms": {
+                    "field": field,
+                    "size": limit
+                }
+            }
+        }
+        es_res = es_client.search(
+            index=self.database.id, query=self.query,
+            aggs=c_aggs, size=0,
+        )
+
+        # 获取结果
+        total = es_res["hits"]["total"]["value"]
+        # 判空与处理
+        if total == 0:
+            return []
+
+        return [
+            CatePercent(
+                cate=bucket["key"],
+                value=bucket["doc_count"],
+                percentage=bucket["doc_count"] / total
+            ) for bucket in
+            es_res["aggregations"]["subject_aggs"]["buckets"]
+        ]
 
     @staticmethod
     def _calculate_time_series(year_agg_buckets: list) -> dict[str, list]:

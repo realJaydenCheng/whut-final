@@ -1256,6 +1256,30 @@
         {
             "language": "typescript",
             "source": [
+                "import axios from 'axios';\r\n\r\nconst db_id = \"65e94e64-e526-4298-981b-8168eb142605\"\r\n\r\naxios.post(\r\n    `http://127.0.0.1:8000/api/charts/categories?field=项目类型`,\r\n    {\r\n        db_id: db_id,\r\n        terms: null,\r\n        date_range: null,\r\n        filters: null,\r\n        sub_terms: null,\r\n        page: null,\r\n        page_size: 0,\r\n    }\r\n).then(res => {\r\n    // console.log(Object.entries(res.data).length);\r\n    console.log(res.data);\r\n}).catch( err => {\r\n    console.log(err);\r\n});\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "[",
+                                "  { cate: '创新训练项目', percentage: 20.7487, value: 207487 },",
+                                "  { cate: '创业训练项目', percentage: 2.933, value: 29330 },",
+                                "  { cate: '创业实践项目', percentage: 1.0756, value: 10756 }",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
                 ""
             ],
             "outputs": []

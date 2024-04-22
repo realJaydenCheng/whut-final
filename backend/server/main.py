@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from elasticsearch import Elasticsearch
 
 from server.service import (
-    EsSearchQuery, SearchRequest, SearchedData, TimeSeriesStat,
+    CatePercent, EsSearchQuery, SearchRequest, SearchedData, TimeSeriesStat,
     import_data_into_es_from_frame,
     transform_files_into_data_frame,
 )
@@ -201,3 +201,7 @@ def get_words_cloud(s_requests: SearchRequest):
         word_cloud_dict.items()
     ], key=lambda x: x["count"], reverse=True)
     
+@app.post("/api/charts/categories", response_model=list[CatePercent])
+def get_words_cloud(s_requests: SearchRequest, field: str):
+    es_query = EsSearchQuery(s_requests, database_meta_db)
+    return es_query.get_categories_percent(es_client, field)
