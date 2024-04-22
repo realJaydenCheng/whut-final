@@ -30,7 +30,7 @@ interface SearchComplexProps {
 const SearchComplex: React.FC<SearchComplexProps> = (props) => {
 
     const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
-    const [selectedDbId, setSelectedDbId] = useState<string>();  // TODO: remove vars about default select value.
+    const [selectedDbId, setSelectedDbId] = useState<string>('65e94e64-e526-4298-981b-8168eb142605');  // TODO: remove vars about default select value.
 
     const { run: fetchDbDetails } = useRequest(getDbDetailApiDbDetailGet, {
         manual: true,
@@ -47,7 +47,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
             setSelectOptions(props.databaseMetas.map(
                 (meta) => ({ label: meta.name, value: meta.id })
             ));
-            fetchDbDetails({ db_id: props.databaseMetas[0].id });
+            fetchDbDetails({ db_id: selectedDbId });
         }
     }, [props.databaseMetas]);
 
@@ -187,7 +187,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                 <Row>
 
                     <Col span={5} offset={4}>
-                        <FormItem name="db_id" initialValue='65e94e64-e526-4298-981b-8168eb142605'>
+                        <FormItem name="db_id" initialValue={selectedDbId}>
                             <Select  // FIXME: need to add dynamic default values.
                                 // initValue and defaultValue are not working.
                                 size="large"

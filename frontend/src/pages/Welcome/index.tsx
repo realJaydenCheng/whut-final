@@ -37,18 +37,18 @@ const Welcome: React.FC = () => {
     <Card bordered={false} style={{ margin: 25 }}>
       <Row>
         <Col sm={8} xs={24}>
-          <Info title="数据库数量" value="3 座" bordered />
+          <Info title="系统数据库数量" value="4 座" bordered />
         </Col>
         <Col sm={8} xs={24}>
-          <Info title="科研项目收录总数量" value="16,888,808 条" bordered />
+          <Info title="科研项目收录总数量" value="111,762 条" bordered />
         </Col>
         <Col sm={8} xs={24}>
-          <Info title="系统涵盖年份" value="2016-2023" />
+          <Info title="收录数据涵盖年份" value="2010 - 2023" />
         </Col>
       </Row>
     </Card>
 
-    <div style={{ margin: 48 }}>
+    <div style={{ margin: 48, marginBottom: 36 }}>
       <SearchLite
         onSearchAndSubmit={() => { }}
         databaseMetas={dbMetas || []}

@@ -7,7 +7,7 @@ import useStylesB from './style.B';
 
 import { ChartCard, Field } from './Charts';
 import Trend from './Trend';
-import MicroTrend from './MicroTrend';
+import MicroTrends from './MicroTrends';
 
 const topColResponsiveProps = {
   xs: 24,
@@ -103,7 +103,7 @@ const HotNewTopics = () => {
           contentHeight={cardHeight}
         >
 
-          <MicroTrend />
+          <MicroTrends color='darkblue' />
 
         </ChartCard>
       </Col>
@@ -120,7 +120,7 @@ const HotNewTopics = () => {
           }
           total={undefined}
           footer={undefined}
-          contentHeight={cardHeight+30}
+          contentHeight={cardHeight+15}
         >
 
           <WordCloud
@@ -147,7 +147,7 @@ const HotNewTopics = () => {
           contentHeight={cardHeight}
         >
 
-          <MicroTrend />
+          <MicroTrends color='darkgreen' />
 
         </ChartCard>
       </Col>
