@@ -158,7 +158,7 @@ def get_search_result(s_requests: SearchRequest):
 
 
 @app.post("/api/charts/vice-trends/new", response_model=dict[str, TimeSeriesStat])
-def get_vice_trends(s_requests: SearchRequest):
+def get_new_trends(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
     meta_detail = database_meta_db.get_database_meta_detail(
         es_query.database.id
@@ -174,7 +174,7 @@ def get_vice_trends(s_requests: SearchRequest):
     }
 
 @app.post("/api/charts/vice-trends/hot", response_model=dict[str, TimeSeriesStat])
-def get_vice_trends(s_requests: SearchRequest):
+def get_hot_trends(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
     meta_detail = database_meta_db.get_database_meta_detail(
         es_query.database.id
@@ -189,6 +189,11 @@ def get_vice_trends(s_requests: SearchRequest):
         for word in new_words_list
     }
 
+@app.post("/api/charts/vice-trend", response_model=TimeSeriesStat)
+def get_vice_trends(s_requests: SearchRequest):
+    es_query = EsSearchQuery(s_requests, database_meta_db)
+    return es_query.get_vice_trend(es_client)
+
 @app.post("/api/charts/words-cloud", response_model=list[dict])
 def get_words_cloud(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
@@ -202,6 +207,6 @@ def get_words_cloud(s_requests: SearchRequest):
     ], key=lambda x: x["count"], reverse=True)
     
 @app.post("/api/charts/categories", response_model=list[CatePercent])
-def get_words_cloud(s_requests: SearchRequest, field: str):
+def get_categories_percentage(s_requests: SearchRequest, field: str):
     es_query = EsSearchQuery(s_requests, database_meta_db)
     return es_query.get_categories_percent(es_client, field)

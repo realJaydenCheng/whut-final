@@ -4,8 +4,13 @@
 // API 唯一标识：
 import * as createDbApiDbCreatePost from './createDbApiDbCreatePost';
 import * as deleteDbApiDbDeletePost from './deleteDbApiDbDeletePost';
+import * as getCategoriesPercentageApiChartsCategoriesPost from './getCategoriesPercentageApiChartsCategoriesPost';
 import * as getDbDetailApiDbDetailGet from './getDbDetailApiDbDetailGet';
+import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiChartsViceTrendsHotPost';
+import * as getNewTrendsApiChartsViceTrendsNewPost from './getNewTrendsApiChartsViceTrendsNewPost';
 import * as getSearchResultApiSearchPost from './getSearchResultApiSearchPost';
+import * as getViceTrendsApiChartsViceTrendPost from './getViceTrendsApiChartsViceTrendPost';
+import * as getWordsCloudApiChartsWordsCloudPost from './getWordsCloudApiChartsWordsCloudPost';
 import * as importDataApiDbImportPost from './importDataApiDbImportPost';
 import * as listDbApiDbListGet from './listDbApiDbListGet';
 import * as loginApiUserLoginPost from './loginApiUserLoginPost';
@@ -23,4 +28,9 @@ export default {
   importDataApiDbImportPost,
   getDbDetailApiDbDetailGet,
   getSearchResultApiSearchPost,
+  getNewTrendsApiChartsViceTrendsNewPost,
+  getHotTrendsApiChartsViceTrendsHotPost,
+  getViceTrendsApiChartsViceTrendPost,
+  getWordsCloudApiChartsWordsCloudPost,
+  getCategoriesPercentageApiChartsCategoriesPost,
 };

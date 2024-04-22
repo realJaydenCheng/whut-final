@@ -6,6 +6,15 @@ declare namespace API {
     db_id: string;
   };
 
+  type CatePercent = {
+    /** Cate */
+    cate: string;
+    /** Percentage */
+    percentage: number;
+    /** Value */
+    value: number;
+  };
+
   type createDbApiDbCreatePostParams = {
     user_id?: string;
   };
@@ -43,7 +52,7 @@ declare namespace API {
     /** Id Fields */
     id_fields: string[];
     /** Text Fields */
-    text_fields: string[];
+    text_fields?: string[];
   };
 
   type DatabaseMetaOutput = {
@@ -74,6 +83,10 @@ declare namespace API {
   type deleteDbApiDbDeletePostParams = {
     db_id: string;
     user_id?: string;
+  };
+
+  type getCategoriesPercentageApiChartsCategoriesPostParams = {
+    field: string;
   };
 
   type getDbDetailApiDbDetailGetParams = {
@@ -118,6 +131,19 @@ declare namespace API {
     page: number | null;
     /** Page Size */
     page_size: number | null;
+  };
+
+  type TimeSeriesStat = {
+    /** Dates */
+    dates: number[];
+    /** Values */
+    values: (number | number)[];
+    /** Percentages */
+    percentages: (number | number)[];
+    /** Deltas */
+    deltas: (number | number)[];
+    /** Rates */
+    rates: (number | number)[];
   };
 
   type User = {
