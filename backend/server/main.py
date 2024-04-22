@@ -188,3 +188,16 @@ def get_vice_trends(s_requests: SearchRequest):
         ).get_vice_trend(es_client)
         for word in new_words_list
     }
+
+@app.post("/api/charts/words-cloud", response_model=list[dict])
+def get_words_cloud(s_requests: SearchRequest):
+    es_query = EsSearchQuery(s_requests, database_meta_db)
+    word_cloud_dict = es_query.get_word_cloud(es_client)
+    return sorted([
+        {
+            "word": k,
+            "count": v,
+        } for k, v in
+        word_cloud_dict.items()
+    ], key=lambda x: x["count"], reverse=True)
+    

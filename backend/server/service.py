@@ -115,6 +115,7 @@ class EsSearchQuery:
         # 查询数据库元数据
         self.database = database_meta_db.get_database_meta(s_request.db_id)
 
+        self.request = s_request
         self.page_size = s_request.page_size
         self.page = s_request.page
 
@@ -379,6 +380,32 @@ class EsSearchQuery:
             )
 
         return self._calculate_time_series(buckets)
+
+    def get_word_cloud(self, es_client: Elasticsearch, limit=200):
+
+        keywords = self.request.terms if self.request.terms else []
+        db = self.database
+
+        word_aggs = {"word_aggs": {
+            "terms": {
+                "field": db.title_field,
+                "size": limit * 2
+            }
+        }}
+        es_res = (
+            es_client.search(
+                index=db.id, query=self.query,
+                aggs=word_aggs, size=0
+            )
+            ["aggregations"]["word_aggs"]["buckets"]
+        )
+        words_list = self.filter_stop_words_buckets(es_res, keywords, limit)
+
+        return {
+            str(item["key"]) : int(item["doc_count"])
+            for item in words_list
+        }
+        
 
     @staticmethod
     def _calculate_time_series(year_agg_buckets: list) -> dict[str, list]:
