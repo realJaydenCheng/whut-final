@@ -1,5 +1,5 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Area, Bar, Column, Pie, Treemap } from '@ant-design/charts';
+import { DatabaseOutlined, DatabaseTwoTone, InfoCircleOutlined } from '@ant-design/icons';
+import { Area, Bar, CirclePacking, Column, Pie, Treemap } from '@ant-design/charts';
 import { Col, Progress, Row, Tooltip } from 'antd';
 import numeral from 'numeral';
 import type { DataItem } from './data.d';
@@ -8,6 +8,7 @@ import useStylesB from './style.B';
 import { ChartCard, Field } from './Charts';
 import Trend from './Trend';
 import { Children } from 'react';
+import Icon from '@ant-design/icons/lib/components/Icon';
 
 const topColResponsiveProps = {
   xs: 24,
@@ -19,11 +20,50 @@ const topColResponsiveProps = {
     marginBottom: 24,
   },
 };
-const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: DataItem[] }) => {
+
+const contentHeight = 80;
+
+interface IntroduceRowProps {
+  dbTrend?: API.TimeSeriesStat,
+  cateDataA?: API.CatePercent[],
+  cateDataB?: API.CatePercent[],
+  // newTrends: API.TimeSeriesStat[],
+  // wordsCloudData: Record<string, any>[],
+  // hotTrends: API.TimeSeriesStat[],
+}
+
+const IntroduceRow = ({
+  dbTrend,
+  cateDataA,
+  cateDataB,
+}: IntroduceRowProps) => {
+
   const { styles } = useStylesB();
+
+  const dbTotal = dbTrend?.values.reduce((acc, cur) => acc + cur, 0);
+  const dbCurr = dbTrend?.values[dbTrend.values.length - 1];
+  const dbPer = dbTrend?.percentages[dbTrend.percentages.length - 1];
+  const dbPerFlag = (dbPer || 0) >= 0 ? "up" : "down";
+
+  const dbLineData = dbTrend?.values.map((value, index) => {
+    return {
+      date: dbTrend?.dates[index],
+      value: value,
+    }
+  });
+
+  const catePerB = (cateDataA && cateDataB) ?
+    (cateDataB[1].value - cateDataB[0].value) / cateDataB[0].value
+    : 0;
+
+  const cateTreeData = {
+    name: "root",
+    children: cateDataB?.map((e) => ({ name: e.cate, value: e.value })) || [],
+  };
 
   return (
     <Row gutter={24}>
+
       <Col {...topColResponsiveProps}>
         <ChartCard
           bordered={false}
@@ -33,54 +73,56 @@ const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: Dat
               <InfoCircleOutlined />
             </Tooltip>
           }
-          loading={loading}
-          total={() => "126,560 条"}
-          footer={<Field label="当年数据" value={`12,423 条`} />}
-          contentHeight={46}
+          loading={dbTrend ? false : true}
+          total={`${numeral(dbTotal).format("0,0")} 条`}
+          footer={<Field label="当年数据" value={`${numeral(dbCurr).format("0,0")} 条`} />}
+          contentHeight={contentHeight}
         >
+
           <Trend
-            flag="up"
+            flag={dbPerFlag}
             style={{
               marginRight: 16,
+              marginTop: 20,
+              fontSize: 16,
+              textAlign: "right"
             }}
           >
+            <span style={{ fontSize: 30 }} > <DatabaseTwoTone /> </span>
             年数据量同比
-            <span className={styles.trendText}>12%</span>
+            <span className={styles.trendText}>{numeral(dbPer).format("0.00") + "%"}</span>
           </Trend>
-          <Trend flag="down">
-            平均数量相比
-            <span className={styles.trendText}>11%</span>
-          </Trend>
+
         </ChartCard>
       </Col>
 
       <Col {...topColResponsiveProps}>
         <ChartCard
           bordered={false}
-          loading={loading}
+          loading={dbTrend ? false : true}
           title="总体立项趋势"
           action={
             <Tooltip title="指标说明">
               <InfoCircleOutlined />
             </Tooltip>
           }
-          total={`12,423 条`}
-          footer={<Field label="总量" value={"126,560 条"} />}
-          contentHeight={46}
+          total={`${numeral(dbCurr).format("0,0")} 条`}
+          footer={<Field label="总量" value={`${numeral(dbTotal).format("0,0")} 条`} />}
+          contentHeight={contentHeight}
         >
           <Area
-            xField="x"
-            yField="y"
+            xField="date"
+            yField="value"
             shapeField="smooth"
-            height={46}
+            height={contentHeight}
             axis={false}
             style={{
               fill: 'linear-gradient(-90deg, white 0%, #975FE4 100%)',
               fillOpacity: 0.6,
               width: '100%',
             }}
-            padding={-25}
-            data={visitData}
+            padding={-5}
+            data={dbLineData}
           />
 
         </ChartCard>
@@ -89,30 +131,33 @@ const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: Dat
       <Col {...topColResponsiveProps}>
         <ChartCard
           bordered={false}
-          loading={loading}
+          loading={cateDataA ? false : true}
           title="立项类型占比"
           action={
             <Tooltip title="指标说明">
               <InfoCircleOutlined />
             </Tooltip>
           }
-          total={`26.12 %`}
-          footer={"222  232  323 "}
-          contentHeight={46}
+          total={numeral(cateDataA ? cateDataA[0].percentage : 0).format("0.00") + " %"}
+          footer={
+            `${cateDataA ? cateDataA[1].cate : ""} ${numeral(cateDataA ? cateDataA[1].percentage : 0).format("0.00")}% ` +
+            ` ${cateDataA ? cateDataA[2]?.cate || "" : ""} ${numeral(cateDataA ? cateDataA[2]?.percentage || 0 : 0).format("0.00")}%`
+          }
+          contentHeight={contentHeight}
         >
-          <Column 
-          data={visitData} 
-          height={46} 
-          padding={-25}
-          yField="y" xField="x" 
-          axis={false}
+          <Column
+            data={cateDataA}
+            height={contentHeight}
+            padding={-5}
+            yField="value" xField="cate"
+            axis={false}
           />
         </ChartCard>
       </Col>
 
       <Col {...topColResponsiveProps}>
         <ChartCard
-          loading={loading}
+          loading={cateDataB ? false : true}
           bordered={false}
           title="学科分类占比"
           action={
@@ -127,41 +172,29 @@ const IntroduceRow = ({ loading, visitData }: { loading: boolean; visitData: Dat
                 overflow: 'hidden',
               }}
             >
-              <Trend
-                flag="up"
-                style={{
-                  marginRight: 16,
-                }}
-              >
-                周同比
-                <span className={styles.trendText}>12%</span>
-              </Trend>
               <Trend flag="down">
-                日同比
-                <span className={styles.trendText}>11%</span>
+                第二高与最高相比
+                <span className={styles.trendText}> {numeral(catePerB).format("0.00%")} </span>
               </Trend>
             </div>
           }
-          total={"31.41%"}
-          contentHeight={46}
+          total={numeral(cateDataB ? cateDataB[0].percentage : 0).format("0.00") + "%"}
+          contentHeight={contentHeight}
         >
+
           <Treemap
-            data={
-              {
-                name: "root",
-                children: visitData.map((e)=>({
-                  name: e.x,
-                  value: e.y,
-                })).slice(0, 5),
-              }
-            } 
-            height={46} 
-            padding={-25}
-            valueField="value" colorField="value" 
+            data={cateTreeData}
+            height={contentHeight}
+            padding={-5}
+            valueField="value"
+            // see: https://github.com/ant-design/ant-design-charts/issues/2399#issuecomment-1961023927
+            colorField={(d: any) => d.data['group']}
             legend={false}
           />
+
         </ChartCard>
       </Col>
+
     </Row>
   );
 };

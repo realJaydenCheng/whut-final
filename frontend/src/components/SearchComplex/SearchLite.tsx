@@ -20,13 +20,15 @@ interface SearchLiteProps {
         info?: tInfo,
         currentDbMeta?: API.DatabaseMetaOutput,
     ) => void;
-    databaseMetas: API.DatabaseMetaOutput[]
+    databaseMetas: API.DatabaseMetaOutput[];
+    onSelectChange: (value: string) => void;
 }
 
 const SearchLite: React.FC<SearchLiteProps> = (props) => {
 
     const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
-    const [selectedDbId, setSelectedDbId] = useState<string>();  // TODO: remove vars about default select value.
+    const [selectedDbId, setSelectedDbId] = useState<string>('65e94e64-e526-4298-981b-8168eb142605');
+    // TODO: remove vars about default select value.
 
     const [form] = Form.useForm();
 
@@ -59,19 +61,24 @@ const SearchLite: React.FC<SearchLiteProps> = (props) => {
         props.onSearchAndSubmit(value, searchRequest, form, event, info, databaseMeta);
     };
 
+    const handleSelectChange = (value: string) => {
+        setSelectedDbId(value);
+        props.onSelectChange(value);
+    }
+
     return (
         <Form form={form}>
             <div style={{ textAlign: 'center' }}>
                 <Row>
 
                     <Col span={5} offset={4}>
-                        <FormItem name="db_id" initialValue='65e94e64-e526-4298-981b-8168eb142605'>
+                        <FormItem name="db_id" initialValue={selectedDbId}>
                             <Select  // FIXME: need to add dynamic default values.
                                 // initValue and defaultValue are not working.
                                 size="large"
                                 value={selectedDbId}
                                 options={selectOptions}
-                                onChange={setSelectedDbId}
+                                onChange={handleSelectChange}
                             />
                         </FormItem>
                     </Col>

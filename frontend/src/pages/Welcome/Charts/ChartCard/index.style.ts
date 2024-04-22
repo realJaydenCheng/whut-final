@@ -41,8 +41,8 @@ const useStyles = createStyles(({ token }) => {
     },
     total: {
       height: '38px',
-      marginTop: '4px',
-      marginBottom: '0',
+      marginTop: '5px',
+      marginBottom: '5px',
       overflow: 'hidden',
       color: token.colorTextHeading,
       fontSize: '30px',
@@ -54,7 +54,7 @@ const useStyles = createStyles(({ token }) => {
     content: {
       position: 'relative',
       width: '100%',
-      marginBottom: '12px',
+      marginBottom: '5px',
     },
     contentFixed: {
       position: 'absolute',
@@ -63,8 +63,8 @@ const useStyles = createStyles(({ token }) => {
       width: '100%',
     },
     footer: {
-      marginTop: '8px',
-      paddingTop: '9px',
+      marginTop: '5px',
+      paddingTop: '5px',
       borderTop: `1px solid ${token.colorSplit}`,
       '& > *': { position: 'relative' },
     },

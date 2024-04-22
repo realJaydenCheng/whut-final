@@ -55,7 +55,7 @@ const MicroTrends: React.FC<{
             <Col span={5} style={{ fontSize: 18 }}> <b>同比变化</b> </Col>
 
         </Row>
-        {cnt.map(() => <TrendRow color={props.color} />)}
+        {cnt.map((i) => <TrendRow color={props.color} key={i} />)}
     </>
 }
 
