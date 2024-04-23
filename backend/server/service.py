@@ -10,7 +10,7 @@ from fastapi import UploadFile
 from pydantic import BaseModel
 
 from database.database_meta import DatabaseMeta, DatabaseMetaData
-
+from database import ACADEMY_STOP_WORDS
 
 def transform_files_into_data_frame(
     files: list[UploadFile],
@@ -510,19 +510,17 @@ class EsSearchQuery:
             these:str, 查询用的关键词，用于排除本身。如为空，则不排除
             limit: int = 10, 返回的长度限制
         """
+
         words_list = []
         for word_item in buckets:
             # 学术停用词和检索词本身
-            words_ext = these  # + ACADEMY_STOP_WORDS
+            words_ext = these + ACADEMY_STOP_WORDS
+
             if len(word_item["key"]) < 2:  # 太短的不要
                 continue
-            _has_ext = False  # 标记是否含有停用词
-            for ext in words_ext:
-                if ext in word_item["key"]:
-                    _has_ext = True  # 标记含有 退出
-                    break
-            if _has_ext:
+            if word_item["key"] in words_ext:
                 continue  # 查看下一个词
+
             words_list.append(word_item)
             if len(words_list) >= limit:
                 return words_list  # 词数够了就可以返回了

@@ -17,8 +17,9 @@ const TrendRow  = ({
         value: v,
         date: data.dates[i],
     }));
-    const per = data.percentages[dataArray.length - 2];
+    const per = data.percentages[dataArray.length - 2] || 0.0;
     const flag = per > 0 ? 'up' : 'down';
+    const last = dataArray[dataArray.length-1]?.value || 1;
 
     const config = {
         data: dataArray,
@@ -35,13 +36,11 @@ const TrendRow  = ({
         axis: false,
     };
 
-    console.log(dataArray);
-
     return <Row style={{ marginBottom: 25, textAlign: 'center' }}>
 
         <Col span={5} style={{ fontSize: 18, whiteSpace: "nowrap"}}> {word} </Col>
 
-        <Col span={5} style={{ fontSize: 18 }}> {dataArray[dataArray.length-1].value} </Col>
+        <Col span={5} style={{ fontSize: 18 }}> {last} </Col>
 
         <Col span={9}>
             <Tiny.Line {...config} />
