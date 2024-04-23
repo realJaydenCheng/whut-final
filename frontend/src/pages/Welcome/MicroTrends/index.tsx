@@ -1,37 +1,54 @@
 import { Tiny } from "@ant-design/charts";
 import { Col, Row } from "antd";
 import Trend from "../Trend";
+import { fill } from "lodash";
 
-const TrendRow: React.FC<{ color: string }> = (props) => {
-    const data = [
-        264, 417, 438, 887, 309, 397, 550, 575, 563, 430, 525, 592, 492, 467,
-    ].map((value, index) => ({ value, index }));
+const TrendRow  = ({
+    color,
+    data,
+    word,
+}:{
+    color: string
+    data: API.TimeSeriesStat,
+    word: string,
+}) => {
+
+    const dataArray = data.values.map((v,i)=>({
+        value: v,
+        date: data.dates[i],
+    }));
+    const per = data.percentages[dataArray.length - 2];
+    const flag = per > 0 ? 'up' : 'down';
+
     const config = {
-        data,
+        data: dataArray,
         height: 30,
         width: 150,
-        // padding: 8,
         shapeField: 'smooth',
-        xField: 'index',
+        xField: 'date',
         yField: 'value',
+        color: color,
         style: {
-            fill: `linear-gradient(-90deg, white 0%, ${props.color} 100%)`,
-            fillOpacity: 0.6,
+            lineWidth: 3,
+            stroke: color,
         },
+        axis: false,
     };
+
+    console.log(dataArray);
 
     return <Row style={{ marginBottom: 25, textAlign: 'center' }}>
 
-        <Col span={5} style={{ fontSize: 18 }}> 主题词 </Col>
+        <Col span={5} style={{ fontSize: 18, whiteSpace: "nowrap"}}> {word} </Col>
 
-        <Col span={5} style={{ fontSize: 18 }}> 168 </Col>
+        <Col span={5} style={{ fontSize: 18 }}> {dataArray[dataArray.length-1].value} </Col>
 
         <Col span={9}>
-            <Tiny.Area {...config} />
+            <Tiny.Line {...config} />
         </Col>
 
         <Col span={5} style={{ fontSize: 18 }}>
-            <Trend flag="up"> 12 % </Trend>
+            <Trend flag={flag}> {per.toFixed(2)} % </Trend>
         </Col>
 
     </Row>
@@ -39,10 +56,14 @@ const TrendRow: React.FC<{ color: string }> = (props) => {
 
 
 
-const MicroTrends: React.FC<{
-    color: string
-}> = (props) => {
-    const cnt = [1, 2, 3, 4, 5, 6,]
+const MicroTrends = ({
+    color,
+    dataMap,
+}:{
+    color: string,
+    dataMap: Record<string, any>,
+}) => {
+    
     return <>
         <Row style={{ marginBottom: 25, textAlign: "center", marginTop: 15 }}>
 
@@ -55,7 +76,7 @@ const MicroTrends: React.FC<{
             <Col span={5} style={{ fontSize: 18 }}> <b>同比变化</b> </Col>
 
         </Row>
-        {cnt.map((i) => <TrendRow color={props.color} key={i} />)}
+        {Object.entries(dataMap).slice(0,6).map((e, i) => <TrendRow color={color} key={i} data={e[1]} word={e[0]} />)}
     </>
 }
 

@@ -200,11 +200,11 @@ def get_words_cloud(s_requests: SearchRequest):
     word_cloud_dict = es_query.get_word_cloud(es_client)
     return sorted([
         {
-            "word": k,
-            "count": v,
+            "text": k,
+            "value": v,
         } for k, v in
         word_cloud_dict.items()
-    ], key=lambda x: x["count"], reverse=True)
+    ], key=lambda x: x["value"], reverse=True)
     
 @app.post("/api/charts/categories", response_model=list[CatePercent])
 def get_categories_percentage(s_requests: SearchRequest, field: str):

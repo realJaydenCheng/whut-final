@@ -12,6 +12,9 @@ import getFakeChartData from "./_mock"
 import HotNewTopics from './HotNewTopics';
 import { getViceTrendsApiChartsViceTrendPost } from '@/services/ant-design-pro/getViceTrendsApiChartsViceTrendPost';
 import { getCategoriesPercentageApiChartsCategoriesPost } from '@/services/ant-design-pro/getCategoriesPercentageApiChartsCategoriesPost';
+import { getNewTrendsApiChartsViceTrendsNewPost } from '@/services/ant-design-pro/getNewTrendsApiChartsViceTrendsNewPost';
+import { getHotTrendsApiChartsViceTrendsHotPost } from '@/services/ant-design-pro/getHotTrendsApiChartsViceTrendsHotPost';
+import { getWordsCloudApiChartsWordsCloudPost } from '@/services/ant-design-pro/getWordsCloudApiChartsWordsCloudPost';
 
 type tEvent = React.ChangeEvent<HTMLInputElement> |
   React.MouseEvent<HTMLElement> |
@@ -49,14 +52,11 @@ const genSearchRequest = (db_id: string): API.SearchRequest => {
 
 const Welcome: React.FC = () => {
 
-  const [selectedDbId, setSelectedDbId] = useState<string>('65e94e64-e526-4298-981b-8168eb142605');
+  const defaultDbId = '65e94e64-e526-4298-981b-8168eb142605';
 
   const { data: dbMetas } = useRequest(listDbApiDbListGet, {
     onSuccess: (data) => {
-      runDbTrend(selectedDbId);
-      const _meta = data?.find(db => db.id === selectedDbId);
-      runCateA(_meta);
-      runCateB(_meta);
+      runRequests(defaultDbId, data)
     }
   });
 
@@ -102,6 +102,50 @@ const Welcome: React.FC = () => {
     }
   );
 
+  const { data: newTrData, run: runNewTr } = useRequest(
+    (db_id?: string) => {
+      if (db_id) {
+        return getNewTrendsApiChartsViceTrendsNewPost(genSearchRequest(db_id));
+      }
+    },
+    {
+      manual: true
+    }
+  );
+
+  const { data: hotTrData, run: runHotTr } = useRequest(
+    (db_id?: string) => {
+      if (db_id) {
+        return getHotTrendsApiChartsViceTrendsHotPost(genSearchRequest(db_id));
+      }
+    },
+    {
+      manual: true
+    }
+  );
+
+  const { data: wordCloudData, run: runWordCloud } = useRequest(
+    (db_id?: string) => {
+      if (db_id) {
+        return getWordsCloudApiChartsWordsCloudPost(genSearchRequest(db_id));
+      }
+    },
+    {
+      manual: true
+    }
+  );
+
+  const runRequests = (db_id: string, metas?: API.DatabaseMetaOutput[]) => {
+    const _metas = metas ? metas : dbMetas;
+    const _meta = _metas?.find(db => db.id === db_id);
+    runDbTrend(db_id);
+    runHotTr(db_id);
+    runNewTr(db_id);
+    runWordCloud(db_id);
+    runCateA(_meta);
+    runCateB(_meta);
+  }
+
   const handleOnSearchAndSubmit = (
     searchValue: string,
     formData: API.SearchRequest,
@@ -113,10 +157,7 @@ const Welcome: React.FC = () => {
   };
 
   const handleSelectChange = (value: string) => {
-    runDbTrend(value);
-    const _meta = dbMetas?.find(db => db.id === value);
-    runCateA(_meta);
-    runCateB(_meta);
+    runRequests(value);
   };
 
   return <PageContainer>
@@ -149,7 +190,11 @@ const Welcome: React.FC = () => {
       cateDataB={ cateB }
     />
 
-    <HotNewTopics />
+    <HotNewTopics 
+      newTrends={newTrData}
+      wordsCloudData={wordCloudData}
+      hotTrends={hotTrData}
+    />
 
 
   </PageContainer>

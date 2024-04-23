@@ -27,9 +27,6 @@ interface IntroduceRowProps {
   dbTrend?: API.TimeSeriesStat,
   cateDataA?: API.CatePercent[],
   cateDataB?: API.CatePercent[],
-  // newTrends: API.TimeSeriesStat[],
-  // wordsCloudData: Record<string, any>[],
-  // hotTrends: API.TimeSeriesStat[],
 }
 
 const IntroduceRow = ({

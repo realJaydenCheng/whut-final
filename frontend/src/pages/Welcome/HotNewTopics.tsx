@@ -20,70 +20,19 @@ const topColResponsiveProps = {
   },
 };
 
-const testData = [
-  {
-      "value": 8.77077893705,
-      "text": "肉眼",
-      "name": "安纳萨哥拉斯"
-  },
-  {
-      "value": 8.18364995057,
-      "text": "微小",
-      "name": "安纳萨哥拉斯"
-  },
-  {
-      "value": 8.10461990121,
-      "text": "大自然",
-      "name": "安纳萨哥拉斯"
-  },
-  {
-      "value": 7.69410172525,
-      "text": "粒子",
-      "name": "安纳萨哥拉斯"
-  },
-  {
-      "value": 21.209681572,
-      "text": "万事万物",
-      "name": "普罗汀"
-  },
-  {
-      "value": 7.48068272383,
-      "text": "上帝",
-      "name": "普罗汀"
-  },
-  {
-      "value": 9.17328983326,
-      "text": "赦免",
-      "name": "耶稣"
-  },
-  {
-      "value": 8.04274449749,
-      "text": "拯救",
-      "name": "耶稣"
-  },
-  {
-      "value": 8.29120585679,
-      "text": "递减",
-      "name": "牛顿"
-  },
-  {
-      "value": 7.9817837977,
-      "text": "行星",
-      "name": "牛顿"
-  },
-  {
-      "value": 4.36834335975,
-      "text": "宇宙",
-      "name": "牛顿"
-  },
-]
+interface HotNewTopicsProps {
+  newTrends?: Record<string, any>,
+  wordsCloudData?: Record<string, any>[],
+  hotTrends?: Record<string, any>,
+}
 
-const HotNewTopics = () => {
-  const { styles } = useStylesB();
+const cardHeight = 380;
 
-  const loading = false;
-  const visitData = [{ x: 1, y: 1 }];
-  const cardHeight = 350;
+const HotNewTopics = ({
+  newTrends,
+  wordsCloudData,
+  hotTrends,
+}: HotNewTopicsProps) => {
 
   return (
     <Row gutter={24}>
@@ -91,7 +40,7 @@ const HotNewTopics = () => {
       <Col {...topColResponsiveProps}>
         <ChartCard
           bordered={false}
-          loading={loading}
+          loading={newTrends ? false : true}
           title="新兴研究"
           action={
             <Tooltip title="指标说明">
@@ -103,7 +52,7 @@ const HotNewTopics = () => {
           contentHeight={cardHeight}
         >
 
-          <MicroTrends color='darkblue' />
+          <MicroTrends color='orange' dataMap={newTrends || {}} />
 
         </ChartCard>
       </Col>
@@ -111,7 +60,7 @@ const HotNewTopics = () => {
       <Col {...topColResponsiveProps}>
         <ChartCard
           bordered={false}
-          loading={loading}
+          loading={wordsCloudData ? false : true}
           title="热门选题"
           action={
             <Tooltip title="指标说明">
@@ -120,13 +69,13 @@ const HotNewTopics = () => {
           }
           total={undefined}
           footer={undefined}
-          contentHeight={cardHeight+15}
+          contentHeight={cardHeight + 15}
         >
 
           <WordCloud
-            data={testData.concat(testData.concat(testData)).concat(testData)}
-            colorField={"name"}
-            height={cardHeight+30}
+            data={wordsCloudData}
+            colorField={"text"}
+            height={cardHeight + 30}
           />
 
         </ChartCard>
@@ -134,7 +83,7 @@ const HotNewTopics = () => {
 
       <Col {...topColResponsiveProps}>
         <ChartCard
-          loading={loading}
+          loading={hotTrends ? false : true}
           bordered={false}
           title="立项趋势"
           action={
@@ -147,7 +96,7 @@ const HotNewTopics = () => {
           contentHeight={cardHeight}
         >
 
-          <MicroTrends color='darkgreen' />
+          <MicroTrends color='green' dataMap={hotTrends || {}} />
 
         </ChartCard>
       </Col>
