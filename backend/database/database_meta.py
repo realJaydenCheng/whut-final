@@ -19,7 +19,7 @@ class DatabaseMetaInput(BaseModel):
     time_field: str
 
     cate_fields: list[str]
-    id_fields: list[str]
+    id_fields: list[str] = []
     text_fields: list[str] = []
 
 

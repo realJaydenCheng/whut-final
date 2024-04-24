@@ -4,6 +4,7 @@
         "ahooks",
         "antd",
         "astype",
+        "cnki",
         "cond",
         "dotenv",
         "dtype",

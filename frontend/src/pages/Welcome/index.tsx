@@ -165,13 +165,13 @@ const Welcome: React.FC = () => {
     <Card bordered={false} style={{ margin: 25 }}>
       <Row>
         <Col sm={8} xs={24}>
-          <Info title="系统项目数据库数量" value="4 座" bordered />
+          <Info title="系统项目数据库数量" value="6 座" bordered />
         </Col>
         <Col sm={8} xs={24}>
-          <Info title="科研项目收录总数量" value="351,738 条" bordered />
+          <Info title="科研项目收录总数量" value="903,686 条" bordered />
         </Col>
         <Col sm={8} xs={24}>
-          <Info title="收录数据涵盖的年份" value="2010 - 2023" />
+          <Info title="收录数据涵盖的年份" value="1981 - 2023" />
         </Col>
       </Row>
     </Card>
