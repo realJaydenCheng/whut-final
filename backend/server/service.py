@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from database.database_meta import DatabaseMeta, DatabaseMetaData
 from database import ACADEMY_STOP_WORDS
 
+
 def transform_files_into_data_frame(
     files: list[UploadFile],
 ) -> pd.DataFrame:
