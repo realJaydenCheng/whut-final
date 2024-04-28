@@ -50,7 +50,7 @@ declare namespace API {
     /** Cate Fields */
     cate_fields: string[];
     /** Id Fields */
-    id_fields: string[];
+    id_fields?: string[];
     /** Text Fields */
     text_fields?: string[];
   };
@@ -83,6 +83,10 @@ declare namespace API {
   type deleteDbApiDbDeletePostParams = {
     db_id: string;
     user_id?: string;
+  };
+
+  type embedDbTextApiDbEmbeddingGetParams = {
+    db_id: string;
   };
 
   type getCategoriesPercentageApiChartsCategoriesPostParams = {
@@ -120,17 +124,17 @@ declare namespace API {
     /** Db Id */
     db_id: string;
     /** Terms */
-    terms: string[] | null;
+    terms?: string[] | null;
     /** Date Range */
-    date_range: any[] | null;
+    date_range?: any[] | null;
     /** Filters */
-    filters: Record<string, any> | null;
+    filters?: Record<string, any> | null;
     /** Sub Terms */
-    sub_terms: Record<string, any> | null;
+    sub_terms?: Record<string, any> | null;
     /** Page */
-    page: number | null;
+    page?: number | null;
     /** Page Size */
-    page_size: number | null;
+    page_size?: number | null;
   };
 
   type TimeSeriesStat = {

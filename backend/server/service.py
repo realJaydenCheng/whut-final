@@ -534,8 +534,7 @@ class EsSearchQuery:
             text_list = []
             for hit in hits:
                 for field in fields_will_embedding:
-                    if hit["_source"].get(field):
-                        text_list.append(hit["_source"][field])
+                    text_list.append(hit["_source"].get(field, ""))
             return text_list
 
         def get_embedding_list(text_list) -> list[list[float]]:
@@ -546,7 +545,7 @@ class EsSearchQuery:
             return res.json()
 
         db = self.database
-        fields_will_embedding = db.text_fields + [db.title_field]
+        fields_will_embedding = [db.title_field]  # + db.text_fields
 
         # 筛选 is_embedded 字段不是 true 的文档
         query = {
@@ -560,7 +559,7 @@ class EsSearchQuery:
         page = es_client.search(
             index=db.id,
             body={"query": query},
-            size=500,
+            size=200,
             scroll="10m"
         )
         scroll_id = page['_scroll_id']
@@ -594,3 +593,7 @@ class EsSearchQuery:
             page = es_client.scroll(scroll_id=scroll_id, scroll='10m')
             scroll_id = page['_scroll_id']
             hits = page['hits']['hits']
+
+            del bulk_body
+            del text_list
+            del embedding_list

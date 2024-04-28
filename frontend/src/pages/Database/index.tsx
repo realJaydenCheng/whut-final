@@ -22,6 +22,7 @@ import { deleteDbApiDbDeletePost } from '@/services/ant-design-pro/deleteDbApiDb
 import { createDbApiDbCreatePost } from '@/services/ant-design-pro/createDbApiDbCreatePost';
 import UploadModal from './UploadModal';
 import { importDataApiDbImportPost, BodyImportDataApiDbImportPost } from './service'
+import { embedDbTextApiDbEmbeddingGet } from '@/services/ant-design-pro/embedDbTextApiDbEmbeddingGet';
 
 
 const { Search } = Input;
@@ -91,6 +92,10 @@ export const BasicList: FC = () => {
     deleteDbApiDbDeletePost({ db_id: id });
   };
 
+  const embedItem = (id: string) => {
+    embedDbTextApiDbEmbeddingGet({ db_id: id });
+  }
+
   const showDeleteConfirm = (currentItem: API.DatabaseMetaOutput) => {
     Modal.confirm({
       title: '删除任务',
@@ -100,6 +105,16 @@ export const BasicList: FC = () => {
       onOk: () => deleteItem(currentItem.id),
     });
   };
+
+  const showEmbedConfirm = (currentItem: API.DatabaseMetaOutput) => {
+    Modal.confirm({
+      title: '嵌入数据库',
+      content: '确定将刚数据库中的文本进行嵌入操作吗？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => embedItem(currentItem.id),
+    });
+  }
 
   const handleItemOperation = (key: string | number, currentItem: API.DatabaseMetaOutput) => {
     if (key === 'edit') {
@@ -125,6 +140,10 @@ export const BasicList: FC = () => {
           {
             key: 'import',
             label: '导入',
+          },
+          {
+            key: 'embed',
+            label: '嵌入',
           },
           {
             key: 'edit',
@@ -168,6 +187,16 @@ export const BasicList: FC = () => {
             }}
           >
             导入
+          </a>,
+
+          <a
+            key="embed"
+            onClick={(e) => {
+              e.preventDefault();
+              showEmbedConfirm(item);
+            }}
+          >
+            嵌入
           </a>,
 
           <a
@@ -245,7 +274,7 @@ export const BasicList: FC = () => {
               }
             }}
             extra={extraContent}
-            
+
           >
 
             <List

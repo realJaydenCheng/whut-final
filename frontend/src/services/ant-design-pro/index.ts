@@ -4,6 +4,7 @@
 // API 唯一标识：
 import * as createDbApiDbCreatePost from './createDbApiDbCreatePost';
 import * as deleteDbApiDbDeletePost from './deleteDbApiDbDeletePost';
+import * as embedDbTextApiDbEmbeddingGet from './embedDbTextApiDbEmbeddingGet';
 import * as getCategoriesPercentageApiChartsCategoriesPost from './getCategoriesPercentageApiChartsCategoriesPost';
 import * as getDbDetailApiDbDetailGet from './getDbDetailApiDbDetailGet';
 import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiChartsViceTrendsHotPost';
@@ -17,6 +18,7 @@ import * as loginApiUserLoginPost from './loginApiUserLoginPost';
 import * as logoutApiUserLogoutGet from './logoutApiUserLogoutGet';
 import * as registerApiUserRegisterPost from './registerApiUserRegisterPost';
 import * as rootApiGet from './rootApiGet';
+import * as upgradeDatabaseMappingAddEmbeddingApiMaintenanceUpgradeDatabaseMappingAddEmbeddingGet from './upgradeDatabaseMappingAddEmbeddingApiMaintenanceUpgradeDatabaseMappingAddEmbeddingGet';
 export default {
   rootApiGet,
   registerApiUserRegisterPost,
@@ -26,6 +28,7 @@ export default {
   listDbApiDbListGet,
   deleteDbApiDbDeletePost,
   importDataApiDbImportPost,
+  embedDbTextApiDbEmbeddingGet,
   getDbDetailApiDbDetailGet,
   getSearchResultApiSearchPost,
   getNewTrendsApiChartsViceTrendsNewPost,
@@ -33,4 +36,5 @@ export default {
   getViceTrendsApiChartsViceTrendPost,
   getWordsCloudApiChartsWordsCloudPost,
   getCategoriesPercentageApiChartsCategoriesPost,
+  upgradeDatabaseMappingAddEmbeddingApiMaintenanceUpgradeDatabaseMappingAddEmbeddingGet,
 };
