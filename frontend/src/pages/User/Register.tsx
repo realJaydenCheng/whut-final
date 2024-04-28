@@ -256,8 +256,7 @@ const Register: FC = () => {
         </FormItem>
 
       </Form>
-
-      <Footer></Footer>
+      
     </div>
   );
 };

@@ -60,7 +60,6 @@ interface LoginState {
 
 const Login: React.FC = () => {
   const [userLoginState, setUserLoginState] = useState<LoginState>({ status: null });
-  const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
 
@@ -177,8 +176,6 @@ const Login: React.FC = () => {
 
         </LoginForm>
       </div>
-
-      <Footer />
 
     </div>
 
