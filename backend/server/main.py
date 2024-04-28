@@ -146,6 +146,13 @@ def import_data(data_files: list[UploadFile] | UploadFile, db_id: str = Form()):
     return ReturnMessage(status=True, message=msg)
 
 
+@app.get("/api/db/embedding", response_model=ReturnMessage)
+def embed_db_text(db_id: str):
+    query = EsSearchQuery(SearchRequest(db_id=db_id), database_meta_db)
+    query.update_text_embedding(es_client)
+    return ReturnMessage(message="ok", status=True)
+
+
 @app.get("/api/db/detail", response_model=DatabaseMetaDetail)
 def get_db_detail(db_id: str):
     return database_meta_db.get_database_meta_detail(db_id)
@@ -173,6 +180,7 @@ def get_new_trends(s_requests: SearchRequest):
         for word in new_words_list
     }
 
+
 @app.post("/api/charts/vice-trends/hot", response_model=dict[str, TimeSeriesStat])
 def get_hot_trends(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
@@ -189,10 +197,12 @@ def get_hot_trends(s_requests: SearchRequest):
         for word in new_words_list
     }
 
+
 @app.post("/api/charts/vice-trend", response_model=TimeSeriesStat)
 def get_vice_trends(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
     return es_query.get_vice_trend(es_client)
+
 
 @app.post("/api/charts/words-cloud", response_model=list[dict])
 def get_words_cloud(s_requests: SearchRequest):
@@ -205,8 +215,17 @@ def get_words_cloud(s_requests: SearchRequest):
         } for k, v in
         word_cloud_dict.items()
     ], key=lambda x: x["value"], reverse=True)
-    
+
+
 @app.post("/api/charts/categories", response_model=list[CatePercent])
 def get_categories_percentage(s_requests: SearchRequest, field: str):
     es_query = EsSearchQuery(s_requests, database_meta_db)
     return es_query.get_categories_percent(es_client, field)
+
+
+@app.get("/api/maintenance/upgrade-database-mapping-add-embedding", response_model=ReturnMessage)
+def upgrade_database_mapping_add_embedding():
+    metas = database_meta_db.list_database_metas(None)
+    for meta in metas:
+        database_meta_db.upgrade_database_mapping_add_embedding(meta.id)
+    return ReturnMessage(message="ok", status=True)

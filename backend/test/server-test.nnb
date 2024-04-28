@@ -283,7 +283,7 @@
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
                                 "Database Created: { message: '已创建test_db_temp', status: true }",
-                                "Database ID : 395c496f-0b3b-4ead-b068-a9f458b7b21f",
+                                "Database ID : 3625c448-9f07-4058-bf21-61cd1d2e1a1f",
                                 "",
                                 ""
                             ]

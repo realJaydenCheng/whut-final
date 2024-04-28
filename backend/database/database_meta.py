@@ -162,12 +162,19 @@ class DatabaseMetaData:
                     },
                     "like": {
                         "type": "wildcard"
-                    }
+                    },
                 }
             },
             meta.time_field: {
                 "type": "date",
                 "format": "yyyy-MM-dd"
+            },
+            f"{meta.title_field}_embedding": {
+                "type": "dense_vector",
+                "dims": 1024
+            },
+            "is_embedded": {
+                "type": "boolean"
             }
         }
 
@@ -210,6 +217,10 @@ class DatabaseMetaData:
                         "type": "wildcard"
                     }
                 }
+            }
+            properties[f"{field}_embedding"] = {
+                "type": "dense_vector",
+                "dims": 1024
             }
 
         # 建表
@@ -287,3 +298,30 @@ class DatabaseMetaData:
             }
         )["aggregations"]["unique"]["buckets"]
         return [category["key"] for category in es_res]
+
+    def upgrade_database_mapping_add_embedding(self, db_id: str):
+
+        meta_hit = self.client.get(index=self.index, id=db_id)
+        meta = DatabaseMeta(**meta_hit["_source"])
+
+        add_properties = {
+            f"{field}_embedding": {
+                "type": "dense_vector",
+                "dims": 1024
+            } for field in meta.text_fields
+        }
+
+        add_properties.update({
+            "is_embedded": {
+                "type": "boolean"
+            },
+            f"{meta.title_field}_embedding": {
+                "type": "dense_vector",
+                "dims": 1024
+            },
+        })
+
+        self.client.indices.put_mapping(
+            index=db_id,
+            properties=add_properties
+        )

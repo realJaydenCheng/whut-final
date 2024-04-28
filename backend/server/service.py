@@ -8,6 +8,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from fastapi import UploadFile
 from pydantic import BaseModel
+import requests
 
 from database.database_meta import DatabaseMeta, DatabaseMetaData
 from database import ACADEMY_STOP_WORDS
@@ -84,14 +85,14 @@ def import_data_into_es_from_frame(
 class SearchRequest(BaseModel):
     db_id: str
 
-    terms: list[str] | None
-    date_range: tuple[int, int] | None
+    terms: list[str] | None = None
+    date_range: tuple[int, int] | None = None
 
-    filters: dict[str, list[str]] | None
-    sub_terms: dict[str, list[str]] | None
+    filters: dict[str, list[str]] | None = None
+    sub_terms: dict[str, list[str]] | None = None
 
-    page: int | None
-    page_size: int | None
+    page: int | None = None
+    page_size: int | None = None
 
 
 class SearchedData(BaseModel):
@@ -526,3 +527,70 @@ class EsSearchQuery:
             if len(words_list) >= limit:
                 return words_list  # 词数够了就可以返回了
         return words_list
+
+    def update_text_embedding(self, es_client: Elasticsearch):
+
+        def get_text_list(hits):
+            text_list = []
+            for hit in hits:
+                for field in fields_will_embedding:
+                    if hit["_source"].get(field):
+                        text_list.append(hit["_source"][field])
+            return text_list
+
+        def get_embedding_list(text_list) -> list[list[float]]:
+            res = requests.post(
+                "http://127.0.0.1:8002/embedding/text-list",
+                json={"ls": text_list}
+            )
+            return res.json()
+
+        db = self.database
+        fields_will_embedding = db.text_fields + [db.title_field]
+
+        # 筛选 is_embedded 字段不是 true 的文档
+        query = {
+            "bool": {
+                "must_not": [
+                    {"term": {"is_embedded": True}}
+                ]
+            }
+        }
+
+        page = es_client.search(
+            index=db.id,
+            body={"query": query},
+            size=500,
+            scroll="10m"
+        )
+        scroll_id = page['_scroll_id']
+        hits = page['hits']['hits']
+
+        while hits:
+            text_list = get_text_list(hits)
+            embedding_list = get_embedding_list(text_list)
+
+            bulk_body = []
+            for i, hit in enumerate(hits):
+                update_actions = {
+                    "update": {
+                        "_id": hit["_id"],
+                        "_index": db.id
+                    }
+                }
+                fields_to_update = {
+                    "is_embedded": True  # 更新 is_embedded 标记
+                }
+                for j, field in enumerate(fields_will_embedding):
+                    embedding_index = i * len(fields_will_embedding) + j
+                    fields_to_update[f"{field}_embedding"] = embedding_list[embedding_index]
+                doc = {
+                    "doc": fields_to_update
+                }
+                bulk_body.extend([update_actions, doc])
+
+            es_client.bulk(body=bulk_body)
+
+            page = es_client.scroll(scroll_id=scroll_id, scroll='10m')
+            scroll_id = page['_scroll_id']
+            hits = page['hits']['hits']
