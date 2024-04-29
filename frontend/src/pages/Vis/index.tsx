@@ -3,6 +3,7 @@ import { Card, Col, Row } from "antd";
 
 import useStylesA from './styleA';
 import { useMatch, history, Outlet } from "@umijs/max";
+import SearchLite from "@/components/SearchComplex/SearchLite";
 
 const Info: React.FC<{
     title: React.ReactNode;
@@ -46,8 +47,15 @@ const Vis = () => {
 
     let match = useMatch(location.pathname);
 
-    const headerCard = <Card bordered={false} style={{ margin: 25 }}>
-        <Row>
+    const headerCard = <Card bordered={false} style={{ margin: 25, padding: 25 }}>
+
+        <SearchLite
+            onSearchAndSubmit={() => { }}
+            databaseMetas={[]}
+            onSelectChange={() => { }}
+        />
+
+        <Row style={{ margin: 10}}>
             <Col sm={8} xs={24}>
                 <Info title="关键词" value="大数据" bordered />
             </Col>
@@ -55,7 +63,7 @@ const Vis = () => {
                 <Info title="立项数量" value="3,686 条" bordered />
             </Col>
             <Col sm={8} xs={24}>
-                <Info title="相比之前" value=" + 3.14 %" />
+                <Info title="同比变化" value=" + 3.14 %" />
             </Col>
         </Row>
     </Card>
@@ -66,16 +74,17 @@ const Vis = () => {
 
     const getTabKey = () => {
         const tabKey = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
-        if (tabList.find( (tab) => tab.key === tabKey )) {
-          return tabKey;
+        if (tabList.find((tab) => tab.key === tabKey)) {
+            return tabKey;
         } else return 'trend';
-      };
+    };
 
     return <PageContainer
         content={headerCard}
         tabList={tabList}
         tabActiveKey={getTabKey()}
         onTabChange={handleTabChange}
+        title="可视分析"
     >
         <Outlet />
     </PageContainer>
