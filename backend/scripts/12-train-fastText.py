@@ -11,6 +11,8 @@ new_model = fasttext.train_unsupervised(
     new_text_path,
     epoch=3,
     thread=14,
+    minn=2, 
+    maxn=20,
 )
 
 old_text_path = r"C:\Users\realj\Desktop\Projects\AFAS4PI\assets\data\corpus\corpus-old.text"
@@ -19,6 +21,8 @@ old_model = fasttext.train_unsupervised(
     old_text_path,
     epoch=3,
     thread=14,
+    minn=2, 
+    maxn=20,
 )
 
 new_model.save_model(r"C:\Users\realj\Desktop\Projects\whut-final\backend\var\fasttext-models\2023-model.bin")

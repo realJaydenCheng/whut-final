@@ -2715,7 +2715,7 @@
         {
             "language": "typescript",
             "source": [
-                "// 连通性\r\nimport axios from 'axios';\r\n\r\naxios.post(\r\n    'http://127.0.0.1:8002/embedding/text-list',\r\n    {\r\n        ls: [\r\n            \"早上好我的朋友\",\r\n            \"一分钱一分货啊\",\r\n            \"风物长宜放眼量\",\r\n            \"这个代码没问题\",\r\n        ]\r\n    }\r\n).then((response) => {\r\n    console.log(response.data[0].slice(0,3));\r\n    console.log(\"ls length:\", response.data.length);\r\n});"
+                "\r\nimport axios from 'axios';\r\n\r\naxios.post(\r\n    'http://127.0.0.1:8002/embedding/text-list',\r\n    {\r\n        ls: [\r\n            \"早上好我的朋友\",\r\n            \"一分钱一分货啊\",\r\n            \"风物长宜放眼量\",\r\n            \"这个代码没问题\",\r\n        ]\r\n    }\r\n).then((response) => {\r\n    console.log(response.data[0].slice(0,3));\r\n    console.log(\"ls length:\", response.data.length);\r\n});"
             ],
             "outputs": [
                 {
@@ -2736,9 +2736,42 @@
         {
             "language": "typescript",
             "source": [
-                ""
+                "\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8002/eval/score?text=AIGC',\r\n).then((response) => {\r\n    console.log(response.data);\r\n});"
             ],
-            "outputs": []
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "98",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8002/eval/score?text=推荐系统',\r\n).then((response) => {\r\n    console.log(response.data);\r\n});"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "90.77389654135054",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
         },
         {
             "language": "typescript",
