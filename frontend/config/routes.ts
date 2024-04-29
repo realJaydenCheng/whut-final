@@ -1,4 +1,5 @@
 ﻿import icons from "@/.umi/plugin-layout/icons";
+import path from "path";
 
 /**
  * @name umi 的路由配置
@@ -28,8 +29,46 @@ export default [
   {
     path: '/vis',
     name: '可视分析',
-    icon: 'areaChart',
+    icon: 'lineChart',
     component: './Vis',
+    routes: [
+      {
+        path: '/vis',
+        redirect: '/vis/trend',
+      },
+      {
+        path: '/vis/cate',
+        component: './Vis/CateVis',
+      },
+      {
+        path: '/vis/graph',
+        component: './Vis/GraphVis',
+      },
+      {
+        path: '/vis/hot',
+        component: './Vis/HotVis',
+      },
+      {
+        path: '/vis/trend',
+        component: './Vis/TrendVis',
+      },
+      {
+        path: '/vis/rec',
+        component: './Vis/RecVis',
+      },
+    ]
+  },
+  {
+    path: '/eval',
+    name: '选题评估',
+    icon: 'fundView',
+    component: './Eval'
+  },
+  {
+    path: '/gen',
+    name: '智能生成',
+    icon: 'thunderbolt',
+    component: './Gen'
   },
   {
     path: '/database',

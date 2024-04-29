@@ -5,10 +5,8 @@ import { request, useModel, useRequest } from '@umijs/max';
 import { Card, Col, FormInstance, Row, theme } from 'antd';
 import React, { useEffect, useState } from 'react';
 
-import useStylesA from './styleA';
+
 import IntroduceRow from './IntroduceRow';
-import { AnalysisData } from './data';
-import getFakeChartData from "./_mock"
 import HotNewTopics from './HotNewTopics';
 import { getViceTrendsApiChartsViceTrendPost } from '@/services/ant-design-pro/getViceTrendsApiChartsViceTrendPost';
 import { getCategoriesPercentageApiChartsCategoriesPost } from '@/services/ant-design-pro/getCategoriesPercentageApiChartsCategoriesPost';
@@ -22,6 +20,7 @@ type tEvent = React.ChangeEvent<HTMLInputElement> |
 
 type tInfo = { source?: 'clear' | 'input'; } | undefined
 
+import useStylesA from './styleA';
 const Info: React.FC<{
   title: React.ReactNode;
   value: React.ReactNode;
