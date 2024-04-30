@@ -5,6 +5,11 @@ from sentence_transformers import SentenceTransformer
 from fastapi import FastAPI
 import fasttext
 import torch
+from elasticsearch import Elasticsearch
+
+es_client = Elasticsearch(
+    hosts="http://localhost:9200",
+)
 
 e5_local = SentenceTransformer(
     r'C:\Users\realj\Desktop\Projects\whut-final\backend\var\multilingual-e5-large-instruct',
@@ -30,7 +35,13 @@ class TextList(BaseModel):
     ls: list[str]
 
 
-def map_scores(value: float):
+class EvalScores(BaseModel):
+    novelty_score: float
+    academic_score: float
+    application_score: float
+
+
+def _map_novelty_scores(value: float):
 
     Q1 = 0.009386032819747925
     Q2 = 0.017434478
@@ -62,6 +73,63 @@ def map_scores(value: float):
             return 90 + (98 - 90) * ((value - Q3) / (upper_fence - Q3))
 
 
+def _get_word_novelty(token: str):
+    new_repr = torch.tensor(
+        embedding_2023.get_word_vector(token),
+        dtype=torch.float32,
+    )
+    old_repr = torch.tensor(
+        embedding_2022.get_word_vector(token),
+        dtype=torch.float32,
+    )
+    new_repr_al = torch.matmul(new_repr, alignment_matrix)
+    novelty_value = 1 - float(
+        torch.cosine_similarity(new_repr_al, old_repr, dim=0).item()
+    )
+    score = _map_novelty_scores(novelty_value)
+    return score
+
+
+def get_text_novelty(text: str):
+    es_res = es_client.indices.analyze(
+        text=text,
+        tokenizer="ik_max_word",
+    )
+    tokens = [token["token"] for token in es_res["tokens"]]
+    tokens_novelty = [_get_word_novelty(token) for token in tokens]
+    novelty_score = ((
+        sum(tokens_novelty) - min(tokens_novelty) - max(tokens_novelty)
+    ) / (
+        len(tokens) - 2
+    ))
+    return novelty_score
+
+
+def _get_text_prompt_cos_sim(prompt: str, text: str):
+    embedding = torch.tensor(e5_local.encode(prompt))
+    text_embedding = torch.tensor(e5_local.encode(text))
+    return float(torch.cosine_similarity(embedding, text_embedding, dim=0).item())
+
+
+def _map_prompt_scores(value: float):
+    if value >= 0.98:
+        return 98.
+    elif value <= 0.65:
+        return 65.
+    else:
+        return value * 100
+
+
+def get_text_academic(text: str):
+    prompt = "创造高深知识的，具有专业性、风险性、曲折性、连续性和未知性"
+    return _map_prompt_scores(_get_text_prompt_cos_sim(prompt, text) + .05)
+
+
+def get_text_application(text: str):
+    prompt = "应用价值高"
+    return _map_prompt_scores(_get_text_prompt_cos_sim(prompt, text) + .05)
+
+
 @server.get('/embedding/text', response_model=list[float])
 def get_text_embedding(text: str) -> list[float]:
     return e5_local.encode(text).tolist()
@@ -91,18 +159,10 @@ def get_words_embedding_old(text_ls: TextList) -> list[float]:
     ]
 
 
-@server.get('/eval/score', response_model=float)
-def get_eval_score(text: str) -> float:
-    new_repr = torch.tensor(
-        embedding_2023.get_word_vector(text),
-        dtype=torch.float32,
+@server.get('/eval/scores', response_model=EvalScores)
+def get_eval_scores(text: str) -> EvalScores:
+    return EvalScores(
+        novelty_score=get_text_novelty(text),
+        academic_score=get_text_academic(text),
+        application_score=get_text_application(text),
     )
-    old_repr = torch.tensor(
-        embedding_2022.get_word_vector(text),
-        dtype=torch.float32,
-    )
-    new_repr_al = torch.matmul(new_repr, alignment_matrix)
-    value = 1 - float(
-        torch.cosine_similarity(new_repr_al, old_repr, dim=0).item()
-    )
-    return map_scores(value)

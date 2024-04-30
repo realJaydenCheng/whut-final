@@ -2756,7 +2756,7 @@
         {
             "language": "typescript",
             "source": [
-                "\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8002/eval/score?text=推荐系统',\r\n).then((response) => {\r\n    console.log(response.data);\r\n});"
+                "\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8002/eval/scores?text=少数民族历史文化名城语言景观研究调查',\r\n).then((response) => {\r\n    console.log(response.data);\r\n});"
             ],
             "outputs": [
                 {
@@ -2764,7 +2764,11 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "90.77389654135054",
+                                "{",
+                                "  novelty_score: 91.8641991201637,",
+                                "  academic_score: 88.73273611068726,",
+                                "  application_score: 88.56754779815674",
+                                "}",
                                 "",
                                 ""
                             ]
@@ -2772,6 +2776,13 @@
                     ]
                 }
             ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                ""
+            ],
+            "outputs": []
         },
         {
             "language": "typescript",
