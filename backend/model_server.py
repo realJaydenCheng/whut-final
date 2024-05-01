@@ -39,6 +39,8 @@ class EvalScores(BaseModel):
     novelty_score: float
     academic_score: float
     application_score: float
+    trend_score: float
+    match_score: float
 
 
 def _map_novelty_scores(value: float):
@@ -130,6 +132,128 @@ def get_text_application(text: str):
     return _map_prompt_scores(_get_text_prompt_cos_sim(prompt, text) + .05)
 
 
+def _map_match_score(value: float):
+    def scale_value(v, A, B, C, D):
+        return C + ((D - C) * (v - A) / (B - A))
+    if 90 <= value <= 98:
+        return scale_value(value, 90, 98, 75, 98)
+    elif value < 90:
+        return 75.
+    else:
+        return 98.
+
+
+def get_text_match(text: str):
+
+    index = "dca9094a-413f-4864-ad99-6d27efb3a12e"
+    embedding = e5_local.encode(text)
+
+    knn_query = {
+        "field": "标题_embedding",
+        "query_vector": embedding,
+        "k": 30,
+        "num_candidates": 100
+    }
+
+    # 执行k-NN查询
+    knn_response = es_client.search(
+        index=index, size=5, knn=knn_query
+    )
+
+    # 计算前五个结果的_score平均值
+    scores = [hit['_score'] for hit in knn_response['hits']['hits']]
+    if scores:
+        average_score = sum(scores) / len(scores)
+    else:
+        average_score = 0  # 如果没有结果，分数为0
+
+    return _map_match_score(average_score*100)
+
+
+def _get_es_knn_scores(text_embedding: list[float], year: int) -> list[float]:
+    # 国家级大学生创新创业训练项目
+    index = "65e94e64-e526-4298-981b-8168eb142605"
+    knn_query = {
+        "knn": {
+            "field": "项目名称_embedding",
+            "query_vector": text_embedding,  # 确保 text_embedding 已经正确生成
+            # "k": 30,
+            "num_candidates": 100
+        }
+    }
+
+    filters = {
+        "range": {
+            "立项时间": {
+                "gte": f"{year}-01-01",
+                "lte": f"{year}-12-31",
+            }
+        }
+    }
+
+    query = {
+        "bool": {
+            "must": [
+                knn_query
+            ],
+            "filter": [
+                filters
+            ]
+        }
+    }
+
+    knn_response = es_client.search(
+        index=index,
+        size=50,
+        query=query
+    )
+
+    return [hit['_score'] for hit in knn_response['hits']['hits']]
+
+
+def _get_over_threshold_cnt(scores: list[float], threshold: float):
+    return sum(1 for score in scores if score > threshold)
+
+
+def _get_deltas_avg(series: list[float]):
+    this = series[1:]
+    last = series[:-1]
+    deltas = [vt-vl for vt, vl in zip(this, last)]
+
+    return (sum(deltas) + deltas[-1]) / (len(deltas)+1)
+
+
+def _map_trend_score(value: float):
+    # 检查value是否超出了上界
+    if value >= 20:
+        return 98.0
+    # 检查value是否低于下界
+    elif value <= -15:
+        return 65.0
+    # 处理在区间[-15, 1)内的value
+    elif -15 <= value < 1:
+        # 应用线性变换公式
+        return 1.25 * value + 83.75
+    # 处理在区间[1, 20)内的value
+    elif 1 <= value < 20:
+        # 应用线性变换公式
+        return 0.6842 * value + 84.316
+
+
+def get_text_trend(text: str):
+    th = 0.94
+    embedding = e5_local.encode(text)
+    knn_s_scores = [
+        _get_es_knn_scores(embedding, year)
+        for year in (2021, 2022, 2023)
+    ]
+    cnt_s = [
+        _get_over_threshold_cnt(knn_scores, th)
+        for knn_scores in knn_s_scores
+    ]
+    return _map_trend_score(_get_deltas_avg(cnt_s))
+
+
 @server.get('/embedding/text', response_model=list[float])
 def get_text_embedding(text: str) -> list[float]:
     return e5_local.encode(text).tolist()
@@ -165,4 +289,6 @@ def get_eval_scores(text: str) -> EvalScores:
         novelty_score=get_text_novelty(text),
         academic_score=get_text_academic(text),
         application_score=get_text_application(text),
+        match_score=get_text_match(text),
+        trend_score=get_text_trend(text),
     )

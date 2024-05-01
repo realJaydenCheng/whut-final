@@ -2767,7 +2767,9 @@
                                 "{",
                                 "  novelty_score: 91.8641991201637,",
                                 "  academic_score: 88.73273611068726,",
-                                "  application_score: 88.56754779815674",
+                                "  application_score: 88.56754779815674,",
+                                "  trend_score: 85.0002,",
+                                "  match_score: 93.677182775",
                                 "}",
                                 "",
                                 ""
