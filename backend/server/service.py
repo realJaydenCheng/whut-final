@@ -117,6 +117,9 @@ class CatePercent(BaseModel):
     value: int
 
 
+class coOccurrence(BaseModel):
+    pass
+
 class EsSearchQuery:
 
     def __init__(self, s_request: SearchRequest, database_meta_db: DatabaseMetaData) -> None:
@@ -448,6 +451,91 @@ class EsSearchQuery:
             es_res["aggregations"]["subject_aggs"]["buckets"]
         ]
 
+    def get_co_occurrence_data(self, es_client: Elasticsearch, limit=30, depth=3):
+        keywords: list[str] = self.request.terms
+
+        target = self.database.title_field
+
+        # 查询中心词的共现词，一级共现词
+        word_aggs = {"word_aggs": {
+            "terms": {
+                "field": target,
+                "size": limit * 2
+            }
+        }}
+        rel_words = es_client.search(
+            index=self.database.id, query=self.query, aggs=word_aggs
+        )['aggregations']['word_aggs']['buckets']
+        rel_words = self.filter_stop_words_buckets(rel_words, keywords, limit * 2)
+
+        # 判空与处理
+        if not rel_words:
+            return {
+                "NodeMinMax": [0, 0],
+                "EdgeMinMax": [0, 0],
+                "WordList": [],
+                "linksList": [],
+                "categoriesList": []
+            }
+
+        # 构建共现网络，限制数量
+        nodes_d, edges_d = self._get_occurrence_network_bfs(
+            [str(w["key"]) for w in rel_words], word_aggs,
+            self.query, self.database.id,
+            depth=depth, limit=limit, client=es_client
+        )
+        edges = sorted(edges_d.items(), key=lambda x: x[1], reverse=True)[:limit]
+
+        # 仅保留边引用的节点
+        words_id_set = set()
+        for edge in edges:
+            words_id_set.add(tuple(edge[0])[0])
+            words_id_set.add(tuple(edge[0])[1])
+        nodes = {
+            node[1][0]: (node[0], node[1][1])
+            for node in nodes_d.items()
+            if node[1][0] in words_id_set
+        }
+        del words_id_set
+
+        def _get_smaller_count(_edge: frozenset):
+            _edge = tuple(_edge)
+            cnt0, cnt1 = nodes[_edge[0]][-1], nodes[_edge[1]][-1]
+            return cnt0 if cnt0 < cnt1 else cnt1
+
+
+        return {
+            "NodeMinMax": [
+                min(nodes.values(), key=lambda x: x[-1])[-1],
+                max(nodes.values(), key=lambda x: x[-1])[-1]
+            ],
+            "EdgeMinMax": [edges[-1][-1], edges[0][-1]],
+            "WordList": [
+                {
+                    "id": str(id_),  # 词序号
+                    "name": item[0],
+                    "symbolSize": item[-1],  # 词频
+                    "category": id_  # 与词序号一致
+                } for id_, item in nodes.items()
+            ],
+            "linksList": [
+                {
+                    "source": str(tuple(nodes)[0]),  # 词序号连接形成线
+                    "target": str(tuple(nodes)[1]),
+                    "lineStyle": {
+                        "normal": {
+                            "width": _get_smaller_count(nodes),
+                        },
+                    }
+                } for nodes, width in edges
+            ],
+            "categoriesList": [
+                {
+                    "name": w[0]  # 词名称
+                } for w in nodes.values()
+            ]
+        }
+
     @staticmethod
     def _calculate_time_series(year_agg_buckets: list) -> dict[str, list]:
 
@@ -597,3 +685,92 @@ class EsSearchQuery:
             del bulk_body
             del text_list
             del embedding_list
+
+    def _get_occurrence_network_bfs(
+            self,
+            seed_words: list[str],
+            aggs: dict,
+            query: dict,
+            from_: str,
+            depth: int = 3,
+            limit: int = 30,
+            *
+            client: Elasticsearch,
+    ) -> tuple[dict[str, tuple[int, int]], dict[frozenset[int], int]]:
+        """
+        根据初始词，使用广度优先搜索的方式构建共现网络
+        params:
+            seed_words: list 第一层查询的词
+            aggs: dict 聚合计数的方式，聚合名称需要是“word_aggs”
+            query: dict 基础的筛选条件
+            from_: str 查询的数据库
+            depth: int 广度优先搜索的深度 默认为3层
+            client: elasticsearch client
+        returns: tuple[list, list]
+            nodes: dict 节点映射，映射为【词：（节点id，计数）】
+            edges: dict 边映射，映射为【（节点1id，节点2id）：计数】
+        """
+        nodes, edges = {}, {}
+        words = deepcopy(seed_words)
+        id_cnt = 1
+        while depth > 0:
+            # 广度查询
+            for word in words:
+                _query = self._add_keywords_wildcard([word], query)
+                response = client.search(
+                    index=from_, size=0, aggs=aggs, query=_query,
+                )
+                word_buckets = EsSearchQuery.filter_stop_words_buckets(
+                    response['aggregations']['word_aggs']['buckets'],
+                    [word], limit
+                )
+                # 有节点则id不变；没节点则顺序加id，旧计数设为0
+                id_, old_count = nodes.get(word, (id_cnt, 0))
+                if old_count == 0:  # 新出现的节点
+                    id_cnt += 1
+                    nodes[word] = (int(id_), 10)
+                # 计算id，存储数据
+                _words = []
+                for bucket in word_buckets:
+                    node = str(bucket["key"])
+                    new_count = int(bucket["doc_count"])
+                    # 有节点则id不变；没节点则顺序加id，旧计数设为0
+                    id_, old_count = nodes.get(node, (id_cnt, 0))
+                    if old_count == 0:  # 新出现的节点
+                        id_cnt += 1
+                    if old_count < new_count:
+                        nodes[node] = (int(id_), new_count)
+                    edge = frozenset((id_, nodes[word][0]))
+                    if len(edge) != 2:
+                        continue
+                    if edge not in edges:
+                        edges[edge] = new_count
+                    _words.append(node)
+                words = _words
+            depth -= 1
+        return nodes, edges
+
+
+    def _add_keywords_wildcard(self, keywords: list[str], query_: dict) -> dict:
+        query = deepcopy(query_)
+        wildcard_list = []
+
+        # 清除原查询中的条件，并记录
+        for i, filter_ in enumerate(query["bool"]["filter"]):
+            try:
+                wildcard_list = filter_["bool"]["must"]
+                del query["bool"]["filter"][i]
+                break
+            except KeyError:
+                continue
+
+        # 构建新的查询，在原生查询上添加新关键词
+        wildcard_list.extend(
+            {"wildcard": {f"{self.database.title_field}.like": f"*{keyword}*"}}
+            for keyword in keywords
+        )
+        query["bool"]["filter"].append({
+            "bool": {"must": wildcard_list}
+        })
+
+        return query

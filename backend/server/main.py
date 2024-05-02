@@ -8,7 +8,10 @@ from fastapi import Depends, FastAPI, Cookie, Response, UploadFile, Form
 from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
+from langchain_community.chat_models import QianfanChatEndpoint
+from langchain_core.language_models.chat_models import HumanMessage
 
+from server.gen import GenData, GenInput
 from server.service import (
     CatePercent, EsSearchQuery, SearchRequest, SearchedData, TimeSeriesStat,
     import_data_into_es_from_frame,
@@ -23,6 +26,7 @@ from database.database_meta import (
 dotenv.load_dotenv()
 
 app = FastAPI()
+llm = QianfanChatEndpoint(model="ERNIE-3.5-8K")
 mongo_client = MongoClient(
     host=os.getenv("MONGO_HOST"),
     port=int(os.getenv("MONGO_PORT"))
@@ -229,3 +233,39 @@ def upgrade_database_mapping_add_embedding():
     for meta in metas:
         database_meta_db.upgrade_database_mapping_add_embedding(meta.id)
     return ReturnMessage(message="ok", status=True)
+
+@app.post("/api/gen", response_model=list[str])
+def gen_topics(
+    major: str = Form(),
+    dir: str = Form(""),
+    skills: str = Form(""),
+    lessons: str = Form(""),
+    remark: str = Form(""),
+    keywords: str = Form(""),
+    idea: str = Form(""),
+    ref: UploadFile | None = None,
+):
+    inputs = GenInput(
+        major=major,
+        dir=dir,
+        skills=skills.split("$"),
+        lessons=lessons.split("$"),
+        remark=remark,
+        keywords=keywords.split("$"),
+        idea=idea,
+        ref=ref,
+    )
+    gen = GenData(inputs, es_client)
+    prompt = gen.gen_prompt()
+
+    messages = [HumanMessage(content=prompt)]
+    content: str = llm.invoke(messages).content
+
+    try:
+        return [
+            line.split(". ")[1].strip() for line in
+            content.split("\n")
+        ]
+    except Exception as e:
+        print(e)
+        return gen.search_results
