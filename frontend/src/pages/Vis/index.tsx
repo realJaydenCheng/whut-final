@@ -4,6 +4,7 @@ import { Card, Col, Row } from "antd";
 import useStylesA from './styleA';
 import { useMatch, history, Outlet } from "@umijs/max";
 import SearchLite from "@/components/SearchComplex/SearchLite";
+import SearchComplex from "@/components/SearchComplex";
 
 const Info: React.FC<{
     title: React.ReactNode;
@@ -47,26 +48,26 @@ const Vis = () => {
 
     let match = useMatch(location.pathname);
 
-    const headerCard = <Card bordered={false} style={{ margin: 25, padding: 25 }}>
-
-        <SearchLite
+    const headerCard = <>
+        <SearchComplex
             onSearchAndSubmit={() => { }}
             databaseMetas={[]}
-            onSelectChange={() => { }}
         />
+        <Card bordered={false} style={{ margin: 25, padding: 5 }}>
 
-        <Row style={{ margin: 10}}>
-            <Col sm={8} xs={24}>
-                <Info title="关键词" value="大数据" bordered />
-            </Col>
-            <Col sm={8} xs={24}>
-                <Info title="立项数量" value="3,686 条" bordered />
-            </Col>
-            <Col sm={8} xs={24}>
-                <Info title="同比变化" value=" + 3.14 %" />
-            </Col>
-        </Row>
-    </Card>
+            <Row style={{ margin: 10 }}>
+                <Col sm={8} xs={24}>
+                    <Info title="关键词" value="大数据" bordered />
+                </Col>
+                <Col sm={8} xs={24}>
+                    <Info title="立项数量" value="3,686 条" bordered />
+                </Col>
+                <Col sm={8} xs={24}>
+                    <Info title="同比变化" value=" + 3.14 %" />
+                </Col>
+            </Row>
+        </Card>
+    </>
 
     const handleTabChange = (key: string) => {
         history.push(`/vis/${key}`);

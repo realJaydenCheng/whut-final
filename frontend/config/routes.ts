@@ -29,7 +29,7 @@ export default [
   {
     path: '/vis',
     name: '可视分析',
-    icon: 'lineChart',
+    icon: 'barChart',
     component: './Vis',
     routes: [
       {

@@ -1,12 +1,8 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Area, Bar, Column, Pie, Treemap, WordCloud } from '@ant-design/charts';
-import { Col, Progress, Row, Tooltip } from 'antd';
-import numeral from 'numeral';
-import type { DataItem } from './data.d';
-import useStylesB from './style.B';
+import { WordCloud } from '@ant-design/charts';
+import { Col, Row, Tooltip } from 'antd';
 
-import { ChartCard, Field } from './Charts';
-import Trend from './Trend';
+import { ChartCard } from './Charts';
 import MicroTrends from './MicroTrends';
 
 const topColResponsiveProps = {

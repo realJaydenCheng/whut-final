@@ -101,7 +101,6 @@ const SearchPage: React.FC<{}> = () => {
             columns={columns}
             showHeader
             style={{marginTop: 20}}
-            
         />
 
 

@@ -1,8 +1,6 @@
 import SearchLite from "@/components/SearchComplex/SearchLite";
 import { Gauge, Radar, Tiny } from "@ant-design/charts";
 import { PageContainer, ProCard, StatisticCard } from "@ant-design/pro-components"
-import { Statistic } from "antd"
-import { useState } from "react";
 
 const Eval = () => {
 
@@ -31,8 +29,14 @@ const Eval = () => {
             target: score,
             total: 100,
             name: 'score',
+            thresholds: [65, 80, 90, 100],
         }}
         autoFit={true}
+        scale={{
+            color: {
+                range: ['#913700', '#776f00', '#5ea600', '#44dd00'],
+            },
+        }}
         style={{
             textContent: (target: number, total: number) => "良好",
         }}
@@ -75,11 +79,13 @@ const Eval = () => {
 
     const subCard = (score: number, label: string, description: string) => {
 
+        const bgColor = "#E8EFF5"
+
         const subRing = <Tiny.Ring
             percent={score / 100}
             width={100}
             height={100}
-            color={['#E8EFF5', '#66AFF4']}
+            color={[bgColor, '#66AFF4']}
             annotations={[
                 {
                     type: 'text',
