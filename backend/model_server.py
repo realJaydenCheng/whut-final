@@ -136,9 +136,9 @@ def _map_match_score(value: float):
     def scale_value(v, A, B, C, D):
         return C + ((D - C) * (v - A) / (B - A))
     if 90 <= value <= 98:
-        return scale_value(value, 90, 98, 75, 98)
-    elif value < 90:
-        return 75.
+        return scale_value(value, 88, 98, 65, 98)
+    elif value < 88:
+        return 65.
     else:
         return 98.
 

@@ -4,16 +4,18 @@ import functools
 from typing import Annotated
 
 import dotenv
-from fastapi import Depends, FastAPI, Cookie, Response, UploadFile, Form
+from fastapi import FastAPI, Cookie, Response, UploadFile, Form
 from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
 from langchain_community.chat_models import QianfanChatEndpoint
 from langchain_core.language_models.chat_models import HumanMessage
+import requests
 
 from server.gen import GenData, GenInput
 from server.service import (
-    CatePercent, EsSearchQuery, SearchRequest, SearchedData, TimeSeriesStat,
+    CatePercent, EsSearchQuery, EvalDetails, SearchRequest, 
+    SearchedData, TimeSeriesStat, EvalScores,
     import_data_into_es_from_frame,
     transform_files_into_data_frame,
 )
@@ -233,6 +235,14 @@ def upgrade_database_mapping_add_embedding():
     for meta in metas:
         database_meta_db.upgrade_database_mapping_add_embedding(meta.id)
     return ReturnMessage(message="ok", status=True)
+
+@app.get("/api/eval", response_model=EvalDetails)
+def get_eval_result(text: str):
+    scores = EvalScores(
+        **requests.get(
+            "http://localhost:8002/eval/scores?text=" + text
+    ).json())
+    return EvalDetails.get_details_from(scores)
 
 @app.post("/api/gen", response_model=list[str])
 def gen_topics(

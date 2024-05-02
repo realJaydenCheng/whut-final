@@ -2813,6 +2813,44 @@
         {
             "language": "typescript",
             "source": [
+                "\r\nimport axios from 'axios';\r\n\r\naxios.get(\r\n    'http://127.0.0.1:8000/api/eval?text=少数民族历史文化名城语言景观研究调查',\r\n).then((response) => {\r\n    console.log(response.data);\r\n});"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{",
+                                "  novelty_score: 91.8641991201637,",
+                                "  academic_score: 88.73273611068726,",
+                                "  application_score: 88.56754779815674,",
+                                "  trend_score: 85.0002,",
+                                "  match_score: 93.677182775,",
+                                "  main_score: 89.56837316080154,",
+                                "  main_describe: '良好',",
+                                "  novelty_describe: '该选题新颖性很好，展示了独特的研究方向和未被广泛探讨的问题。',",
+                                "  novelty_color: '#4466ff',",
+                                "  match_describe: '该选题与相关资助指南高度匹配，完全符合当前研究和发展的方向。',",
+                                "  match_color: '#4466ff',",
+                                "  trend_describe: '该选题跟随相关领域立项的现有趋势，保持行业标准。',",
+                                "  trend_color: '#6581FD',",
+                                "  application_describe: '该选题具有较好的应用前景，可能在特定领域或市场中得到实用化。',",
+                                "  application_color: '#6581FD',",
+                                "  academic_describe: '该选题学术价值较高，可为学科领域增添有价值的见解和数据。',",
+                                "  academic_color: '#6581FD'",
+                                "}",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
                 ""
             ],
             "outputs": []

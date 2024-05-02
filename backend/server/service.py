@@ -120,6 +120,116 @@ class CatePercent(BaseModel):
 class coOccurrence(BaseModel):
     pass
 
+
+class EvalScores(BaseModel):
+    novelty_score: float
+    academic_score: float
+    application_score: float
+    trend_score: float
+    match_score: float
+
+
+class EvalDetails(EvalScores):
+    main_score: float | int
+    main_describe: str
+    novelty_describe: str
+    novelty_color: str
+    match_describe: str
+    match_color: str
+    trend_describe: str
+    trend_color: str
+    application_describe: str
+    application_color: str
+    academic_describe: str
+    academic_color: str
+
+    @staticmethod
+    def map_score_to_color(score: float):
+        if score < 65:
+            return '#a6b8f9'
+        elif score < 80:
+            return '#869dfb'
+        elif score < 90:
+            return '#6581FD'
+        else:
+            return '#4466ff'
+
+    @staticmethod
+    def map_main_describe(score: float):
+        if score < 65:
+            return '建议考虑'
+        elif score < 80:
+            return '一般'
+        elif score < 90:
+            return '良好'
+        else:
+            return '很好'
+
+    @staticmethod
+    def map_describe(score: float, category: str):
+        descriptions = {
+            'novelty': [
+                '该选题新颖性较低，与现有的研究项目内容重复较多，建议重新考虑其独特性。',
+                '该选题新颖性一般，大部分研究内容与已经立项的项目相似。',
+                '该选题新颖性良好，提出了一些新的观点或方法，但在已立项的项目中已有初步的探讨。',
+                '该选题新颖性很好，展示了独特的研究方向和未被广泛探讨的问题。'
+            ],
+            'academic': [
+                '该选题学术价值较低，可能不足以支撑一项有影响力的学术研究。',
+                '该选题学术价值一般，对学科的贡献有限。',
+                '该选题学术价值较高，可为学科领域增添有价值的见解和数据。',
+                '该选题学术价值很高，能够显著推动学科发展，为学术界提供重要的理论或实证贡献。'
+            ],
+            'application': [
+                '该选题应用价值较低，实际应用中可能面临较大的障碍或风险。',
+                '该选题应用价值一般，实用性和市场潜力有限，或存在一定的转换困难。',
+                '该选题具有较好的应用前景，可能在特定领域或市场中得到实用化。',
+                '该选题应用价值很高，预期能在工业界和行业应用中产生显著效益和广泛影响。'
+            ],
+            'match': [
+                '该选题与当前资助指南匹配度较低，可能需要调整以更好地符合指导方针。',
+                '该选题与相关资助指南匹配度一般，存在部分偏差，可能会影响到立项成功率。',
+                '该选题与相关资助指南较好地匹配，部分符合研究方向。',
+                '该选题与相关资助指南高度匹配，完全符合当前研究和发展的方向。'
+            ],
+            'trend': [
+                '该选题可能落后于当前基金立项的趋势，需要更新以增大立项概率。',
+                '该选题在近年的立项趋势中表现平平，未能显著突出。',
+                '该选题跟随相关领域立项的现有趋势，保持行业标准。',
+                '该选题处于科研领域的前沿，紧跟最新趋势，有望引领未来发展。'
+            ]
+        }
+        index = 0 if score < 65 else 1 if score < 80 else 2 if score < 90 else 3
+        return descriptions[category][index]
+
+    @staticmethod
+    def get_details_from(scores: EvalScores) -> "EvalDetails":
+        main_score = (scores.novelty_score + scores.academic_score +
+                      scores.application_score + scores.trend_score + scores.match_score) / 5
+        return EvalDetails(
+            main_score=main_score,
+            main_describe=EvalDetails.map_main_describe(main_score),
+            novelty_describe=EvalDetails.map_describe(
+                scores.novelty_score, 'novelty'),
+            novelty_color=EvalDetails.map_score_to_color(scores.novelty_score),
+            match_describe=EvalDetails.map_describe(
+                scores.match_score, 'match'),
+            match_color=EvalDetails.map_score_to_color(scores.match_score),
+            trend_describe=EvalDetails.map_describe(
+                scores.trend_score, 'trend'),
+            trend_color=EvalDetails.map_score_to_color(scores.trend_score),
+            application_describe=EvalDetails.map_describe(
+                scores.application_score, 'application'),
+            application_color=EvalDetails.map_score_to_color(
+                scores.application_score),
+            academic_describe=EvalDetails.map_describe(
+                scores.academic_score, 'academic'),
+            academic_color=EvalDetails.map_score_to_color(
+                scores.academic_score),
+            **scores.model_dump(),
+        )
+
+
 class EsSearchQuery:
 
     def __init__(self, s_request: SearchRequest, database_meta_db: DatabaseMetaData) -> None:
@@ -466,7 +576,8 @@ class EsSearchQuery:
         rel_words = es_client.search(
             index=self.database.id, query=self.query, aggs=word_aggs
         )['aggregations']['word_aggs']['buckets']
-        rel_words = self.filter_stop_words_buckets(rel_words, keywords, limit * 2)
+        rel_words = self.filter_stop_words_buckets(
+            rel_words, keywords, limit * 2)
 
         # 判空与处理
         if not rel_words:
@@ -484,7 +595,8 @@ class EsSearchQuery:
             self.query, self.database.id,
             depth=depth, limit=limit, client=es_client
         )
-        edges = sorted(edges_d.items(), key=lambda x: x[1], reverse=True)[:limit]
+        edges = sorted(edges_d.items(), key=lambda x: x[1], reverse=True)[
+            :limit]
 
         # 仅保留边引用的节点
         words_id_set = set()
@@ -502,7 +614,6 @@ class EsSearchQuery:
             _edge = tuple(_edge)
             cnt0, cnt1 = nodes[_edge[0]][-1], nodes[_edge[1]][-1]
             return cnt0 if cnt0 < cnt1 else cnt1
-
 
         return {
             "NodeMinMax": [
@@ -749,7 +860,6 @@ class EsSearchQuery:
                 words = _words
             depth -= 1
         return nodes, edges
-
 
     def _add_keywords_wildcard(self, keywords: list[str], query_: dict) -> dict:
         query = deepcopy(query_)
