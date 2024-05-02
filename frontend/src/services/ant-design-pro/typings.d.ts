@@ -108,12 +108,53 @@ declare namespace API {
     db_id: string;
   };
 
+  type EvalDetails = {
+    /** Novelty Score */
+    novelty_score: number;
+    /** Academic Score */
+    academic_score: number;
+    /** Application Score */
+    application_score: number;
+    /** Trend Score */
+    trend_score: number;
+    /** Match Score */
+    match_score: number;
+    /** Main Score */
+    main_score: number | number;
+    /** Main Describe */
+    main_describe: string;
+    /** Novelty Describe */
+    novelty_describe: string;
+    /** Novelty Color */
+    novelty_color: string;
+    /** Match Describe */
+    match_describe: string;
+    /** Match Color */
+    match_color: string;
+    /** Trend Describe */
+    trend_describe: string;
+    /** Trend Color */
+    trend_color: string;
+    /** Application Describe */
+    application_describe: string;
+    /** Application Color */
+    application_color: string;
+    /** Academic Describe */
+    academic_describe: string;
+    /** Academic Color */
+    academic_color: string;
+  };
+
   type getCategoriesPercentageApiChartsCategoriesPostParams = {
     field: string;
   };
 
   type getDbDetailApiDbDetailGetParams = {
     db_id: string;
+  };
+
+  type getEvalResultApiEvalGetParams = {
+    text: string;
   };
 
   type HTTPValidationError = {

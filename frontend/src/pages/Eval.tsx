@@ -1,32 +1,54 @@
 import SearchLite from "@/components/SearchComplex/SearchLite";
+import { getEvalResultApiEvalGet } from "@/services/ant-design-pro/getEvalResultApiEvalGet";
 import { Gauge, Radar, Tiny } from "@ant-design/charts";
 import { PageContainer, ProCard, StatisticCard } from "@ant-design/pro-components"
+import { useRequest } from "@umijs/max";
+import { useState } from "react";
+
 
 const Eval = () => {
 
-    const score = 95;
-    const data = {
-        "新颖性": 95,
-        "应用价值": 98,
-        "学术价值": 92,
-        "指南匹配度": 96,
-        "趋势分": 94,
-    }
-    const description = {
-        "新颖性": "新颖性评价指的是产品的可视化表现，产品的可视化表现越高，产品越新颖。",
-        "应用价值": "应用价值评价指的是产品的应用价值，产品的应用价值越高，产品越富有应用价值。",
-        "学术价值": "学术价值评价指的是产品的学术价值，产品的学术价值越高，产品越富有学术价值。",
-        "指南匹配度": "If you need the index of the found element in the array, use findIndex().",
-        "趋势分": "配置路由组件的包装组件，通过包装组件可以为当前的路由组件组合进更多的功能。",
-    }
+    const [scoreInfo, setScoreInfo] = useState<API.EvalDetails>({});
+    const [searchText, setSearchText] = useState<string>("");
 
-    const dataUsing = Object.entries(data).map(
-        (e) => ({ dim: e[0], score: e[1], description: description[e[0]] })
+    const { loading, run: getScore } = useRequest<API.EvalDetails>(
+        (text: string) => {
+            return getEvalResultApiEvalGet({ text });
+        },
+        {
+            manual: true,
+            onSuccess: (data) => {
+                setScoreInfo(data);
+            }
+        }
     )
+
+    const radarData = [
+        {
+            dim: "新颖性",
+            score: scoreInfo?.novelty_score || 0,
+        },
+        {
+            dim: "应用价值",
+            score: scoreInfo?.application_score || 0,
+        },
+        {
+            dim: "学术价值",
+            score: scoreInfo?.academic_score || 0,
+        },
+        {
+            dim: "趋势表现",
+            score: scoreInfo?.trend_score || 0,
+        },
+        {
+            dim: "指标匹配度",
+            score: scoreInfo?.main_score || 0,
+        },
+    ]
 
     const mainGauge = <Gauge
         data={{
-            target: score,
+            target: scoreInfo?.main_score || 0,
             total: 100,
             name: 'score',
             thresholds: [65, 80, 90, 100],
@@ -38,14 +60,16 @@ const Eval = () => {
             },
         }}
         style={{
-            textContent: (target: number, total: number) => "良好",
+            textContent: () => { return scoreInfo?.main_describe || " " },
         }}
+        loading={loading}
     />
 
     const mainRadar = <Radar
-        data={dataUsing}
+        data={radarData}
         xField="dim"
         yField="score"
+        loading={loading}
         area={{
             style: {
                 fillOpacity: 0.2,
@@ -67,7 +91,7 @@ const Eval = () => {
                 labelFontSize: 24,
                 labelFontWeight: 700,
                 labelSpacing: 10,
-                labelFormatter: (label: string, index: number) => `${label}\n${data[label]}`
+                labelFormatter: (label: string, index: number) => `${label}\n${radarData[index].score.toFixed(2)}`
             },
             y: {
                 gridAreaFill: 'rgba(0, 0, 0, 0.04)',
@@ -77,20 +101,20 @@ const Eval = () => {
         }}
     />
 
-    const subCard = (score: number, label: string, description: string) => {
+    const subCard = (score?: number, label?: string, description?: string, color?: string) => {
 
         const bgColor = "#E8EFF5"
 
         const subRing = <Tiny.Ring
-            percent={score / 100}
+            percent={score ? score / 100 : 0}
             width={100}
             height={100}
-            color={[bgColor, '#66AFF4']}
+            color={[bgColor, color || "blue"]}
             annotations={[
                 {
                     type: 'text',
                     style: {
-                        text: score.toFixed(2),
+                        text: score?.toFixed(2) || " ",
                         x: '50%',
                         y: '50%',
                         textAlign: 'center',
@@ -101,29 +125,29 @@ const Eval = () => {
         />
         return <StatisticCard
             statistic={{
-                title: label,
-                value: score,
+                title: label || " ",
+                value: score?.toFixed(2) || 0,
                 suffix: '分',
-                description
+                description: description || " ",
             }}
-            loading={false}
+            loading={loading}
             chartPlacement="left"
             chart={subRing}
-            key={label}
+            key={label || " "}
         />
     }
 
     return <PageContainer>
 
         <SearchLite
-            onSearchAndSubmit={() => { }}
+            onSearchAndSubmit={(searchValue) => { getScore(searchValue); setSearchText(searchValue); }}
             databaseMetas={[]}
             onSelectChange={() => { }}
         />
 
         <ProCard
-            title="主题：基于深度学习的自然语言处理小系统"
-            extra="数据库：国家大创数据库"
+            title={"选题：" + searchText}
+            extra="数据库：国家级大学生创新创业训练项目"
             split='horizontal'
             headerBordered
             bordered
@@ -132,17 +156,17 @@ const Eval = () => {
 
                 <StatisticCard
                     statistic={{
-                        value: score,
+                        value: scoreInfo?.main_score?.toFixed(2) || 0,
                         suffix: '分',
                         title: "总体评分"
                     }}
-                    loading={false}
+                    loading={loading}
                     chart={mainGauge}
                 />
 
                 <StatisticCard
                     title="维度评分"
-                    loading={false}
+                    loading={loading}
                     chart={mainRadar}
                 />
 
@@ -151,20 +175,43 @@ const Eval = () => {
             <ProCard split="horizontal">
                 <ProCard split="vertical">
 
-                    {
-                        dataUsing.slice(0, 3).map((item) => {
-                            return subCard(item.score, item.dim, item.description);
-                        })
-                    }
+                    {subCard(
+                        scoreInfo?.novelty_score,
+                        "新颖性",
+                        scoreInfo?.novelty_describe,
+                        scoreInfo?.novelty_color,
+                    )}
+
+                    {subCard(
+                        scoreInfo?.application_score,
+                        "应用价值",
+                        scoreInfo?.application_describe,
+                        scoreInfo?.application_color,
+                    )}
+
+                    {subCard(
+                        scoreInfo?.academic_score,
+                        "学术价值",
+                        scoreInfo?.academic_describe,
+                        scoreInfo?.academic_color,
+                    )}
 
                 </ProCard>
                 <ProCard split="vertical">
 
-                    {
-                        dataUsing.slice(3, 5).map((item) => {
-                            return subCard(item.score, item.dim, item.description);
-                        })
-                    }
+                    {subCard(
+                        scoreInfo?.match_score,
+                        "指南匹配度",
+                        scoreInfo?.match_describe,
+                        scoreInfo?.match_color,
+                    )}
+
+                    {subCard(
+                        scoreInfo?.trend_score,
+                        "趋势表现",
+                        scoreInfo?.trend_describe,
+                        scoreInfo?.trend_color,
+                    )}
 
                     <ProCard />
 

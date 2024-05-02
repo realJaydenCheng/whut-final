@@ -8,6 +8,7 @@ import * as embedDbTextApiDbEmbeddingGet from './embedDbTextApiDbEmbeddingGet';
 import * as genTopicsApiGenPost from './genTopicsApiGenPost';
 import * as getCategoriesPercentageApiChartsCategoriesPost from './getCategoriesPercentageApiChartsCategoriesPost';
 import * as getDbDetailApiDbDetailGet from './getDbDetailApiDbDetailGet';
+import * as getEvalResultApiEvalGet from './getEvalResultApiEvalGet';
 import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiChartsViceTrendsHotPost';
 import * as getNewTrendsApiChartsViceTrendsNewPost from './getNewTrendsApiChartsViceTrendsNewPost';
 import * as getSearchResultApiSearchPost from './getSearchResultApiSearchPost';
@@ -38,5 +39,6 @@ export default {
   getWordsCloudApiChartsWordsCloudPost,
   getCategoriesPercentageApiChartsCategoriesPost,
   upgradeDatabaseMappingAddEmbeddingApiMaintenanceUpgradeDatabaseMappingAddEmbeddingGet,
+  getEvalResultApiEvalGet,
   genTopicsApiGenPost,
 };
