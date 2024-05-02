@@ -24,6 +24,20 @@ interface SearchLiteProps {
     onSelectChange: (value: string) => void;
 }
 
+const dbDetail: API.DatabaseMetaOutput = {
+    id: "65e94e64-e526-4298-981b-8168eb142605",
+    name: "国家级大学生创新创业训练项目",
+    user_id: "",
+    create_time: "",
+    org_name: "",
+    title_field: "",
+    time_field: "",
+    cate_fields: [],
+    id_fields: [],
+    text_fields: [],
+    user_name: ""
+}
+
 const SearchLite: React.FC<SearchLiteProps> = (props) => {
 
     const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
@@ -37,13 +51,14 @@ const SearchLite: React.FC<SearchLiteProps> = (props) => {
     });
 
     useEffect(() => {
-        if (props.databaseMetas.length > 0) {
-            setSelectedDbId(props.databaseMetas[0].id);
-            setSelectOptions(props.databaseMetas.map(
-                (meta) => ({ label: meta.name, value: meta.id })
-            ));
-            fetchDbDetails({ db_id: props.databaseMetas[0].id });
-        }
+        const databaseMetas = props.databaseMetas.length !== 0 ? props.databaseMetas : [dbDetail];
+
+        setSelectedDbId(databaseMetas[0].id);
+        setSelectOptions(databaseMetas.map(
+            (meta) => ({ label: meta.name, value: meta.id })
+        ));
+        fetchDbDetails({ db_id: databaseMetas[0].id });
+
     }, [props.databaseMetas]);
 
     const searchToSubmit = (value: string, event: tEvent, info: tInfo) => {
@@ -51,8 +66,8 @@ const SearchLite: React.FC<SearchLiteProps> = (props) => {
         const searchRequest: API.SearchRequest = {
             terms: formData["terms"] ? (formData["terms"] as string).split(" ") : null,
             db_id: formData["db_id"],
-            filters:  null,
-            sub_terms:  null,
+            filters: null,
+            sub_terms: null,
             date_range: null,
             page: null,
             page_size: null,

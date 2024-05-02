@@ -5,9 +5,7 @@ import TagSelect from "./TagSelect";
 import { useRequest } from "@umijs/max";
 import { getDbDetailApiDbDetailGet } from "@/services/ant-design-pro/getDbDetailApiDbDetailGet";
 import FormItem from "antd/es/form/FormItem";
-import { ProFormSelect, ProFormSlider, ProFormText } from "@ant-design/pro-components";
-import { listDbApiDbListGet } from "@/services/ant-design-pro/listDbApiDbListGet";
-import { from } from "form-data";
+
 
 type tEvent = React.ChangeEvent<HTMLInputElement> |
     React.MouseEvent<HTMLElement> |
@@ -27,6 +25,21 @@ interface SearchComplexProps {
     databaseMetas: API.DatabaseMetaOutput[]
 }
 
+const dbDetail: API.DatabaseMetaOutput = {
+    id: "65e94e64-e526-4298-981b-8168eb142605",
+    name: "国家级大学生创新创业训练项目",
+    user_id: "",
+    create_time: "",
+    org_name: "",
+    title_field: "",
+    time_field: "",
+    cate_fields: [],
+    id_fields: [],
+    text_fields: [],
+    user_name: ""
+}
+
+
 const SearchComplex: React.FC<SearchComplexProps> = (props) => {
 
     const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
@@ -42,13 +55,14 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
     });
 
     useEffect(() => {
-        if (props.databaseMetas.length > 0) {
-            setSelectedDbId(props.databaseMetas[0].id);
-            setSelectOptions(props.databaseMetas.map(
-                (meta) => ({ label: meta.name, value: meta.id })
-            ));
-            fetchDbDetails({ db_id: selectedDbId });
-        }
+        const databaseMetas = props.databaseMetas.length !== 0 ? props.databaseMetas : [dbDetail];
+
+        setSelectedDbId(databaseMetas[0].id);
+        setSelectOptions(databaseMetas.map(
+            (meta) => ({ label: meta.name, value: meta.id })
+        ));
+        fetchDbDetails({ db_id: databaseMetas[0].id });
+
     }, [props.databaseMetas]);
 
     const handleDbSelectChange = (value: string) => {
