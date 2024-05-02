@@ -2782,7 +2782,7 @@
         {
             "language": "typescript",
             "source": [
-                "import axios from 'axios';\r\nimport FormData from 'form-data';\r\nimport fs from 'fs';\r\n\r\nconst formData = new FormData();\r\n// formData.append('ref', fs.createReadStream('./test-r.csv'));\r\nformData.append('major', \"信息管理和信息系统\");\r\nformData.append('dir', \"自然语言处理\");\r\nformData.append('remark', \"游戏异常玩家识别高维数据可视化系统\\n基于RNN和Transformer的Seq2seq对联生成模型\");\r\nformData.append('idea', \"输入您感兴趣的关键词或学科，一键获取，共现网络，热点关系图，多角度评估分析，助您准确衡量选题价值\");\r\nformData.append('skills', [\"python\", \"typescript\", \"深度学习\", \"数据可视化\"].join(\"$\"));\r\nformData.append('lessons', [\"企业数据挖掘\", \"面向对象程序设计\", \"管理信息系统\"].join(\"$\"));\r\nformData.append('keywords', [\"科研项目选题\", \"人工智能\", \"OLAP\", \"可视分析\", \"辅助系统\"].join(\"$\"));\r\n\r\n\r\n// 创建临时数据库\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/gen',\r\n    formData,\r\n    {\r\n        withCredentials: true,\r\n        headers: {\r\n            Cookie: 'user_id=13657290357; user_name=Test00; user_privilege=0',\r\n        }\r\n    }\r\n).then(response => {\r\n    console.log(response.data);\r\n});"
+                "import axios from 'axios';\r\nimport FormData from 'form-data';\r\nimport fs from 'fs';\r\n\r\nconst formData = new FormData();\r\n// formData.append('ref', fs.createReadStream('./test-r.csv'));\r\nformData.append('major', \"信息管理和信息系统\");\r\nformData.append('dir', \"自然语言处理\");\r\nformData.append('remark', \"游戏异常玩家识别高维数据可视化系统\\n基于RNN和Transformer的Seq2seq对联生成模型\");\r\nformData.append('idea', \"输入用户感兴趣的关键词或学科，一键获取，共现网络，热点关系图，多角度评估分析，助您准确衡量选题价值\");\r\n[\"python\", \"typescript\", \"深度学习\", \"数据可视化\"].forEach((e)=> {formData.append('skills', e)});\r\n[\"企业数据挖掘\", \"面向对象程序设计\", \"管理信息系统\"].forEach((e)=> {formData.append('lessons', e)});\r\n[\"科研项目选题\", \"人工智能\", \"OLAP\", \"可视分析\", \"辅助系统\"].forEach((e)=> {formData.append('keywords', e)});\r\n\r\n\r\n// 创建临时数据库\r\naxios.post(\r\n    'http://127.0.0.1:8000/api/gen',\r\n    formData,\r\n    {\r\n        withCredentials: true,\r\n        headers: {\r\n            Cookie: 'user_id=13657290357; user_name=Test00; user_privilege=0',\r\n        }\r\n    }\r\n).then(response => {\r\n    console.log(response.data);\r\n});"
             ],
             "outputs": [
                 {
@@ -2791,16 +2791,16 @@
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
                                 "[",
-                                "  '基于人工智能的多维度数据可视化分析系统',",
-                                "  'OLAP技术驱动的科研数据分析与辅助决策系统',",
-                                "  '可视分析在人工智能科研项目选题中的应用研究',",
-                                "  '基于深度学习的科研数据热点关系图自动生成系统',",
-                                "  '基于Transformer的科研选题共现网络构建与分析',",
-                                "  '基于深度学习的科研选题多角度评估分析系统',",
-                                "  '人工智能辅助的科研选题价值预测与推荐系统',",
-                                "  '基于深度学习的科研项目选题趋势预测与分析',",
-                                "  '基于自然语言处理的科研选题文本挖掘与情感分析系统',",
-                                "  '基于深度学习的科研项目选题关键词自动生成系统'",
+                                "  '基于自然语言处理的科研项目选题智能推荐系统',",
+                                "  'OLAP技术在科研选题价值评估中的可视分析应用',",
+                                "  '基于深度学习的科研选题热点关系图自动生成系统',",
+                                "  '人工智能辅助的科研项目选题多角度评估分析平台',",
+                                "  '基于知识图谱的科研选题价值预测与推荐系统',",
+                                "  '面向科研人员的选题决策支持系统设计与实现',",
+                                "  '基于文本挖掘的科研选题趋势分析与预测模型',",
+                                "  '基于深度学习的科研选题关键词关联分析系统',",
+                                "  '基于用户兴趣的科研选题智能匹配与推荐算法研究',",
+                                "  '基于深度学习的科研项目选题价值评估模型研究'",
                                 "]",
                                 "",
                                 ""

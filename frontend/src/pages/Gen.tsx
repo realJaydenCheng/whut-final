@@ -6,10 +6,52 @@ import {
 import { useRef, useState } from "react";
 import TagGroup from "./Database/tagGroup";
 import { Card, Modal } from "antd";
+import { BodyGenTopicsApiGenPost, genTopicsApiGenPost } from "@/services/genService";
+import { useRequest } from "@umijs/max";
+
+
+
+const ConfirmCards = (data: BodyGenTopicsApiGenPost) => {
+    return <>
+
+        <Card
+            title="个人信息"
+        >
+            <p><b>专业</b>: {data.major}</p>
+            <p><b>研究方向</b>: {data.dir}</p>
+            <p><b>技能与兴趣领域</b>: {data.skills?.join("、")}</p>
+            <p><b>已修相关课程</b>: {data.lessons?.join("、")}</p>
+            <p><b>相关经历</b>:</p>
+            {data.remark?.split("\n").map((s) => { return <span key={s}>{s}<br /></span> })}
+
+        </Card>
+
+        <Card
+            title="项目想法"
+            style={{ marginTop: 20, marginBottom: 20 }}
+        >
+            <p><b>关键词</b>: {data.keywords?.join("、")}</p>
+            <p><b>初步思路</b>: </p>
+            <p>{data.idea}</p>
+            <p><b>参考资料</b>: {Array.isArray(data.ref) ? data.ref[0].originFileObj.name : null}</p>
+        </Card>
+
+    </>
+}
 
 const Gen = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [formData, setFormData] = useState<BodyGenTopicsApiGenPost>({ major: "", })
+
+    const { run: runGen, loading, data: topics } = useRequest(
+        (body: BodyGenTopicsApiGenPost) => {
+            return genTopicsApiGenPost(body);
+        },
+        {
+            manual: true,
+        }
+    )
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -23,20 +65,37 @@ const Gen = () => {
         setIsModalOpen(false);
     };
 
+    const handleFinishStep = async (values: BodyGenTopicsApiGenPost) => {
+        const data = {
+            ...formData,
+            ...values,
+        };
+        setFormData(data);
+        return true;
+    }
+
+    const handleSubmit = async (values: BodyGenTopicsApiGenPost) => {
+        const data = {
+            ...formData,
+            ref: Array.isArray(formData.ref) ? formData.ref[0].originFileObj : null,
+        }
+        showModal();
+        runGen(data);
+    }
 
     return <PageContainer>
 
-        <StepsForm
-            onFinish={async (v) => { console.log(v); return showModal() }}
+        <StepsForm<BodyGenTopicsApiGenPost>
+            onFinish={handleSubmit}
         >
 
-            <StepsForm.StepForm
+            <StepsForm.StepForm<BodyGenTopicsApiGenPost>
                 name="userInfo"
                 title="个人信息"
                 stepProps={{
                     description: '输入你个人的相关信息',
                 }}
-                onFinish={async () => { return true; }}
+                onFinish={handleFinishStep}
             >
                 <ProFormText
                     name="major"
@@ -79,13 +138,13 @@ const Gen = () => {
 
             </StepsForm.StepForm>
 
-            <StepsForm.StepForm
+            <StepsForm.StepForm<BodyGenTopicsApiGenPost>
                 name="projectIdea"
                 title="头脑风暴"
                 stepProps={{
                     description: '填入关于项目的idea',
                 }}
-                onFinish={async () => { return true }}
+                onFinish={handleFinishStep}
             >
 
                 <ProForm.Item
@@ -115,15 +174,18 @@ const Gen = () => {
                 }}
             >
 
-
+                {<ConfirmCards {...formData} />}
 
             </StepsForm.StepForm>
 
         </StepsForm>
 
         <Modal title="选题结果" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-            <Card loading={true}>
-
+            {loading ? <p>正在生成,，请稍等...</p> : <p>已生成 {topics?.length} 个选题</p>}
+            <Card loading={loading}>
+                {topics?.map((topic) => {
+                    return <p key={topic}>{topic}</p>
+                })}
             </Card>
         </Modal>
 

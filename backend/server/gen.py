@@ -49,7 +49,7 @@ class GenData:
         user_info = f"主修 {self.major}; " if self.major else ""
         user_info += f"{self.dir} 方向; " if self.dir else ""
         user_info += f"熟悉 {','.join(self.skills)}; " if self.skills else ""
-        user_info += f"已完成 {','.join(self.skills)} 的学习; " if self.skills else ""
+        user_info += f"已完成 {','.join(self.lessons)} 的学习; " if self.lessons else ""
 
         prompt += (user_info + "\n") if user_info else ""
 

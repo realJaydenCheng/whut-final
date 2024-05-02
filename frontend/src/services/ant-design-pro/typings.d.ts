@@ -1,4 +1,23 @@
 declare namespace API {
+  type BodyGenTopicsApiGenPost = {
+    /** Major */
+    major: string;
+    /** Dir */
+    dir?: string;
+    /** Skills */
+    skills?: string[];
+    /** Lessons */
+    lessons?: string[];
+    /** Remark */
+    remark?: string;
+    /** Keywords */
+    keywords?: string[];
+    /** Idea */
+    idea?: string;
+    /** Ref */
+    ref?: string | null;
+  };
+
   type BodyImportDataApiDbImportPost = {
     /** Data Files */
     data_files: string[] | string;

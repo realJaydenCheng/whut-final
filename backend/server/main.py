@@ -238,20 +238,20 @@ def upgrade_database_mapping_add_embedding():
 def gen_topics(
     major: str = Form(),
     dir: str = Form(""),
-    skills: str = Form(""),
-    lessons: str = Form(""),
+    skills: list[str] = Form([]),
+    lessons: list[str] = Form([]),
     remark: str = Form(""),
-    keywords: str = Form(""),
+    keywords: list[str] = Form([]),
     idea: str = Form(""),
     ref: UploadFile | None = None,
 ):
     inputs = GenInput(
         major=major,
         dir=dir,
-        skills=skills.split("$"),
-        lessons=lessons.split("$"),
+        skills=skills,
+        lessons=lessons,
         remark=remark,
-        keywords=keywords.split("$"),
+        keywords=keywords,
         idea=idea,
         ref=ref,
     )

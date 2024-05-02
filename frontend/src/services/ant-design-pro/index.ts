@@ -5,6 +5,7 @@
 import * as createDbApiDbCreatePost from './createDbApiDbCreatePost';
 import * as deleteDbApiDbDeletePost from './deleteDbApiDbDeletePost';
 import * as embedDbTextApiDbEmbeddingGet from './embedDbTextApiDbEmbeddingGet';
+import * as genTopicsApiGenPost from './genTopicsApiGenPost';
 import * as getCategoriesPercentageApiChartsCategoriesPost from './getCategoriesPercentageApiChartsCategoriesPost';
 import * as getDbDetailApiDbDetailGet from './getDbDetailApiDbDetailGet';
 import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiChartsViceTrendsHotPost';
@@ -37,4 +38,5 @@ export default {
   getWordsCloudApiChartsWordsCloudPost,
   getCategoriesPercentageApiChartsCategoriesPost,
   upgradeDatabaseMappingAddEmbeddingApiMaintenanceUpgradeDatabaseMappingAddEmbeddingGet,
+  genTopicsApiGenPost,
 };
