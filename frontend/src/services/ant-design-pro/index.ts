@@ -13,6 +13,7 @@ import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiCharts
 import * as getMainTrendsApiChartsMainTrendPost from './getMainTrendsApiChartsMainTrendPost';
 import * as getNewTrendsApiChartsViceTrendsNewPost from './getNewTrendsApiChartsViceTrendsNewPost';
 import * as getSearchResultApiSearchPost from './getSearchResultApiSearchPost';
+import * as getTrendsListApiChartsViceTrendsListPost from './getTrendsListApiChartsViceTrendsListPost';
 import * as getViceTrendsApiChartsViceTrendPost from './getViceTrendsApiChartsViceTrendPost';
 import * as getWordsCloudApiChartsWordsCloudPost from './getWordsCloudApiChartsWordsCloudPost';
 import * as importDataApiDbImportPost from './importDataApiDbImportPost';
@@ -36,6 +37,7 @@ export default {
   getSearchResultApiSearchPost,
   getNewTrendsApiChartsViceTrendsNewPost,
   getHotTrendsApiChartsViceTrendsHotPost,
+  getTrendsListApiChartsViceTrendsListPost,
   getViceTrendsApiChartsViceTrendPost,
   getMainTrendsApiChartsMainTrendPost,
   getWordsCloudApiChartsWordsCloudPost,

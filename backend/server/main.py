@@ -182,8 +182,7 @@ def get_new_trends(s_requests: SearchRequest):
     return {
         word: EsSearchQuery.new_query_with_terms(
             [word], s_requests, database_meta_db
-        ).get_vice_trend(es_client)
-        for word in new_words_list
+        ).get_vice_trend(es_client) for word in new_words_list
     }
 
 
@@ -199,9 +198,18 @@ def get_hot_trends(s_requests: SearchRequest):
     return {
         word: EsSearchQuery.new_query_with_terms(
             [word], s_requests, database_meta_db
-        ).get_vice_trend(es_client)
-        for word in new_words_list
+        ).get_vice_trend(es_client) for word in new_words_list
     }
+
+@app.post("/api/charts/vice-trends/list", response_model=dict[str, TimeSeriesStat])
+def get_trends_list(s_requests: SearchRequest, words: list[str]):
+    terms = s_requests.terms if s_requests.terms else []
+    return {
+        word: EsSearchQuery.new_query_with_terms(
+            terms + [word], s_requests, database_meta_db
+        ).get_vice_trend(es_client) for word in words
+    }
+
 
 
 @app.post("/api/charts/vice-trend", response_model=TimeSeriesStat)

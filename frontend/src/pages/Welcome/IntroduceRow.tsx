@@ -2,7 +2,6 @@ import { DatabaseOutlined, DatabaseTwoTone, InfoCircleOutlined } from '@ant-desi
 import { Area, Bar, CirclePacking, Column, Pie, Treemap } from '@ant-design/charts';
 import { Col, Progress, Row, Tooltip } from 'antd';
 import numeral from 'numeral';
-import type { DataItem } from './data.d';
 import useStylesB from './style.B';
 
 import { ChartCard, Field } from './Charts';

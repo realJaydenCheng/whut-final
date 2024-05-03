@@ -18,6 +18,12 @@ declare namespace API {
     ref?: string | null;
   };
 
+  type BodyGetTrendsListApiChartsViceTrendsListPost = {
+    s_requests: SearchRequest;
+    /** Words */
+    words: string[];
+  };
+
   type BodyImportDataApiDbImportPost = {
     /** Data Files */
     data_files: string[] | string;

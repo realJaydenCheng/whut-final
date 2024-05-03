@@ -58,10 +58,14 @@ const TrendRow  = ({
 const MicroTrends = ({
     color,
     dataMap,
+    limit,
 }:{
     color: string,
     dataMap: Record<string, any>,
+    limit?: number,
 }) => {
+
+    const _limit  = limit? limit : 6
     
     return <>
         <Row style={{ marginBottom: 25, textAlign: "center", marginTop: 15 }}>
@@ -75,7 +79,7 @@ const MicroTrends = ({
             <Col span={5} style={{ fontSize: 18 }}> <b>同比变化</b> </Col>
 
         </Row>
-        {Object.entries(dataMap).slice(0,6).map((e, i) => <TrendRow color={color} key={i} data={e[1]} word={e[0]} />)}
+        {Object.entries(dataMap).slice(0,_limit).map((e, i) => <TrendRow color={color} key={i} data={e[1]} word={e[0]} />)}
     </>
 }
 

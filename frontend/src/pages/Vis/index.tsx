@@ -9,6 +9,8 @@ import { useState } from "react";
 import { getCategoriesPercentageApiChartsCategoriesPost } from "@/services/ant-design-pro/getCategoriesPercentageApiChartsCategoriesPost";
 import { getWordsCloudApiChartsWordsCloudPost } from "@/services/ant-design-pro/getWordsCloudApiChartsWordsCloudPost";
 import { getMainTrendsApiChartsMainTrendPost } from "@/services/ant-design-pro/getMainTrendsApiChartsMainTrendPost";
+import { getTrendsListApiChartsViceTrendsListPost } from "@/services/ant-design-pro/getTrendsListApiChartsViceTrendsListPost";
+
 
 const Info: React.FC<{
     title: React.ReactNode;
@@ -54,9 +56,12 @@ const tabList = [
 
 interface VisContext {
     trendData?: API.TimeSeriesStatPro;
-    cateDataA?: API.CatePercent;
-    cateDataB?: API.CatePercent;
+    cateDataA?: API.CatePercent[];
+    cateDataB?: API.CatePercent[];
     cloudData?: Record<string, any>[];
+    sRequest?: API.SearchRequest;
+    trendsCloudData?: Record<string, any>;
+
 }
 
 const Vis = () => {
@@ -67,6 +72,24 @@ const Vis = () => {
 
     const { data: dbMetas } = useRequest<API.DatabaseMetaOutput[]>(
         listDbApiDbListGet,
+    )
+
+    const { run: runTrends } = useRequest<Record<string, any>>(
+        (s_requests, words) => {
+
+            return getTrendsListApiChartsViceTrendsListPost({
+                s_requests: s_requests || {
+                    db_id: "65e94e64-e526-4298-981b-8168eb142605"
+                }, 
+                words: words || []
+            })
+        },
+        {
+            manual: true,
+            onSuccess: (trendsCloudData) => {
+                setVisContext({ ...visContext, trendsCloudData });
+            }
+        }
     )
 
     const { run: runTrend } = useRequest<API.TimeSeriesStatPro>(
@@ -81,7 +104,7 @@ const Vis = () => {
         },
     );
 
-    const { run: runCateA } = useRequest<API.CatePercent>(
+    const { run: runCateA } = useRequest<API.CatePercent[]>(
         (s_request: API.SearchRequest, field: string) => {
             return getCategoriesPercentageApiChartsCategoriesPost({ field }, s_request);
         },
@@ -93,7 +116,7 @@ const Vis = () => {
         },
     );
 
-    const { run: runCateB } = useRequest<API.CatePercent>(
+    const { run: runCateB } = useRequest<API.CatePercent[]>(
         (s_request: API.SearchRequest, field: string) => {
             return getCategoriesPercentageApiChartsCategoriesPost({ field }, s_request);
         },
@@ -113,6 +136,7 @@ const Vis = () => {
             manual: true,
             onSuccess: (cloudData) => {
                 setVisContext({ ...visContext, cloudData });
+                runTrends(visContext.sRequest, cloudData.map(e => e.text));
             },
         },
     );
