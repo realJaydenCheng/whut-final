@@ -14,8 +14,8 @@ import requests
 
 from server.gen import GenData, GenInput
 from server.service import (
-    CatePercent, EsSearchQuery, EvalDetails, SearchRequest, 
-    SearchedData, TimeSeriesStat, EvalScores,
+    CatePercent, EsSearchQuery, EvalDetails, SearchRequest,
+    SearchedData, TimeSeriesStat, EvalScores, TimeSeriesStatPro,
     import_data_into_es_from_frame,
     transform_files_into_data_frame,
 )
@@ -210,6 +210,12 @@ def get_vice_trends(s_requests: SearchRequest):
     return es_query.get_vice_trend(es_client)
 
 
+@app.post("/api/charts/main-trend", response_model=TimeSeriesStatPro)
+def get_main_trends(s_requests: SearchRequest):
+    es_query = EsSearchQuery(s_requests, database_meta_db)
+    return es_query.get_main_trend(es_client)
+
+
 @app.post("/api/charts/words-cloud", response_model=list[dict])
 def get_words_cloud(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
@@ -236,13 +242,15 @@ def upgrade_database_mapping_add_embedding():
         database_meta_db.upgrade_database_mapping_add_embedding(meta.id)
     return ReturnMessage(message="ok", status=True)
 
+
 @app.get("/api/eval", response_model=EvalDetails)
 def get_eval_result(text: str):
     scores = EvalScores(
         **requests.get(
             "http://localhost:8002/eval/scores?text=" + text
-    ).json())
+        ).json())
     return EvalDetails.get_details_from(scores)
+
 
 @app.post("/api/gen", response_model=list[str])
 def gen_topics(

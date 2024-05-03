@@ -6,9 +6,9 @@ import { history, Outlet, useRequest } from "@umijs/max";
 import SearchComplex from "@/components/SearchComplex";
 import { listDbApiDbListGet } from "@/services/ant-design-pro/listDbApiDbListGet";
 import { useState } from "react";
-import { getViceTrendsApiChartsViceTrendPost } from "@/services/ant-design-pro/getViceTrendsApiChartsViceTrendPost";
 import { getCategoriesPercentageApiChartsCategoriesPost } from "@/services/ant-design-pro/getCategoriesPercentageApiChartsCategoriesPost";
 import { getWordsCloudApiChartsWordsCloudPost } from "@/services/ant-design-pro/getWordsCloudApiChartsWordsCloudPost";
+import { getMainTrendsApiChartsMainTrendPost } from "@/services/ant-design-pro/getMainTrendsApiChartsMainTrendPost";
 
 const Info: React.FC<{
     title: React.ReactNode;
@@ -53,7 +53,7 @@ const tabList = [
 
 
 interface VisContext {
-    trendData?: API.TimeSeriesStat;
+    trendData?: API.TimeSeriesStatPro;
     cateDataA?: API.CatePercent;
     cateDataB?: API.CatePercent;
     cloudData?: Record<string, any>[];
@@ -69,9 +69,9 @@ const Vis = () => {
         listDbApiDbListGet,
     )
 
-    const { run: runTrend } = useRequest<API.TimeSeriesStat>(
+    const { run: runTrend } = useRequest<API.TimeSeriesStatPro>(
         (s_request: API.SearchRequest) => {
-            return getViceTrendsApiChartsViceTrendPost(s_request);
+            return getMainTrendsApiChartsMainTrendPost(s_request);
         },
         {
             manual: true,
@@ -177,9 +177,13 @@ const Vis = () => {
         onTabChange={handleTabChange}
         title="可视分析"
     >
-        <Outlet context={visContext} />
+        <Outlet context={visContext satisfies VisContext} />
     </PageContainer>
 
 }
 
 export default Vis;
+
+export {
+    VisContext
+};

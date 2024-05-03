@@ -110,6 +110,14 @@ class TimeSeriesStat(BaseModel):
     rates: list[int | float]
 
 
+class TimeSeriesStatPro(TimeSeriesStat):
+
+    min: float
+    max: float
+    avg: float
+    shifts: list[float]
+
+
 class CatePercent(BaseModel):
 
     cate: str
@@ -503,6 +511,48 @@ class EsSearchQuery:
 
         return self._calculate_time_series(buckets)
 
+    def get_main_trend(self, es_client: Elasticsearch, window=3):
+        # 取均线参数
+        trend_query = self.query_without_time
+        db = self.database
+
+        # 查询es
+        es_res = es_client.search(
+            index=db.id, query=trend_query,
+            aggs=self.trend_aggs, size=0
+        )
+        buckets = es_res["aggregations"]["by_year"]["buckets"]
+
+        # 判空，无则返回空
+        if not buckets:
+            return TimeSeriesStatPro(**{
+                "dates": [], "values": [],
+                "percentages": [],
+                "deltas": [], "rates": [],
+                "shifts": [],
+                "avg": 0, "max": 0, "min": 0
+            })
+
+        data = self._calculate_time_series(buckets).model_dump()
+
+        # 计算均线
+        shifts = [
+            sum(data["values"][i - window:i]) / window
+            for i in range(window, len(data["values"]) + 1)
+            # length + 1 保证最后一位也取到
+        ]  # 滑动窗口，从窗口处开始往前
+
+
+        # 构造返回值
+        data.update({
+            "shifts": shifts,
+            "avg": sum(data["values"]) / len(data["values"]),
+            "max": max(data["values"]),
+            "min": min(data["values"]),
+        })
+
+        return TimeSeriesStatPro(**data)
+
     def get_word_cloud(self, es_client: Elasticsearch, limit=200):
 
         keywords = self.request.terms if self.request.terms else []
@@ -648,7 +698,7 @@ class EsSearchQuery:
         }
 
     @staticmethod
-    def _calculate_time_series(year_agg_buckets: list) -> dict[str, list]:
+    def _calculate_time_series(year_agg_buckets: list) -> TimeSeriesStat:
 
         _dates = [
             int(item["key_as_string"])

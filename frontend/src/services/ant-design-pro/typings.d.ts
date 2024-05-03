@@ -210,6 +210,27 @@ declare namespace API {
     rates: (number | number)[];
   };
 
+  type TimeSeriesStatPro = {
+    /** Dates */
+    dates: number[];
+    /** Values */
+    values: (number | number)[];
+    /** Percentages */
+    percentages: (number | number)[];
+    /** Deltas */
+    deltas: (number | number)[];
+    /** Rates */
+    rates: (number | number)[];
+    /** Min */
+    min: number;
+    /** Max */
+    max: number;
+    /** Avg */
+    avg: number;
+    /** Shifts */
+    shifts: number[];
+  };
+
   type User = {
     /** Id */
     id: string;

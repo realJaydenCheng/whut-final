@@ -10,6 +10,7 @@ import * as getCategoriesPercentageApiChartsCategoriesPost from './getCategories
 import * as getDbDetailApiDbDetailGet from './getDbDetailApiDbDetailGet';
 import * as getEvalResultApiEvalGet from './getEvalResultApiEvalGet';
 import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiChartsViceTrendsHotPost';
+import * as getMainTrendsApiChartsMainTrendPost from './getMainTrendsApiChartsMainTrendPost';
 import * as getNewTrendsApiChartsViceTrendsNewPost from './getNewTrendsApiChartsViceTrendsNewPost';
 import * as getSearchResultApiSearchPost from './getSearchResultApiSearchPost';
 import * as getViceTrendsApiChartsViceTrendPost from './getViceTrendsApiChartsViceTrendPost';
@@ -36,6 +37,7 @@ export default {
   getNewTrendsApiChartsViceTrendsNewPost,
   getHotTrendsApiChartsViceTrendsHotPost,
   getViceTrendsApiChartsViceTrendPost,
+  getMainTrendsApiChartsMainTrendPost,
   getWordsCloudApiChartsWordsCloudPost,
   getCategoriesPercentageApiChartsCategoriesPost,
   upgradeDatabaseMappingAddEmbeddingApiMaintenanceUpgradeDatabaseMappingAddEmbeddingGet,
