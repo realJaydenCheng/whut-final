@@ -2,7 +2,7 @@
 const RecVis = () => {
     return (
         <div>
-            <h1>RecVis</h1>
+            <h1>敬请期待</h1>
         </div>
     )
 };
