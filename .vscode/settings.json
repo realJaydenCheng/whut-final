@@ -35,6 +35,7 @@
         "suptitle",
         "thead",
         "Treemap",
+        "TSNE",
         "ttest",
         "umijs",
         "upserted",

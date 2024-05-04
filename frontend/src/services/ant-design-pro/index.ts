@@ -12,6 +12,7 @@ import * as getEvalResultApiEvalGet from './getEvalResultApiEvalGet';
 import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiChartsViceTrendsHotPost';
 import * as getMainTrendsApiChartsMainTrendPost from './getMainTrendsApiChartsMainTrendPost';
 import * as getNewTrendsApiChartsViceTrendsNewPost from './getNewTrendsApiChartsViceTrendsNewPost';
+import * as getRecWordsApiChartsRecGet from './getRecWordsApiChartsRecGet';
 import * as getSearchResultApiSearchPost from './getSearchResultApiSearchPost';
 import * as getTrendsListApiChartsViceTrendsListPost from './getTrendsListApiChartsViceTrendsListPost';
 import * as getViceTrendsApiChartsViceTrendPost from './getViceTrendsApiChartsViceTrendPost';
@@ -45,4 +46,5 @@ export default {
   upgradeDatabaseMappingAddEmbeddingApiMaintenanceUpgradeDatabaseMappingAddEmbeddingGet,
   getEvalResultApiEvalGet,
   genTopicsApiGenPost,
+  getRecWordsApiChartsRecGet,
 };

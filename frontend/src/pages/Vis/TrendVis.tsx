@@ -56,6 +56,17 @@ const TrendVis = () => {
                 range: ["#FF4646", "#408888"]
             }
         }}
+        annotations={[
+            {
+                type: 'lineY',
+                data:  [0],
+                style: {
+                    lineWidth: 3,
+                    stroke: "#000000",
+                    opacity: 1,
+                }
+            }
+        ]}
     />
 
     const currentV = trendData?.values[trendData?.values.length - 1] || 0;
@@ -91,9 +102,9 @@ const TrendVis = () => {
             <ProCard split="horizontal">
 
                 <ProCard>
-                    <div style={{ textAlign: "center", marginBottom: 10 }}>
+                    <div style={{ textAlign: "center", marginBottom: 30, marginTop: 20 }}>
                         <span style={{
-                            fontSize: "6rem",
+                            fontSize: "6.5rem",
                             fontWeight: 100,
                         }}>
                             {numeral(currentV).format("0,0")}
@@ -112,7 +123,7 @@ const TrendVis = () => {
                         &nbsp;，同比变化  &nbsp;
                         <ColorData value={rate1} formatStr="+0.00%" />
                     </p>
-                    <p style={{ fontSize: 18 }}>
+                    <p style={{ fontSize: 18, marginBottom: 30 }}>
                         近<b>三年</b>立项数量变化 &nbsp;
                         <ColorData value={delta3} formatStr="+0,0" />
                         &nbsp;，同比变化  &nbsp;

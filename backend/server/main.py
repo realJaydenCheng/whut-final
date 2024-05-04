@@ -5,6 +5,7 @@ from typing import Annotated
 
 import dotenv
 from fastapi import FastAPI, Cookie, Response, UploadFile, Form
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
@@ -16,6 +17,7 @@ from server.gen import GenData, GenInput
 from server.service import (
     CatePercent, EsSearchQuery, EvalDetails, SearchRequest,
     SearchedData, TimeSeriesStat, EvalScores, TimeSeriesStatPro,
+    WordXY,
     import_data_into_es_from_frame,
     transform_files_into_data_frame,
 )
@@ -201,6 +203,7 @@ def get_hot_trends(s_requests: SearchRequest):
         ).get_vice_trend(es_client) for word in new_words_list
     }
 
+
 @app.post("/api/charts/vice-trends/list", response_model=dict[str, TimeSeriesStat])
 def get_trends_list(s_requests: SearchRequest, words: list[str]):
     terms = s_requests.terms if s_requests.terms else []
@@ -209,7 +212,6 @@ def get_trends_list(s_requests: SearchRequest, words: list[str]):
             terms + [word], s_requests, database_meta_db
         ).get_vice_trend(es_client) for word in words
     }
-
 
 
 @app.post("/api/charts/vice-trend", response_model=TimeSeriesStat)
@@ -295,3 +297,10 @@ def gen_topics(
     except Exception as e:
         print(e)
         return gen.search_results
+
+
+@app.get("/api/charts/rec", response_model=list[WordXY])
+def get_rec_words(word: str):
+    return RedirectResponse(
+        f"http://localhost:8002/charts/words-xy?word={word}"
+    )

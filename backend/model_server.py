@@ -3,9 +3,12 @@ from torch import cuda
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import fasttext
 import torch
 from elasticsearch import Elasticsearch
+from sklearn.manifold import TSNE
+import numpy as np
 
 es_client = Elasticsearch(
     hosts="http://localhost:9200",
@@ -29,6 +32,20 @@ alignment_matrix: torch.nn.Parameter = torch.load(
 )
 
 server = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "http://localhost:8001",
+]
+
+server.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class TextList(BaseModel):
@@ -292,3 +309,36 @@ def get_eval_scores(text: str) -> EvalScores:
         match_score=get_text_match(text),
         trend_score=get_text_trend(text),
     )
+
+
+class WordXY(BaseModel):
+    word: str
+    x: float
+    y: float
+    sim: float
+
+
+def words_embedding_to_xy(words: list[str], sims: list[float] | None = None):
+    if sims is None:
+        sims = [0. for _ in words]
+    assert len(words) == len(sims)
+    words_embedded = np.array([
+        embedding_2023.get_word_vector(word)
+        for word in words
+    ])
+    # 100 dims to 2 dims with TSNE
+    tsne = TSNE(n_components=2, random_state=0, perplexity=5)
+    words_embedded_2d = tsne.fit_transform(words_embedded)
+    # convert to WordXY
+    return [
+        WordXY(x=x, y=y, word=words[i], sim=sims[i])
+        for i, (x, y) in enumerate(words_embedded_2d)
+    ]
+
+
+@server.get('/charts/words-xy', response_model=list[WordXY])
+def get_neighbors_words_xy(word: str) -> list[WordXY]:
+    # word_embedding = embedding_2023.get_word_vector(word)
+    neighbors = embedding_2023.get_nearest_neighbors(word, 15)
+    sims, words = zip(*neighbors)
+    return words_embedding_to_xy(words, sims)

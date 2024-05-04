@@ -542,7 +542,6 @@ class EsSearchQuery:
             # length + 1 保证最后一位也取到
         ]  # 滑动窗口，从窗口处开始往前
 
-
         # 构造返回值
         data.update({
             "shifts": shifts,
@@ -934,3 +933,10 @@ class EsSearchQuery:
         })
 
         return query
+
+
+class WordXY(BaseModel):
+    word: str
+    x: float
+    y: float
+    sim: float

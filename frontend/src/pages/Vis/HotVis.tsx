@@ -6,7 +6,7 @@ import MicroTrends from "../Welcome/MicroTrends";
 
 const HotVis = () => {
 
-    const { cloudData, sRequest, trendsCloudData } = useOutletContext<VisContext>();
+    const { cloudData, trendsCloudData } = useOutletContext<VisContext>();
 
 
 

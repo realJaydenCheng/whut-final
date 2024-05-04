@@ -163,6 +163,10 @@ declare namespace API {
     text: string;
   };
 
+  type getRecWordsApiChartsRecGetParams = {
+    word: string;
+  };
+
   type HTTPValidationError = {
     /** Detail */
     detail?: ValidationError[];
@@ -264,5 +268,16 @@ declare namespace API {
     msg: string;
     /** Error Type */
     type: string;
+  };
+
+  type WordXY = {
+    /** Word */
+    word: string;
+    /** X */
+    x: number;
+    /** Y */
+    y: number;
+    /** Sim */
+    sim: number;
   };
 }

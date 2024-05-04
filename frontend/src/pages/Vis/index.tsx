@@ -10,6 +10,7 @@ import { getCategoriesPercentageApiChartsCategoriesPost } from "@/services/ant-d
 import { getWordsCloudApiChartsWordsCloudPost } from "@/services/ant-design-pro/getWordsCloudApiChartsWordsCloudPost";
 import { getMainTrendsApiChartsMainTrendPost } from "@/services/ant-design-pro/getMainTrendsApiChartsMainTrendPost";
 import { getTrendsListApiChartsViceTrendsListPost } from "@/services/ant-design-pro/getTrendsListApiChartsViceTrendsListPost";
+import { getRecWordsApiChartsRecGet } from "@/services/ant-design-pro/getRecWordsApiChartsRecGet";
 
 
 const Info: React.FC<{
@@ -59,9 +60,11 @@ interface VisContext {
     cateDataA?: API.CatePercent[];
     cateDataB?: API.CatePercent[];
     cloudData?: Record<string, any>[];
+    recData?: API.WordXY[];
     sRequest?: API.SearchRequest;
     trendsCloudData?: Record<string, any>;
-
+    trendsRecData?: Record<string, any>;
+    trendsGraphData?: Record<string, any>;
 }
 
 const Vis = () => {
@@ -72,25 +75,7 @@ const Vis = () => {
 
     const { data: dbMetas } = useRequest<API.DatabaseMetaOutput[]>(
         listDbApiDbListGet,
-    )
-
-    const { run: runTrends } = useRequest<Record<string, any>>(
-        (s_requests, words) => {
-
-            return getTrendsListApiChartsViceTrendsListPost({
-                s_requests: s_requests || {
-                    db_id: "65e94e64-e526-4298-981b-8168eb142605"
-                }, 
-                words: words || []
-            })
-        },
-        {
-            manual: true,
-            onSuccess: (trendsCloudData) => {
-                setVisContext({ ...visContext, trendsCloudData });
-            }
-        }
-    )
+    );
 
     const { run: runTrend } = useRequest<API.TimeSeriesStatPro>(
         (s_request: API.SearchRequest) => {
@@ -128,6 +113,23 @@ const Vis = () => {
         },
     );
 
+    const { run: runCloudTrends } = useRequest<Record<string, any>>(
+        (s_requests, words) => {
+
+            return getTrendsListApiChartsViceTrendsListPost({
+                s_requests: s_requests || {
+                    db_id: "65e94e64-e526-4298-981b-8168eb142605"
+                },
+                words: words || []
+            })
+        },
+        {
+            manual: true,
+            onSuccess: (trendsCloudData) => {
+                setVisContext({ ...visContext, trendsCloudData });
+            }
+        }
+    );
     const { run: runCloud } = useRequest<Record<string, any>[]>(
         (s_request: API.SearchRequest) => {
             return getWordsCloudApiChartsWordsCloudPost(s_request)
@@ -136,10 +138,40 @@ const Vis = () => {
             manual: true,
             onSuccess: (cloudData) => {
                 setVisContext({ ...visContext, cloudData });
-                runTrends(visContext.sRequest, cloudData.map(e => e.text));
+                runCloudTrends(visContext.sRequest, cloudData.map(e => e.text));
             },
         },
     );
+
+    const { run: runRecTrends } = useRequest<Record<string, any>>(
+        (s_requests, words) => {
+
+            return getTrendsListApiChartsViceTrendsListPost({
+                s_requests: s_requests || {
+                    db_id: "65e94e64-e526-4298-981b-8168eb142605"
+                },
+                words: words || []
+            })
+        },
+        {
+            manual: true,
+            onSuccess: (trendsRecData) => {
+                setVisContext({ ...visContext, trendsRecData });
+            }
+        }
+    );
+    const { run: runRec } = useRequest<API.WordXY[]>(
+        (word: string) => {
+            return getRecWordsApiChartsRecGet({ word });
+        },
+        {
+            manual: true,
+            onSuccess: (recData) => {
+                setVisContext({ ...visContext, recData });
+                runRecTrends(visContext.sRequest, recData.map(e => e.word));
+            },
+        }
+    )
 
     const handleSearch = (
         value: string,
@@ -154,6 +186,7 @@ const Vis = () => {
         runCateA(formData, currentMeta?.cate_fields[0]);
         runCateB(formData, currentMeta?.cate_fields[1]);
         runCloud(formData);
+        runRec(value);
     };
 
     const currentCnt = visContext.trendData?.values[
@@ -162,7 +195,7 @@ const Vis = () => {
     const currentDlt = visContext.trendData?.percentages[
         visContext.trendData?.percentages.length - 1
     ];
-    const currentFlag = (currentDlt && currentDlt > 0) ? "red" : "green";
+    const currentFlag = (currentDlt && currentDlt > 0) ? "#FF4646" : "#408888";
 
     const headerCard = <>
         <SearchComplex
@@ -181,7 +214,7 @@ const Vis = () => {
                     <Info title="同比变化" value={
                         <span style={{ color: currentFlag }}>
                             <b>{(currentDlt && currentDlt > 0) ? '+ ' : ' '} </b>
-                            {currentDlt?.toFixed(2)}%
+                            {((currentDlt || 0) * 100).toFixed(2)}%
                         </span>
                     } />
                 </Col>

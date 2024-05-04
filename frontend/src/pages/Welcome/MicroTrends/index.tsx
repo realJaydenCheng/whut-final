@@ -1,25 +1,24 @@
 import { Tiny } from "@ant-design/charts";
 import { Col, Row } from "antd";
 import Trend from "../Trend";
-import { fill } from "lodash";
 
-const TrendRow  = ({
+const TrendRow = ({
     color,
     data,
     word,
-}:{
+}: {
     color: string
     data: API.TimeSeriesStat,
     word: string,
 }) => {
 
-    const dataArray = data.values.map((v,i)=>({
+    const dataArray = data.values.map((v, i) => ({
         value: v,
         date: data.dates[i],
     }));
     const per = data.percentages[dataArray.length - 2] || 0.0;
     const flag = per > 0 ? 'up' : 'down';
-    const last = dataArray[dataArray.length-1]?.value || 1;
+    const last = dataArray[dataArray.length - 1]?.value || 1;
 
     const config = {
         data: dataArray,
@@ -38,7 +37,7 @@ const TrendRow  = ({
 
     return <Row style={{ marginBottom: 25, textAlign: 'center' }}>
 
-        <Col span={5} style={{ fontSize: 18, whiteSpace: "nowrap"}}> {word} </Col>
+        <Col span={5} style={{ fontSize: 18, whiteSpace: "nowrap" }}> {word} </Col>
 
         <Col span={5} style={{ fontSize: 18 }}> {last} </Col>
 
@@ -59,14 +58,14 @@ const MicroTrends = ({
     color,
     dataMap,
     limit,
-}:{
+}: {
     color: string,
     dataMap: Record<string, any>,
     limit?: number,
 }) => {
 
-    const _limit  = limit? limit : 6
-    
+    const _limit = limit ? limit : 6
+
     return <>
         <Row style={{ marginBottom: 25, textAlign: "center", marginTop: 15 }}>
 
@@ -79,7 +78,15 @@ const MicroTrends = ({
             <Col span={5} style={{ fontSize: 18 }}> <b>同比变化</b> </Col>
 
         </Row>
-        {Object.entries(dataMap).slice(0,_limit).map((e, i) => <TrendRow color={color} key={i} data={e[1]} word={e[0]} />)}
+        {
+            Object
+                .entries(dataMap)
+                .sort((a, b) => b[1].dates.length - a[1].dates.length)
+                .slice(0, _limit)
+                .map(
+                    (e, i) => <TrendRow color={color} key={i} data={e[1]} word={e[0]} />
+                )
+        }
     </>
 }
 
