@@ -125,8 +125,11 @@ class CatePercent(BaseModel):
     value: int
 
 
-class coOccurrence(BaseModel):
-    pass
+class CoOccurrence(BaseModel):
+    nodeMinMax: tuple[int, int]
+    edgeMinMax: tuple[int, int]
+    nodes: list[dict]
+    edges: list[dict]
 
 
 class EvalScores(BaseModel):
@@ -611,7 +614,7 @@ class EsSearchQuery:
         ]
 
     def get_co_occurrence_data(self, es_client: Elasticsearch, limit=30, depth=3):
-        keywords: list[str] = self.request.terms
+        keywords: list[str] = self.request.terms if self.request.terms else []
 
         target = self.database.title_field
 
@@ -630,13 +633,12 @@ class EsSearchQuery:
 
         # 判空与处理
         if not rel_words:
-            return {
-                "NodeMinMax": [0, 0],
-                "EdgeMinMax": [0, 0],
-                "WordList": [],
-                "linksList": [],
-                "categoriesList": []
-            }
+            return CoOccurrence(**{
+                "nodeMinMax": [0, 0],
+                "edgeMinMax": [0, 0],
+                "nodes": [],
+                "edges": [],
+            })
 
         # 构建共现网络，限制数量
         nodes_d, edges_d = self._get_occurrence_network_bfs(
@@ -664,37 +666,27 @@ class EsSearchQuery:
             cnt0, cnt1 = nodes[_edge[0]][-1], nodes[_edge[1]][-1]
             return cnt0 if cnt0 < cnt1 else cnt1
 
-        return {
-            "NodeMinMax": [
+        return CoOccurrence(**{
+            "nodeMinMax": [
                 min(nodes.values(), key=lambda x: x[-1])[-1],
                 max(nodes.values(), key=lambda x: x[-1])[-1]
             ],
-            "EdgeMinMax": [edges[-1][-1], edges[0][-1]],
-            "WordList": [
+            "edgeMinMax": [edges[-1][-1], edges[0][-1]],
+            "nodes": [
                 {
                     "id": str(id_),  # 词序号
                     "name": item[0],
-                    "symbolSize": item[-1],  # 词频
-                    "category": id_  # 与词序号一致
+                    "size": item[-1],  # 词频
                 } for id_, item in nodes.items()
             ],
-            "linksList": [
+            "edges": [
                 {
                     "source": str(tuple(nodes)[0]),  # 词序号连接形成线
                     "target": str(tuple(nodes)[1]),
-                    "lineStyle": {
-                        "normal": {
-                            "width": _get_smaller_count(nodes),
-                        },
-                    }
+                    "width": _get_smaller_count(nodes),
                 } for nodes, width in edges
             ],
-            "categoriesList": [
-                {
-                    "name": w[0]  # 词名称
-                } for w in nodes.values()
-            ]
-        }
+        })
 
     @staticmethod
     def _calculate_time_series(year_agg_buckets: list) -> TimeSeriesStat:
@@ -854,7 +846,7 @@ class EsSearchQuery:
             from_: str,
             depth: int = 3,
             limit: int = 30,
-            *
+            *,
             client: Elasticsearch,
     ) -> tuple[dict[str, tuple[int, int]], dict[frozenset[int], int]]:
         """

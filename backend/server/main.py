@@ -17,7 +17,7 @@ from server.gen import GenData, GenInput
 from server.service import (
     CatePercent, EsSearchQuery, EvalDetails, SearchRequest,
     SearchedData, TimeSeriesStat, EvalScores, TimeSeriesStatPro,
-    WordXY,
+    WordXY, CoOccurrence,
     import_data_into_es_from_frame,
     transform_files_into_data_frame,
 )
@@ -304,3 +304,9 @@ def get_rec_words(word: str):
     return RedirectResponse(
         f"http://localhost:8002/charts/words-xy?word={word}"
     )
+
+
+@app.post("/api/charts/graph", response_model=CoOccurrence)
+def get_graph_data(s_requests: SearchRequest):
+    es_query = EsSearchQuery(s_requests, database_meta_db)
+    return es_query.get_co_occurrence_data(es_client)

@@ -11,6 +11,7 @@ import { getWordsCloudApiChartsWordsCloudPost } from "@/services/ant-design-pro/
 import { getMainTrendsApiChartsMainTrendPost } from "@/services/ant-design-pro/getMainTrendsApiChartsMainTrendPost";
 import { getTrendsListApiChartsViceTrendsListPost } from "@/services/ant-design-pro/getTrendsListApiChartsViceTrendsListPost";
 import { getRecWordsApiChartsRecGet } from "@/services/ant-design-pro/getRecWordsApiChartsRecGet";
+import { getGraphDataApiChartsGraphPost } from "@/services/ant-design-pro/getGraphDataApiChartsGraphPost";
 
 
 const Info: React.FC<{
@@ -60,6 +61,7 @@ interface VisContext {
     cateDataA?: API.CatePercent[];
     cateDataB?: API.CatePercent[];
     cloudData?: Record<string, any>[];
+    graphData?: API.CoOccurrence;
     recData?: API.WordXY[];
     sRequest?: API.SearchRequest;
     trendsCloudData?: Record<string, any>;
@@ -171,7 +173,37 @@ const Vis = () => {
                 runRecTrends(visContext.sRequest, recData.map(e => e.word));
             },
         }
-    )
+    );
+
+    const { run: runGraphTrends } = useRequest<Record<string, any>>(
+        (s_requests, words) => {
+
+            return getTrendsListApiChartsViceTrendsListPost({
+                s_requests: s_requests || {
+                    db_id: "65e94e64-e526-4298-981b-8168eb142605"
+                },
+                words: words || []
+            })
+        },
+        {
+            manual: true,
+            onSuccess: (trendsGraphData) => {
+                setVisContext({ ...visContext, trendsGraphData });
+            }
+        }
+    );
+    const { run: runGraph } = useRequest<API.CoOccurrence>(
+        (s_request: API.SearchRequest) => {
+            return getGraphDataApiChartsGraphPost(s_request);
+        },
+        {
+            manual: true,
+            onSuccess: (graphData) => {
+                setVisContext({ ...visContext, graphData });
+                runGraphTrends(visContext.sRequest, graphData?.nodes.map(e => e.name));
+            },
+        }
+    );
 
     const handleSearch = (
         value: string,
@@ -187,6 +219,7 @@ const Vis = () => {
         runCateB(formData, currentMeta?.cate_fields[1]);
         runCloud(formData);
         runRec(value);
+        runGraph(formData);
     };
 
     const currentCnt = visContext.trendData?.values[

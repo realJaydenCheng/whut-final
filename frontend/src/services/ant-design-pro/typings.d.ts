@@ -40,6 +40,17 @@ declare namespace API {
     value: number;
   };
 
+  type CoOccurrence = {
+    /** Nodeminmax */
+    nodeMinMax: any[];
+    /** Edgeminmax */
+    edgeMinMax: any[];
+    /** Nodes */
+    nodes: Record<string, any>[];
+    /** Edges */
+    edges: Record<string, any>[];
+  };
+
   type createDbApiDbCreatePostParams = {
     user_id?: string;
   };

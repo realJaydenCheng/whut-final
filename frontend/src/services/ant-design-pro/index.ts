@@ -9,6 +9,7 @@ import * as genTopicsApiGenPost from './genTopicsApiGenPost';
 import * as getCategoriesPercentageApiChartsCategoriesPost from './getCategoriesPercentageApiChartsCategoriesPost';
 import * as getDbDetailApiDbDetailGet from './getDbDetailApiDbDetailGet';
 import * as getEvalResultApiEvalGet from './getEvalResultApiEvalGet';
+import * as getGraphDataApiChartsGraphPost from './getGraphDataApiChartsGraphPost';
 import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiChartsViceTrendsHotPost';
 import * as getMainTrendsApiChartsMainTrendPost from './getMainTrendsApiChartsMainTrendPost';
 import * as getNewTrendsApiChartsViceTrendsNewPost from './getNewTrendsApiChartsViceTrendsNewPost';
@@ -47,4 +48,5 @@ export default {
   getEvalResultApiEvalGet,
   genTopicsApiGenPost,
   getRecWordsApiChartsRecGet,
+  getGraphDataApiChartsGraphPost,
 };
