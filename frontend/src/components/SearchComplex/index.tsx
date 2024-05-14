@@ -43,7 +43,8 @@ const dbDetail: API.DatabaseMetaOutput = {
 const SearchComplex: React.FC<SearchComplexProps> = (props) => {
 
     const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
-    const [selectedDbId, setSelectedDbId] = useState<string>('65e94e64-e526-4298-981b-8168eb142605');  // TODO: remove vars about default select value.
+    const [selectedDbId, setSelectedDbId] = useState<string>('65e94e64-e526-4298-981b-8168eb142605');
+    // TODO: remove vars about default select value.
 
     const { run: fetchDbDetails } = useRequest(getDbDetailApiDbDetailGet, {
         manual: true,
@@ -79,8 +80,10 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
         for (const field_name in detail?.cate_fields_detail) {
             const categoryOptions = detail?.cate_fields_detail[field_name];
             nodes.push(
-                <StandardFormRow key={field_name} title={field_name} block style={{ padding: 0, marginTop: 0, marginBottom: 3 }}>
-                    <FormItem name={`cateField-${field_name}`} style={{ padding: 0, marginTop: 0, marginBottom: 3 }}>
+                <StandardFormRow key={field_name} title={field_name} block
+                    style={{ padding: 0, marginTop: 0, marginBottom: 3 }}>
+                    <FormItem name={`cateField-${field_name}`}
+                        style={{ padding: 0, marginTop: 0, marginBottom: 3 }}>
                         <TagSelect expandable>
                             {categoryOptions.map((category: string) => (
                                 <TagSelect.Option value={category} key={category}>
@@ -133,16 +136,6 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                     max={detail?.date_range ? detail?.date_range[1] : undefined}
                     step={1}
                 />
-                {/* <InputNumber
-                    min={2016}
-                    max={2023}
-                    step={1}
-                />  
-                <InputNumber
-                    min={2016}
-                    max={2023}
-                    step={1}
-                />  TODO: show text input*/}
             </FormItem>
         )
     };
@@ -191,7 +184,9 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
             page: null,
             page_size: null,
         }
-        const databaseMeta = props.databaseMetas.find(meta => meta.id === searchRequest.db_id);
+        const databaseMeta = props.databaseMetas.find(
+            meta => meta.id === searchRequest.db_id
+        );
         props.onSearchAndSubmit(value, searchRequest, form, event, info, databaseMeta);
     };
 
