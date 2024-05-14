@@ -86,6 +86,7 @@ class SearchRequest(BaseModel):
     db_id: str
 
     terms: list[str] | None = None
+    terms_logic: bool = True  # True: and, False: or
     date_range: tuple[int, int] | None = None
 
     filters: dict[str, list[str]] | None = None
@@ -262,13 +263,18 @@ class EsSearchQuery:
         }
 
         if terms := s_request.terms:
-            terms_and = [
+            terms_query = [
                 {"wildcard": {f"{self.database.title_field}.like": f"*{term}*"}}
                 for term in terms
             ]
-            self.query["bool"]["filter"].append({
-                "bool": {"must": terms_and}
-            })
+            if s_request.terms_logic:  # logic True is and
+                self.query["bool"]["filter"].append({
+                    "bool": {"must": terms_query}
+                })
+            else:  # logic False is or
+                self.query["bool"]["filter"].append({
+                    "bool": {"should": terms_query}
+                })
 
         if date_range := s_request.date_range:
             start_date = datetime(date_range[0], 1, 1)

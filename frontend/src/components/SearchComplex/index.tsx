@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Col, Form, FormInstance, Input, InputNumber, Row, Select, Slider } from "antd";
+import { Col, Form, FormInstance, Input, InputNumber, Radio, Row, Select, Slider } from "antd";
 import StandardFormRow from "./StandardFormRow";
 import TagSelect from "./TagSelect";
 import { useRequest } from "@umijs/max";
@@ -183,6 +183,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
             date_range: formData["date_range"] || null,
             page: null,
             page_size: null,
+            terms_logic: formData["terms_logic"],
         }
         const databaseMeta = props.databaseMetas.find(
             meta => meta.id === searchRequest.db_id
@@ -207,7 +208,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                         </FormItem>
                     </Col>
 
-                    <Col span={11}>
+                    <Col span={9}>
                         <FormItem name="terms">
                             <Input.Search
                                 placeholder="请输入"
@@ -216,6 +217,15 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                                 onSearch={searchToSubmit}
                                 style={{ width: '90%' }}
                             />
+                        </FormItem>
+                    </Col>
+
+                    <Col span={2}>
+                        <FormItem name="terms_logic">
+                            <Radio.Group defaultValue={true} buttonStyle="solid">
+                                <Radio.Button value={true}> AND </Radio.Button>
+                                <Radio.Button value={false}> OR </Radio.Button>
+                            </Radio.Group>
                         </FormItem>
                     </Col>
 

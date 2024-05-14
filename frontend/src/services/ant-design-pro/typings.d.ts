@@ -206,6 +206,8 @@ declare namespace API {
     db_id: string;
     /** Terms */
     terms?: string[] | null;
+    /** Terms Logic */
+    terms_logic?: boolean;
     /** Date Range */
     date_range?: any[] | null;
     /** Filters */
