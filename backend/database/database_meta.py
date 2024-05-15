@@ -138,11 +138,19 @@ class DatabaseMetaData:
             meta["user_name"] = user_name
             return meta
 
-        return [
+        metas_output = [
             DatabaseMetaOutput(
                 **add_user_name_into_meta(meta)
             ) for meta in metas
         ]
+
+        def default_sort(meta: DatabaseMetaOutput):
+            if meta.id == "65e94e64-e526-4298-981b-8168eb142605":
+                return 0
+            else:
+                return 1
+
+        return sorted(metas_output, key=default_sort)
 
     def create_database(self, meta: DatabaseMeta):
 

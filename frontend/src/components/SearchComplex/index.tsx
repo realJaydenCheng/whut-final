@@ -43,7 +43,7 @@ const dbDetail: API.DatabaseMetaOutput = {
 const SearchComplex: React.FC<SearchComplexProps> = (props) => {
 
     const [selectOptions, setSelectOptions] = useState<{ label: string, value: string }[]>([]);
-    const [selectedDbId, setSelectedDbId] = useState<string>('65e94e64-e526-4298-981b-8168eb142605');
+    const [selectedDbId, setSelectedDbId] = useState<string>(dbDetail.id);
     // TODO: remove vars about default select value.
 
     const { run: fetchDbDetails } = useRequest(getDbDetailApiDbDetailGet, {
