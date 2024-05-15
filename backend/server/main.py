@@ -1,17 +1,20 @@
 
 import os
+import io
 import functools
 from typing import Annotated
 
 import dotenv
 from fastapi import FastAPI, Cookie, Response, UploadFile, Form
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from pydantic import BaseModel
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
 from langchain_community.chat_models import QianfanChatEndpoint
 from langchain_core.language_models.chat_models import HumanMessage
 import requests
+import pandas as pd
+from urllib.parse import quote
 
 from server.gen import GenData, GenInput
 from server.service import (
@@ -166,10 +169,54 @@ def get_db_detail(db_id: str):
     return database_meta_db.get_database_meta_detail(db_id)
 
 
+@app.get("/api/db/import-template", response_class=StreamingResponse)
+def get_db_import_template(db_id: str):
+    meta_detail = database_meta_db.get_database_meta_detail(db_id)
+    df = meta_detail.to_excel_template()
+    # 用pandas（已经import成pd了）创建一个没有index的只有标题行的excel文件
+    # 返回给浏览器开始下载
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False)
+    # 设置文件指针到开头
+    output.seek(0)
+    file_name = f"{meta_detail.name}-模板.xlsx"
+    encoded_file_name = quote(file_name)
+    # 返回StreamingResponse，开始下载
+    return StreamingResponse(
+        output,
+        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_file_name}"
+        }
+    )
+
+
 @app.post("/api/search", response_model=SearchedData)
 def get_search_result(s_requests: SearchRequest):
     es_query = EsSearchQuery(s_requests, database_meta_db)
     return es_query.get_search_list(es_client)
+
+
+@app.post("/api/search/excel", response_class=StreamingResponse)
+def get_search_excel(s_requests: SearchRequest):
+    es_query = EsSearchQuery(s_requests, database_meta_db)
+    meta = database_meta_db.get_database_meta_detail(s_requests.db_id)
+    cols = meta.to_excel_template().columns.to_list()
+    df = es_query.get_search_pd(es_client, cols)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False)
+    file_name = f"{meta.name}-查询结果.xlsx"
+    output.seek(0)
+    encoded_file_name = quote(file_name)
+    return StreamingResponse(
+        output,
+        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_file_name}"
+        }
+    )
 
 
 @app.post("/api/charts/vice-trends/new", response_model=dict[str, TimeSeriesStat])

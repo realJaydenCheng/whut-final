@@ -170,6 +170,10 @@ declare namespace API {
     db_id: string;
   };
 
+  type getDbImportTemplateApiDbImportTemplateGetParams = {
+    db_id: string;
+  };
+
   type getEvalResultApiEvalGetParams = {
     text: string;
   };

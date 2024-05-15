@@ -21,7 +21,7 @@ import { listDbApiDbListGet } from '@/services/ant-design-pro/listDbApiDbListGet
 import { deleteDbApiDbDeletePost } from '@/services/ant-design-pro/deleteDbApiDbDeletePost';
 import { createDbApiDbCreatePost } from '@/services/ant-design-pro/createDbApiDbCreatePost';
 import UploadModal from './UploadModal';
-import { importDataApiDbImportPost, BodyImportDataApiDbImportPost } from './service'
+import { importDataApiDbImportPost, BodyImportDataApiDbImportPost, getDbImportTemplateApiDbImportTemplateGet } from './service'
 import { embedDbTextApiDbEmbeddingGet } from '@/services/ant-design-pro/embedDbTextApiDbEmbeddingGet';
 
 
@@ -96,6 +96,36 @@ export const BasicList: FC = () => {
     embedDbTextApiDbEmbeddingGet({ db_id: id });
   }
 
+  const { run: runDownloadTemplate } = useRequest(
+    getDbImportTemplateApiDbImportTemplateGet,
+    {
+      manual: true,
+      onSuccess: (data, params) => {
+        console.log(data);
+        // 创建一个隐藏的链接元素
+        const url = window.URL.createObjectURL(
+          new Blob(
+            [data],
+            {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+          )
+        );
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', '导入模板.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      },
+    }
+  )
+
+  const downloadTemplate = (currentItem: API.DatabaseMetaOutput) => {
+    runDownloadTemplate({ db_id: currentItem.id });
+
+  }
+
   const showDeleteConfirm = (currentItem: API.DatabaseMetaOutput) => {
     Modal.confirm({
       title: '删除任务',
@@ -123,6 +153,10 @@ export const BasicList: FC = () => {
       showDeleteConfirm(currentItem);
     } else if (key === 'import') {
       showUploadModal(currentItem);
+    } else if (key === 'embed') {
+      showEmbedConfirm(currentItem);
+    } else if (key === 'template') {
+      downloadTemplate(currentItem);
     }
   };
 
@@ -152,6 +186,10 @@ export const BasicList: FC = () => {
           {
             key: 'delete',
             label: '删除',
+          },
+          {
+            key: 'template',
+            label: '下载模板',
           },
         ],
       }}

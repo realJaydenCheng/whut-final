@@ -85,7 +85,31 @@ todo：
 
 1. ~~修改复杂搜索的bug，默认显示国创的筛选~~
 2. ~~逻辑查询功能，加按钮~~
-3. 修改学校数据，用来检索而非分类筛选
+3. ~~修改学校数据，用来检索而非分类筛选~~
 4. 添加自创的数据支持
 5. 添加另一个创新项目数据的支持
-6. 查询页添加导出，管理页添加模板
+6. ~~查询页添加导出，管理页添加模板~~
+
+```python
+# 获取文档
+doc = es_client.get(index="server-database-meta", id="65e94e64-e526-4298-981b-8168eb142605")
+
+# 获取当前的字段值
+cate_fields = doc['_source']['cate_fields']
+id_fields = doc['_source']['id_fields']
+
+# 将 '所属学校' 从 cate_fields 中移除并添加到 id_fields
+cate_fields.remove('所属学校')
+id_fields.append('所属学校')
+
+# 更新文档
+update_body = {
+    "doc": {
+        "cate_fields": cate_fields,
+        "id_fields": id_fields
+    }
+}
+
+# 执行更新操作
+es_client.update(index="server-database-meta", id="65e94e64-e526-4298-981b-8168eb142605", body=update_body)
+```

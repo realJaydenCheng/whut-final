@@ -353,6 +353,34 @@ class EsSearchQuery:
             data=[x["_source"] for x in res["hits"]],
             total=res['total']["value"],
         )
+    
+    def get_search_pd(self, es_client: Elasticsearch, columns: list[str]) -> pd.DataFrame:
+        # Initialize the scroll
+        page_size = 1000
+        data = []
+
+        res = es_client.search(
+            index=self.database.id,
+            query=self.query,
+            scroll='2m',
+            size=page_size,
+            _source=columns
+        )
+
+        scroll_id = res['_scroll_id']
+        hits = res['hits']['hits']
+        data.extend([hit['_source'] for hit in hits])
+
+        # Keep scrolling until no more hits are returned
+        while len(hits) > 0:
+            res = es_client.scroll(scroll_id=scroll_id, scroll='2m')
+            scroll_id = res['_scroll_id']
+            hits = res['hits']['hits']
+            data.extend([hit['_source'] for hit in hits])
+
+        # Convert to DataFrame
+        df = pd.DataFrame(data, columns=columns)
+        return df
 
     def get_new_words_list(
         self,

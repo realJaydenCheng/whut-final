@@ -8,12 +8,14 @@ import * as embedDbTextApiDbEmbeddingGet from './embedDbTextApiDbEmbeddingGet';
 import * as genTopicsApiGenPost from './genTopicsApiGenPost';
 import * as getCategoriesPercentageApiChartsCategoriesPost from './getCategoriesPercentageApiChartsCategoriesPost';
 import * as getDbDetailApiDbDetailGet from './getDbDetailApiDbDetailGet';
+import * as getDbImportTemplateApiDbImportTemplateGet from './getDbImportTemplateApiDbImportTemplateGet';
 import * as getEvalResultApiEvalGet from './getEvalResultApiEvalGet';
 import * as getGraphDataApiChartsGraphPost from './getGraphDataApiChartsGraphPost';
 import * as getHotTrendsApiChartsViceTrendsHotPost from './getHotTrendsApiChartsViceTrendsHotPost';
 import * as getMainTrendsApiChartsMainTrendPost from './getMainTrendsApiChartsMainTrendPost';
 import * as getNewTrendsApiChartsViceTrendsNewPost from './getNewTrendsApiChartsViceTrendsNewPost';
 import * as getRecWordsApiChartsRecGet from './getRecWordsApiChartsRecGet';
+import * as getSearchExcelApiSearchExcelPost from './getSearchExcelApiSearchExcelPost';
 import * as getSearchResultApiSearchPost from './getSearchResultApiSearchPost';
 import * as getTrendsListApiChartsViceTrendsListPost from './getTrendsListApiChartsViceTrendsListPost';
 import * as getViceTrendsApiChartsViceTrendPost from './getViceTrendsApiChartsViceTrendPost';
@@ -36,7 +38,9 @@ export default {
   importDataApiDbImportPost,
   embedDbTextApiDbEmbeddingGet,
   getDbDetailApiDbDetailGet,
+  getDbImportTemplateApiDbImportTemplateGet,
   getSearchResultApiSearchPost,
+  getSearchExcelApiSearchExcelPost,
   getNewTrendsApiChartsViceTrendsNewPost,
   getHotTrendsApiChartsViceTrendsHotPost,
   getTrendsListApiChartsViceTrendsListPost,

@@ -3,9 +3,10 @@ import SearchComplex from "@/components/SearchComplex";
 import { listDbApiDbListGet } from "@/services/ant-design-pro/listDbApiDbListGet";
 import { useRequest } from "@umijs/max";
 import { getSearchResultApiSearchPost } from "@/services/ant-design-pro/getSearchResultApiSearchPost";
-import { Pagination, Table, TableProps } from "antd";
-import { max } from "lodash";
+import { Button, Table, TableProps } from "antd";
 import { PageContainer } from "@ant-design/pro-components";
+import { DownloadOutlined } from "@ant-design/icons";
+import { getSearchExcelApiSearchExcelPost } from "./Database/service";
 
 const SearchPage: React.FC<{}> = () => {
 
@@ -22,6 +23,28 @@ const SearchPage: React.FC<{}> = () => {
             }
         }
     );
+
+    const { run: runDownloadExcel } = useRequest(
+        (searchRequest: API.SearchRequest) => {
+            return getSearchExcelApiSearchExcelPost(searchRequest);
+        },
+        {
+            manual: true,
+            onSuccess: (data) => {
+                const url = window.URL.createObjectURL(new Blob(
+                    [data],
+                    {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    }
+                ));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', '检索结果.xlsx');
+                document.body.appendChild(link);
+                link.click();
+            }
+        },
+    )
 
     const { run: postForm, loading, data } = useRequest(
         (searchRequest: API.SearchRequest) => getSearchResultApiSearchPost(searchRequest),
@@ -63,7 +86,7 @@ const SearchPage: React.FC<{}> = () => {
     ] : []
     const columns: TableProps['columns'] = mainCols.concat(idCols).concat(cateCols).concat(textCols);
 
-    
+
     return <PageContainer>
 
         <SearchComplex
@@ -78,7 +101,6 @@ const SearchPage: React.FC<{}> = () => {
             }}
             databaseMetas={dbMetas}
         />
-
         <Table
             pagination={{
                 total: data?.total,
@@ -100,9 +122,11 @@ const SearchPage: React.FC<{}> = () => {
             loading={loading}
             columns={columns}
             showHeader
-            style={{marginTop: 20}}
+            style={{ marginTop: 20 }}
         />
-
+        <Button icon={<DownloadOutlined />} onClick={() => {
+            runDownloadExcel(cFormData!);
+        }} />
 
     </PageContainer>;
 };

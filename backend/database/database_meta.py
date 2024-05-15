@@ -3,6 +3,7 @@ import datetime
 import uuid
 from typing import Optional
 
+import pandas as pd
 from pydantic import BaseModel
 from elasticsearch import BadRequestError, Elasticsearch
 
@@ -55,6 +56,14 @@ class DatabaseMetaDetail(BaseModel):
 
     cate_fields_detail: dict[str, list[str]]
     date_range: tuple[int, int] | None
+
+    def to_excel_template(self):
+        columns = [
+            self.title_field, self.time_field
+        ] + list(
+            self.cate_fields_detail.keys()
+        ) + self.id_fields + self.text_fields
+        return pd.DataFrame(columns=columns)
 
 
 class DatabaseMeta(BaseModel):
@@ -275,8 +284,10 @@ class DatabaseMetaData:
         }
         response = self.client.search(index=db_id, size=0, aggs=aggs)
 
-        max_year = response['aggregations']['max_year'].get('value_as_string', None)
-        min_year = response['aggregations']['min_year'].get('value_as_string', None)
+        max_year = response['aggregations']['max_year'].get(
+            'value_as_string', None)
+        min_year = response['aggregations']['min_year'].get(
+            'value_as_string', None)
         date_range = (min_year, max_year) if min_year and max_year else None
 
         return DatabaseMetaDetail(
