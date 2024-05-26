@@ -301,10 +301,10 @@ class EsSearchQuery:
         if sub_terms := s_request.sub_terms:
             for field, values in sub_terms.items():
                 field_or = [
-                    {"wildcard": {f"{field}.like": f"*{value}*"}}
+                    {"wildcard": {f"{field}": f"*{value}*"}}
                     for value in values
                 ]
-                self.query["bool"]["should"].append({
+                self.query["bool"]["filter"].append({
                     "bool": {"must": field_or}
                 })
 

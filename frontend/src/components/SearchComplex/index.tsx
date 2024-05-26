@@ -161,8 +161,8 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                 if (!res[target]) {
                     res[target] = {};
                 }
-                // Assign the value to the correct target and realKey
-                if (value instanceof String) {
+                // Assign the value to the correct target and realKey;
+                if ( typeof value === "string") {
                     res[target][realKey] = value.split(" ");
                 } else if (value instanceof Array) {
                     res[target][realKey] = value;
