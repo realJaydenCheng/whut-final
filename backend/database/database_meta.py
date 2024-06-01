@@ -156,8 +156,12 @@ class DatabaseMetaData:
         def default_sort(meta: DatabaseMetaOutput):
             if meta.id == "65e94e64-e526-4298-981b-8168eb142605":
                 return 0
-            else:
+            elif meta.id == "a86a6d16-73c0-4f5a-9320-f9334d4f1540":
                 return 1
+            elif meta.id == "3f64549c-5357-43e9-9e5b-977bf93bde13":
+                return 2
+            else:
+                return 100
 
         return sorted(metas_output, key=default_sort)
 

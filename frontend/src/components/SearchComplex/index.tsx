@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Col, Form, FormInstance, Input, InputNumber, Radio, Row, Select, Slider } from "antd";
+import { Col, Form, FormInstance, Input, InputNumber, Radio, Row, Select, Slider, SliderSingleProps } from "antd";
 import StandardFormRow from "./StandardFormRow";
 import TagSelect from "./TagSelect";
 import { useRequest } from "@umijs/max";
@@ -74,6 +74,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
     const [cateFieldsTagSelects, setCateFieldsTagSelects] = useState<React.ReactNode[]>([]);
     const [otherFieldsTexts, setOtherFieldsTexts] = useState<React.ReactNode[]>([]);
     const [dateRangeSlider, setDateRangeSlider] = useState<React.ReactNode>();
+    const [dateRange, setDateRange] = useState<number[]>([]);
 
     const renderCateFieldsTagSelects = (detail: API.DatabaseMetaDetail) => {
         const nodes = [];
@@ -125,18 +126,52 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
     };
 
     const renderDateRangeSlider = (detail: API.DatabaseMetaDetail) => {
+
+
+        const marks: SliderSingleProps['marks'] = detail?.date_range
+            ? new Array(detail.date_range[1] - detail.date_range[0] + 1).fill(0).reduce((acc, _, i) => {
+                const value = i + detail.date_range![0];
+                acc[value] = value.toString();
+                return acc;
+            }, {})
+            : {};
+
         setDateRangeSlider(
-            <FormItem
-                name="date_range"
-                label="时间范围"
-            >
-                <Slider
-                    range={{ draggableTrack: true }}
-                    min={detail?.date_range ? detail?.date_range[0] : undefined}
-                    max={detail?.date_range ? detail?.date_range[1] : undefined}
-                    step={1}
+            <>
+                {/* <InputNumber
+                    value={dateRange[0]}
+                    onChange={(value)=>{
+                        if (value) {
+                            setDateRange([value, dateRange[1]]);
+                        }
+                    }}
                 />
-            </FormItem>
+                <InputNumber
+                    value={dateRange[1]}
+                    onChange={(value)=>{
+                        if (value) {
+                            setDateRange([dateRange[0], value]);
+                        }
+                    }}
+                /> */}
+                <FormItem
+                    name="date_range"
+                    label="时间范围"
+                >
+                    <Slider
+                        range={{ draggableTrack: true }}
+                        min={detail?.date_range ? detail?.date_range[0] : undefined}
+                        max={detail?.date_range ? detail?.date_range[1] : undefined}
+                        step={1}
+                        value={dateRange}
+                        onChange={(value: number[]) => {
+                            setDateRange(value);
+                        }}
+                        marks={marks}
+                    />
+                </FormItem>
+            </>
+
         )
     };
 
@@ -162,7 +197,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                     res[target] = {};
                 }
                 // Assign the value to the correct target and realKey;
-                if ( typeof value === "string") {
+                if (typeof value === "string") {
                     res[target][realKey] = value.split(" ");
                 } else if (value instanceof Array) {
                     res[target][realKey] = value;
@@ -211,7 +246,7 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                     <Col span={9}>
                         <FormItem name="terms">
                             <Input.Search
-                                placeholder="请输入"
+                                placeholder="请输入标题关键词"
                                 enterButton="检索"
                                 size="large"
                                 onSearch={searchToSubmit}
@@ -221,8 +256,8 @@ const SearchComplex: React.FC<SearchComplexProps> = (props) => {
                     </Col>
 
                     <Col span={2}>
-                        <FormItem name="terms_logic">
-                            <Radio.Group defaultValue={true} buttonStyle="solid">
+                        <FormItem name="terms_logic" initialValue={true}>
+                            <Radio.Group buttonStyle="solid">
                                 <Radio.Button value={true}> AND </Radio.Button>
                                 <Radio.Button value={false}> OR </Radio.Button>
                             </Radio.Group>
